@@ -1,0 +1,27 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+
+    <persistence-unit name="MediaLibraryUnit" transaction-type="JTA">
+        <description>Persistence unit for Chii2 Media Library</description>
+        <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+        <jta-data-source>osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/chii2db)
+        </jta-data-source>
+        <non-jta-data-source>osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/chii2dbnojta)
+        </non-jta-data-source>
+
+        <!-- Mapping Classes -->
+        <class>org.chii2.medialibrary.persistence.entity.MovieImpl</class>
+        <class>org.chii2.medialibrary.persistence.entity.MovieInfoImpl</class>
+        <class>org.chii2.medialibrary.persistence.entity.MovieImageImpl</class>
+        <class>org.chii2.medialibrary.persistence.entity.MovieFileImpl</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+        <properties>
+            <property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)"/>
+            <property name="openjpa.jdbc.DBDictionary" value="derby"/>
+        </properties>
+
+    </persistence-unit>
+</persistence>

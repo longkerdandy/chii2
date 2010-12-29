@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:tx="http://aries.apache.org/xmlns/transactions/v1.1.0"
+           xmlns:jpa="http://aries.apache.org/xmlns/jpa/v1.1.0"
+           default-activation="lazy">
+
+    <!-- Chii2 Media Library Persistence Bean -->
+    <bean id="persistenceService"
+          class="org.chii2.medialibrary.persistence.PersistenceServiceImpl"
+          init-method="init"
+          destroy-method="destroy">
+        <tx:transaction method="*" value="Required"/>
+        <jpa:context property="entityManager" unitname="MediaLibraryUnit"/>
+    </bean>
+
+    <!-- Chii2 Media Library Movie Factory Bean -->
+    <bean id="movieFactoryService"
+          class="org.chii2.medialibrary.persistence.factory.MovieFactoryImpl"
+          init-method="init"
+          destroy-method="destroy">
+    </bean>
+
+    <!-- Chii2 Media Library Persistence Service -->
+    <service ref="persistenceService"
+             interface="org.chii2.medialibrary.api.persistence.PersistenceService">
+    </service>
+
+    <!-- Chii2 Media Library Movie Factory  Service -->
+    <service ref="movieFactoryService"
+             interface="org.chii2.medialibrary.api.persistence.factory.MovieFactory">
+    </service>
+
+</blueprint>
