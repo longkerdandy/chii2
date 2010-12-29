@@ -24,11 +24,21 @@
 
     <repositories>
         <repository>
-            <id>gson</id>
-            <url>http://google-gson.googlecode.com/svn/mavenrepo</url>
+            <id>Sonatype-public</id>
+            <url>http://oss.sonatype.org/content/groups/public/</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
+        </repository>
+        <repository>
+            <id>Apache-Snapshots</id>
+            <url>https://repository.apache.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
         </repository>
         <repository>
             <id>repository.jboss.org</id>
@@ -38,8 +48,8 @@
             </snapshots>
         </repository>
         <repository>
-            <id>Sonatype-public</id>
-            <url>http://oss.sonatype.org/content/groups/public/</url>
+            <id>gson</id>
+            <url>http://google-gson.googlecode.com/svn/mavenrepo</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
