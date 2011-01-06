@@ -20,6 +20,8 @@
         <module>utility</module>
         <module>assembly</module>
         <module>medialibrary.shell</module>
+        <module>mediaserver.api</module>
+        <module>mediaserver.core</module>
     </modules>
 
     <repositories>
@@ -97,6 +99,17 @@
             <dependency>
                 <groupId>org.chii2</groupId>
                 <artifactId>chii2.utility</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.chii2</groupId>
+                <artifactId>chii2.mediaserver.api</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.chii2</groupId>
+                <artifactId>chii2.mediaserver.core</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
 
@@ -313,6 +326,23 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin</artifactId>
                 <version>6.4.8</version>
+            </dependency>
+
+            <!-- Cling UPnP Library -->
+            <dependency>
+                <groupId>org.teleal</groupId>
+                <artifactId>teleal-common</artifactId>
+                <version>1.0.11</version>
+            </dependency>
+            <dependency>
+                <groupId>org.teleal.cling</groupId>
+                <artifactId>cling-core</artifactId>
+                <version>1.0-beta9</version>
+            </dependency>
+            <dependency>
+                <groupId>org.teleal.cling</groupId>
+                <artifactId>cling-support</artifactId>
+                <version>1.0-beta9</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

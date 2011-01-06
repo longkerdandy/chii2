@@ -60,6 +60,16 @@
             <artifactId>chii2.utility</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.chii2</groupId>
+            <artifactId>chii2.mediaserver.api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.chii2</groupId>
+            <artifactId>chii2.mediaserver.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
