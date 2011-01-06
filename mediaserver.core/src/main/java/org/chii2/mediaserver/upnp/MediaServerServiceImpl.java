@@ -3,6 +3,7 @@ package org.chii2.mediaserver.upnp;
 import org.chii2.mediaserver.api.upnp.MediaServerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.teleal.cling.DefaultUpnpServiceConfiguration;
 import org.teleal.cling.UpnpService;
 import org.teleal.cling.UpnpServiceImpl;
 import org.teleal.cling.binding.LocalServiceBindingException;
@@ -14,6 +15,9 @@ import org.teleal.cling.model.types.DeviceType;
 import org.teleal.cling.model.types.UDADeviceType;
 import org.teleal.cling.model.types.UDN;
 import org.teleal.cling.support.connectionmanager.ConnectionManagerService;
+import org.teleal.cling.transport.impl.apache.StreamClientConfigurationImpl;
+import org.teleal.cling.transport.impl.apache.StreamClientImpl;
+import org.teleal.cling.transport.spi.StreamClient;
 
 import java.net.URI;
 
@@ -42,7 +46,13 @@ public class MediaServerServiceImpl implements MediaServerService {
 
         try {
             // Init UPnP stack
-            upnpService = new UpnpServiceImpl();
+            upnpService = new UpnpServiceImpl(new DefaultUpnpServiceConfiguration() {
+                @Override
+                public StreamClient<StreamClientConfigurationImpl> createStreamClient() {
+                    return new StreamClientImpl(new StreamClientConfigurationImpl());
+                }
+
+            });
             // Attach service and device
             upnpService.getRegistry().addDevice(createDevice());
         } catch (Exception e) {
