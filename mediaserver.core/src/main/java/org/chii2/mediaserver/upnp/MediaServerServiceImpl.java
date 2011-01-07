@@ -12,6 +12,7 @@ import org.teleal.cling.model.DefaultServiceManager;
 import org.teleal.cling.model.ValidationException;
 import org.teleal.cling.model.meta.*;
 import org.teleal.cling.model.types.DeviceType;
+import org.teleal.cling.model.types.ServiceType;
 import org.teleal.cling.model.types.UDADeviceType;
 import org.teleal.cling.model.types.UDN;
 import org.teleal.cling.support.connectionmanager.ConnectionManagerService;
@@ -54,7 +55,7 @@ public class MediaServerServiceImpl implements MediaServerService {
 
             });
             // Attach service and device
-            upnpService.getRegistry().addDevice(createDevice());
+            upnpService.getRegistry().addDevice(createUPnPDevice());
         } catch (Exception e) {
             logger.error("Chii MediaServerService init with exception: {}.", e.getMessage());
         }
@@ -84,7 +85,7 @@ public class MediaServerServiceImpl implements MediaServerService {
      * @throws ValidationException          thrown when the device graph being instantiated is invalid
      * @throws LocalServiceBindingException thrown when something is wrong with annotation metadata on service implementation class
      */
-    public LocalDevice createDevice()
+    public LocalDevice createUPnPDevice()
             throws ValidationException, LocalServiceBindingException {
 
         DeviceType type =
@@ -92,9 +93,9 @@ public class MediaServerServiceImpl implements MediaServerService {
 
         DeviceDetails details =
                 new DeviceDetails(
-                        "Chii2 MediaServer",
+                        "Chii2 (Home-Server):1",
                         new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
-                        new ModelDetails("Chii2 MediaServer", "Chii2 Media Server.", "v1")
+                        new ModelDetails("Windows Media Connect", "Windows Media Connect", "1")
                 );
 
         LocalService contentDirectory =
@@ -117,12 +118,21 @@ public class MediaServerServiceImpl implements MediaServerService {
                 )
         );
 
+        LocalService mediaReceiverRegistrar =
+                new AnnotationLocalServiceBinder().read(MediaReceiverRegistrar.class);
+        mediaReceiverRegistrar.setManager(
+                new DefaultServiceManager<MediaReceiverRegistrar>(
+                        mediaReceiverRegistrar,
+                        MediaReceiverRegistrar.class
+                )
+        );
+
         return new LocalDevice(
                 new DeviceIdentity(udn),
                 type,
                 details,
                 createDefaultDeviceIcon(),
-                new LocalService[]{connectionManager, contentDirectory}
+                new LocalService[]{connectionManager, contentDirectory, mediaReceiverRegistrar}
         );
     }
 
