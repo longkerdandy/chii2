@@ -11,10 +11,7 @@ import org.teleal.cling.binding.annotations.AnnotationLocalServiceBinder;
 import org.teleal.cling.model.DefaultServiceManager;
 import org.teleal.cling.model.ValidationException;
 import org.teleal.cling.model.meta.*;
-import org.teleal.cling.model.types.DeviceType;
-import org.teleal.cling.model.types.ServiceType;
-import org.teleal.cling.model.types.UDADeviceType;
-import org.teleal.cling.model.types.UDN;
+import org.teleal.cling.model.types.*;
 import org.teleal.cling.support.connectionmanager.ConnectionManagerService;
 import org.teleal.cling.transport.impl.apache.StreamClientConfigurationImpl;
 import org.teleal.cling.transport.impl.apache.StreamClientImpl;
@@ -35,7 +32,7 @@ public class MediaServerServiceImpl implements MediaServerService {
     private Logger logger;
 
     public MediaServerServiceImpl() {
-        logger = LoggerFactory.getLogger("org.chii2.mediaserver.core");
+        logger = LoggerFactory.getLogger("org.chii2.mediaserver.upnp");
     }
 
     /**
@@ -47,7 +44,7 @@ public class MediaServerServiceImpl implements MediaServerService {
 
         try {
             // Init UPnP stack
-            upnpService = new UpnpServiceImpl(new DefaultUpnpServiceConfiguration() {
+            upnpService = new UpnpServiceImpl(new DefaultUpnpServiceConfiguration(8895) {
                 @Override
                 public StreamClient<StreamClientConfigurationImpl> createStreamClient() {
                     return new StreamClientImpl(new StreamClientConfigurationImpl());
@@ -95,7 +92,16 @@ public class MediaServerServiceImpl implements MediaServerService {
                 new DeviceDetails(
                         "Chii2 (Home-Server):1",
                         new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
-                        new ModelDetails("Windows Media Connect", "Windows Media Connect", "1")
+                        new ModelDetails("Windows Media Connect", "Windows Media Connect", "1"),
+                        "000da201238c",
+                        "100000000001",
+                        "http://www.chii2.org/some_user_interface/",
+                        new DLNADoc[]{
+                                new DLNADoc("DMS", DLNADoc.Version.V1_5),
+                        },
+                        new DLNACaps(new String[] {
+                                "av-upload", "image-upload", "audio-upload"
+                        })
                 );
 
         LocalService contentDirectory =

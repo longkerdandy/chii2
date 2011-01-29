@@ -1,0 +1,38 @@
+package org.chii2.mediaserver.upnp.content.wmc;
+
+import org.chii2.mediaserver.upnp.content.VisualContainer;
+import org.teleal.cling.support.model.DIDLObject;
+import org.teleal.cling.support.model.WriteStatus;
+
+/**
+ * Root Container for Windows Media Connect (Windows Media Player) related devices
+ */
+public class RootContainer extends VisualContainer {
+
+    public RootContainer() {
+        super();
+
+        // Root Container ID: 0
+        setId("0");
+        // There is no parent container for Root
+        setParentID("-1");
+        // Title TODO: This should be I18N
+        setTitle("Root");
+        // May used in Container Property Creator (part of UPnP protocol standard)
+        setCreator("System");
+        // May used in Container Property Clazz (part of UPnP protocol standard)
+        setClazz(new DIDLObject.Class("object.container"));
+        // Restricted
+        setRestricted(true);
+        // Searchable
+        setSearchable(false);
+        // Writable
+        setWriteStatus(WriteStatus.NOT_WRITABLE);
+    }
+
+    @Override
+    public void loadContents() {
+        addContainer(new PicturesContainer());
+        setChildCount(1);
+    }
+}

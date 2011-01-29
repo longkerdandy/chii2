@@ -278,6 +278,13 @@
                 <version>2.0</version>
             </dependency>
 
+            <!-- Apache HTTP Components -->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore</artifactId>
+                <version>4.1</version>
+            </dependency>
+
             <!-- Logging -->
             <dependency>
                 <groupId>org.slf4j</groupId>

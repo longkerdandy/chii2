@@ -2,11 +2,21 @@
 
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
+    <!-- Chii2 Media Server HTTP Bean -->
+    <bean id="mediaserverHttpService" class="org.chii2.mediaserver.http.HttpServerServiceImpl"
+          init-method="init"
+          destroy-method="destroy">
+    </bean>
+
     <!-- Chii2 Media Server Core Bean -->
     <bean id="mediaserverService" class="org.chii2.mediaserver.upnp.MediaServerServiceImpl"
           init-method="init"
           destroy-method="destroy">
     </bean>
+
+    <!-- Chii2 Media Library HTTP Service -->
+    <service ref="mediaserverHttpService" interface="org.chii2.mediaserver.api.http.HttpServerService">
+    </service>
 
     <!-- Chii2 Media Library Core Service -->
     <service ref="mediaserverService" interface="org.chii2.mediaserver.api.upnp.MediaServerService">
