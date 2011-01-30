@@ -13,7 +13,17 @@ public interface MediaLibraryService {
      * Scan for all kinds of media files in directories.
      * (Media type extensions and  Directories are configured in configuration file)
      */
-    public void scan();
+    public void scanAll();
+
+    /**
+     * Scan for all movie files in directories.
+     */
+    public void scanMovies();
+
+    /**
+     * Scan for all image files in directories.
+     */
+    public void scanImages();
 
     /**
      * Get all the Movies in the Media Library.

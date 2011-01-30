@@ -7,7 +7,7 @@ import java.util.List;
  */
 public interface MediaLibraryCommand {
     /**
-     * Command scan, scan all kinds of media and save them in library, this may also trigger information update from providers
+     * Command scanAll, scanAll all kinds of media and save them in library, this may also trigger information update from providers
      *
      * @param media Media type, currently supported type are: <movies>
      */

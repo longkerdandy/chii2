@@ -31,18 +31,24 @@ public class FileServiceImpl implements FileService {
     private static final String MOVIE_DIRECTORY = "movie.directory";
     // Video File Extension Configuration Key
     private static final String VIDEO_EXTENSION = "video.extension";
-    // Movie directories from configuration
-    private List<String> movieDirectories = Arrays.asList("/Share/Movie");
+    // Image Directory Configuration Key
+    private static final String IMAGE_DIRECTORY = "image.directory";
+    // Image File Extension Configuration Key
+    private static final String IMAGE_EXTENSION = "image.extension";
+    // Movie directories
+    private List<String> movieDirectories = Arrays.asList(System.getProperty("user.home") + "/Videos");
     // Movie file extension filter
     private List<String> movieExtFilters = Arrays.asList(".avi", ".mkv", ".mpeg", ".rm", ".rmvb", ".wmv");
-    // Files scanner thread
-    private Thread scanThread;
+    // Image directories
+    private List<String> imageDirectories = Arrays.asList(System.getProperty("user.home") + "/Pictures");
+    // Image file extension filter
+    private List<String> imageExtFilters = Arrays.asList(".jpg", ".jpeg", ".tiff", ".tif", ".png", ".gif", ".bmp");
+    // Movie Files scanner thread
+    private Thread movieScanThread;
+    // Image Files scanner thread
+    private Thread imageScanThread;
     // Logger
-    private Logger logger;
-
-    public FileServiceImpl() {
-        logger = LoggerFactory.getLogger("org.chii2.medialibrary.file");
-    }
+    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file");
 
     /**
      * Life Cycle Init
@@ -62,21 +68,39 @@ public class FileServiceImpl implements FileService {
             logger.error("FileService load configuration error for <{}>.", CONFIG_FILE);
         } else {
             // Load movie directories configuration
-            List<String> directories = ConfigUtils.loadConfigurations(props, MOVIE_DIRECTORY);
-            if (directories != null && !directories.isEmpty()) {
-                movieDirectories = directories;
+            List<String> movieDirectories = ConfigUtils.loadConfigurations(props, MOVIE_DIRECTORY);
+            if (movieDirectories != null && !movieDirectories.isEmpty()) {
+                this.movieDirectories = movieDirectories;
                 logger.debug("FileService configuration <{}> loaded.", MOVIE_DIRECTORY);
             } else {
                 logger.error("FileService configuration <{}> is not valid.", MOVIE_DIRECTORY);
             }
 
             // Load movie extension filter configuration
-            List<String> filters = ConfigUtils.loadConfigurations(props, VIDEO_EXTENSION);
-            if (filters != null && !filters.isEmpty()) {
-                movieExtFilters = filters;
+            List<String> movieExtFilters = ConfigUtils.loadConfigurations(props, VIDEO_EXTENSION);
+            if (movieExtFilters != null && !movieExtFilters.isEmpty()) {
+                this.movieExtFilters = movieExtFilters;
                 logger.debug("FileService configuration <{}> loaded.", VIDEO_EXTENSION);
             } else {
                 logger.error("FileService configuration <{}> is not valid.", VIDEO_EXTENSION);
+            }
+
+            // Load image directories configuration
+            List<String> imageDirectories = ConfigUtils.loadConfigurations(props, IMAGE_DIRECTORY);
+            if (imageDirectories != null && !imageDirectories.isEmpty()) {
+                this.imageDirectories = imageDirectories;
+                logger.debug("FileService configuration <{}> loaded.", IMAGE_DIRECTORY);
+            } else {
+                logger.error("FileService configuration <{}> is not valid.", IMAGE_DIRECTORY);
+            }
+
+            // Load image extension filter configuration
+            List<String> imageExtFilters = ConfigUtils.loadConfigurations(props, IMAGE_EXTENSION);
+            if (imageExtFilters != null && !imageExtFilters.isEmpty()) {
+                this.imageExtFilters = imageExtFilters;
+                logger.debug("FileService configuration <{}> loaded.", IMAGE_EXTENSION);
+            } else {
+                logger.error("FileService configuration <{}> is not valid.", IMAGE_EXTENSION);
             }
         }
     }
@@ -96,7 +120,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void scanMovies(List<String> directories) {
-        scanMovies(directories, null);
+        scanMovies(directories, movieExtFilters);
     }
 
     @Override
@@ -112,36 +136,57 @@ public class FileServiceImpl implements FileService {
             if (extensions != null && !extensions.isEmpty()) {
                 filter = createFilter(extensions);
             } else {
-                filter = createFilter();
+                filter = createFilter(movieExtFilters);
             }
-            scanFiles(directoryList, filter, MOVIE_SCAN_TOPIC);
+            scanFiles(directoryList, filter, movieScanThread, MOVIE_SCAN_TOPIC);
+        }
+    }
+
+    @Override
+    public void scanImages() {
+        scanImages(imageDirectories);
+    }
+
+    @Override
+    public void scanImages(List<String> directories) {
+        scanImages(directories, imageExtFilters);
+    }
+
+    @Override
+    public void scanImages(List<String> directories, List<String> extensions) {
+        if (directories != null && !directories.isEmpty()) {
+            List<File> directoryList = new ArrayList<File>();
+            for (String directory : directories) {
+                if (StringUtils.isNotBlank(directory)) {
+                    directoryList.add(new File(StringUtils.trim(directory)));
+                }
+            }
+            FileExtensionFilter filter;
+            if (extensions != null && !extensions.isEmpty()) {
+                filter = createFilter(extensions);
+            } else {
+                filter = createFilter(imageExtFilters);
+            }
+            scanFiles(directoryList, filter, imageScanThread, IMAGE_SCAN_TOPIC);
         }
     }
 
     /**
-     * Start a new thread to scan files
+     * Start a new thread to scanAll files
      *
      * @param directories Directories to be scanned
      * @param filter      File name filter
+     * @param thread      Scanner thread
      * @param topic       Event topic
      */
-    private void scanFiles(List<File> directories, FileExtensionFilter filter, String topic) {
-        if (scanThread != null && scanThread.isAlive()) {
+    private void scanFiles(List<File> directories, FileExtensionFilter filter, Thread thread, String topic) {
+        if (thread != null && thread.isAlive()) {
             logger.debug("A File Scanner thread already running, request discard.");
         } else {
             logger.debug("File Service try to start a new File Scanner thread.");
-            scanThread = new Thread(new FileScanner(directories, filter, eventAdmin, topic));
-            scanThread.start();
+            thread = new Thread(new FileScanner(directories, filter, eventAdmin, topic));
+            thread.start();
         }
-    }
-
-    /**
-     * Create a FileExtensionFilter based on configuration
-     *
-     * @return FileExtensionFilter
-     */
-    private FileExtensionFilter createFilter() {
-        return createFilter(movieExtFilters);
     }
 
     /**

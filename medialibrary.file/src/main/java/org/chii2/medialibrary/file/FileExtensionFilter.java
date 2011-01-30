@@ -15,11 +15,10 @@ public class FileExtensionFilter implements FileFilter {
     // Acceptable File Extensions
     private List<String> acceptableExtensions;
     // Logger
-    private Logger logger;
+    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file");
 
     public FileExtensionFilter(List<String> acceptableExtensions) {
         this.acceptableExtensions = acceptableExtensions;
-        logger = LoggerFactory.getLogger("org.chii2.medialibrary.file");
     }
 
     @Override

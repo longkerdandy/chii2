@@ -27,6 +27,9 @@ public class PicturesStorageFolderContainer extends StorageFolderContainer {
 
     @Override
     public void loadContents() {
-        //TODO
+        //TODO Fake
+        PhotoItem samplePhoto = new PhotoItem("111111", "999999", "Koala", "Samples");
+        this.addItem(samplePhoto);
+        this.setChildCount(1);
     }
 }

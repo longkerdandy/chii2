@@ -13,7 +13,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 /**
- * FileScanner is used to scan directories for a give type of file
+ * FileScanner is used to scanAll directories for a give type of file
  */
 public class FileScanner implements Runnable {
 
@@ -28,14 +28,13 @@ public class FileScanner implements Runnable {
     // Found Files
     List<File> files = new ArrayList<File>();
     // Logger
-    private Logger logger;
+    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file");
 
     public FileScanner(List<File> directories, FileFilter filter, EventAdmin eventAdmin, String topic) {
         this.directories = directories;
         this.filter = filter;
         this.eventAdmin = eventAdmin;
         this.topic = topic;
-        logger = LoggerFactory.getLogger("org.chii2.medialibrary.file");
     }
 
     @Override
@@ -76,7 +75,7 @@ public class FileScanner implements Runnable {
     }
 
     /**
-     * Send a scan event asynchronously
+     * Send a scanAll event asynchronously
      *
      * @param files Files discovered
      * @param topic Event topic
@@ -85,7 +84,7 @@ public class FileScanner implements Runnable {
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put("files", files);
         Event event = new Event(topic, properties);
-        logger.debug("Send a movie scan event with {} records.", files.size());
+        logger.debug("Send a file scanAll event with {} records to topic {}.", files.size(), topic);
         eventAdmin.postEvent(event);
     }
 

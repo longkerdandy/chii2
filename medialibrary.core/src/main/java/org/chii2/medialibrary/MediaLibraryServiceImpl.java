@@ -42,8 +42,18 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     }
 
     @Override
-    public void scan() {
+    public void scanAll() {
+        // TODO
+    }
+
+    @Override
+    public void scanMovies() {
         fileService.scanMovies();
+    }
+
+    @Override
+    public void scanImages() {
+        fileService.scanImages();
     }
 
     @Override

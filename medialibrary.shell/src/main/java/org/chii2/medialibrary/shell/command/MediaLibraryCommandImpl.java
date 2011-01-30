@@ -19,9 +19,13 @@ public class MediaLibraryCommandImpl implements MediaLibraryCommand {
     @Override
     public void scan(String media) {
         if ("movie".equalsIgnoreCase(media) || "movies".equalsIgnoreCase(media)) {
-            mediaLibrary.scan();
+            // Scan movies
+            mediaLibrary.scanMovies();
+        } else if ("image".equalsIgnoreCase(media) || "images".equalsIgnoreCase(media)) {
+            // Scan images
+            mediaLibrary.scanImages();
         } else {
-            System.out.println("Bad parameter for <scan> command, the correct usage is: \"scan movies\".");
+            System.out.println("Bad parameter for <scan> command, the correct usage is: \"scan <movies|images>\".");
         }
     }
 
