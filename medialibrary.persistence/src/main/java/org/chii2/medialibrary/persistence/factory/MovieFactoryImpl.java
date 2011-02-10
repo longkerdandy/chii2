@@ -18,14 +18,7 @@ import org.slf4j.LoggerFactory;
 public class MovieFactoryImpl implements MovieFactory {
 
     // Logger
-    private Logger logger;
-
-    /**
-     * Constructor
-     */
-    public MovieFactoryImpl() {
-        logger = LoggerFactory.getLogger("org.chii2.medialibrary.persistence");
-    }
+    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.persistence");
 
     /**
      * Life Cycle Init

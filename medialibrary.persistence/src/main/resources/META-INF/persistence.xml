@@ -16,6 +16,8 @@
         <class>org.chii2.medialibrary.persistence.entity.MovieInfoImpl</class>
         <class>org.chii2.medialibrary.persistence.entity.MovieImageImpl</class>
         <class>org.chii2.medialibrary.persistence.entity.MovieFileImpl</class>
+        <class>org.chii2.medialibrary.persistence.entity.ImageImpl</class>
+        <class>org.chii2.medialibrary.persistence.entity.ImageFileImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
 
         <properties>

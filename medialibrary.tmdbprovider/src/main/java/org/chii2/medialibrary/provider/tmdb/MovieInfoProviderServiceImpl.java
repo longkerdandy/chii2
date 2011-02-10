@@ -59,7 +59,7 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService {
     // Injected MovieFactory
     private MovieFactory movieFactory;
     // Logger
-    private Logger logger;
+    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.provider.tmdb");
 
     /**
      * Constructor
@@ -69,7 +69,6 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService {
         bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
                 Executors.newCachedThreadPool(),
                 Executors.newCachedThreadPool()));
-        logger = LoggerFactory.getLogger("org.chii2.medialibrary.provider.tmdb");
     }
 
     /**

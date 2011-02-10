@@ -34,7 +34,7 @@ public class FileExtensionFilter implements FileFilter {
         }
         // Test file extension
         for (String ext : acceptableExtensions) {
-            if (ext != null && !ext.isEmpty() && file.getName().endsWith(ext)) {
+            if (ext != null && !ext.isEmpty() && file.getName().substring(file.getName().lastIndexOf('.')).equalsIgnoreCase(ext)) {
                 logger.debug("File <{}> is accepted.", file.getName());
                 return true;
             }

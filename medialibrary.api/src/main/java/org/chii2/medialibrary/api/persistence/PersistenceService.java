@@ -1,9 +1,6 @@
 package org.chii2.medialibrary.api.persistence;
 
-import org.chii2.medialibrary.api.persistence.entity.Movie;
-import org.chii2.medialibrary.api.persistence.entity.MovieFile;
-import org.chii2.medialibrary.api.persistence.entity.MovieImage;
-import org.chii2.medialibrary.api.persistence.entity.MovieInfo;
+import org.chii2.medialibrary.api.persistence.entity.*;
 
 import java.util.List;
 
@@ -68,6 +65,45 @@ public interface PersistenceService {
     public MovieImage getMovieImageById(String imageId);
 
     /**
+     * Get all the Images
+     *
+     * @return Image List
+     */
+    public List<? extends Image> getAllImages();
+
+    /**
+     * Get Image by Image ID
+     *
+     * @param id Image ID
+     * @return Image
+     */
+    public Image getImageById(String id);
+
+    /**
+     * Get all possible image records by image name
+     *
+     * @param imageName Image Name
+     * @return Image List
+     */
+    public List<? extends Image> getAllImagesByName(String imageName);
+
+    /**
+     * Get single image record by image name, usually return first result
+     *
+     * @param imageName Image Name
+     * @return Image
+     */
+    public Image getSingleImageByName(String imageName);
+
+    /**
+     * Get Image File by ID
+     *
+     * @param id Image File ID
+     * @return Image File
+     */
+    public ImageFile getImageFileById(String id);
+
+    /**
      * Persist a list of movies into database
      *
      * @param movies List of movies
@@ -103,6 +139,20 @@ public interface PersistenceService {
     public void persist(MovieImage movieImage);
 
     /**
+     * Persist a image into database
+     *
+     * @param image Image
+     */
+    public void persist(Image image);
+
+    /**
+     * Persist a image file into database
+     *
+     * @param imageFile Image File
+     */
+    public void persist(ImageFile imageFile);
+
+    /**
      * Merge a movie into database
      *
      * @param movie Movie
@@ -131,6 +181,20 @@ public interface PersistenceService {
     public void merge(MovieImage movieImage);
 
     /**
+     * Merge a image into database
+     *
+     * @param image Image
+     */
+    public void merge(Image image);
+
+    /**
+     * Merge a image file into database
+     *
+     * @param imageFile Image File
+     */
+    public void merge(ImageFile imageFile);
+
+    /**
      * Remove a movie from database
      *
      * @param movie Movie
@@ -157,4 +221,18 @@ public interface PersistenceService {
      * @param movieImage Movie Image
      */
     public void remove(MovieImage movieImage);
+
+    /**
+     * Remove a image from database
+     *
+     * @param image Image
+     */
+    public void remove(Image image);
+
+    /**
+     * Remove a image file from database
+     *
+     * @param imageFile Image File
+     */
+    public void remove(ImageFile imageFile);
 }

@@ -2,6 +2,7 @@ package org.chii2.medialibrary;
 
 import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.medialibrary.api.file.FileService;
+import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.persistence.PersistenceService;
 import org.slf4j.Logger;
@@ -74,6 +75,26 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     @Override
     public Movie getSingleMovieByName(String movieName) {
         return persistenceService.getSingleMovieByName(movieName);
+    }
+
+    @Override
+    public List<? extends Image> getAllImages() {
+        return persistenceService.getAllImages();
+    }
+
+    @Override
+    public Image getImageById(String id) {
+        return persistenceService.getImageById(id);
+    }
+
+    @Override
+    public List<? extends Image> getAllImagesByName(String imageName) {
+        return persistenceService.getAllImagesByName(imageName);
+    }
+
+    @Override
+    public Image getSingleImageByName(String imageName) {
+        return persistenceService.getSingleImageByName(imageName);
     }
 
     /**

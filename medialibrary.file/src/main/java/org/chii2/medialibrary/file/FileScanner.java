@@ -26,7 +26,7 @@ public class FileScanner implements Runnable {
     // EventAdmin Topic
     private String topic;
     // Found Files
-    List<File> files = new ArrayList<File>();
+    private List<File> files = new ArrayList<File>();
     // Logger
     private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file");
 

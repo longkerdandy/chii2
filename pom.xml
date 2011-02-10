@@ -22,6 +22,7 @@
         <module>medialibrary.shell</module>
         <module>mediaserver.api</module>
         <module>mediaserver.core</module>
+        <module>medialibrary.graphicsmagickprovider</module>
     </modules>
 
     <repositories>
@@ -101,6 +102,11 @@
             <dependency>
                 <groupId>org.chii2</groupId>
                 <artifactId>chii2.medialibrary.tmdbprovider</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.chii2</groupId>
+                <artifactId>chii2.medialibrary.graphicsmagickprovider</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>

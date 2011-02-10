@@ -73,14 +73,7 @@ public class MovieHandler implements EventHandler {
     // Extract Disk Number Pattern
     private Pattern diskNumPattern = Pattern.compile("\\w*(?<number>\\d+)");
     // Logger
-    private Logger logger;
-
-    /**
-     * Constructor
-     */
-    public MovieHandler() {
-        logger = LoggerFactory.getLogger("org.chii2.medialibrary.event");
-    }
+    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.event");
 
     /**
      * Life Cycle Init
@@ -256,9 +249,9 @@ public class MovieHandler implements EventHandler {
     }
 
     /**
-     * Parse the scanned files and sync to the database
+     * Parse the scanned movie files and sync to the database
      *
-     * @param files Scanned Files
+     * @param files Scanned Movie Files
      */
     private void doScanProcess(List<File> files) {
         // List of movie files

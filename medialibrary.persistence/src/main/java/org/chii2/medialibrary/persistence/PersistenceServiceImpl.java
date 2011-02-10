@@ -1,14 +1,8 @@
 package org.chii2.medialibrary.persistence;
 
 import org.chii2.medialibrary.api.persistence.PersistenceService;
-import org.chii2.medialibrary.api.persistence.entity.Movie;
-import org.chii2.medialibrary.api.persistence.entity.MovieFile;
-import org.chii2.medialibrary.api.persistence.entity.MovieImage;
-import org.chii2.medialibrary.api.persistence.entity.MovieInfo;
-import org.chii2.medialibrary.persistence.entity.MovieFileImpl;
-import org.chii2.medialibrary.persistence.entity.MovieImageImpl;
-import org.chii2.medialibrary.persistence.entity.MovieImpl;
-import org.chii2.medialibrary.persistence.entity.MovieInfoImpl;
+import org.chii2.medialibrary.api.persistence.entity.*;
+import org.chii2.medialibrary.persistence.entity.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,11 +18,7 @@ public class PersistenceServiceImpl implements PersistenceService {
     // Entity Manager
     private EntityManager entityManager;
     // Logger
-    private Logger logger;
-
-    public PersistenceServiceImpl() {
-        logger = LoggerFactory.getLogger("org.chii2.medialibrary.persistence");
-    }
+    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.persistence");
 
     /**
      * Life Cycle Init
@@ -114,6 +104,51 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
+    public List<? extends Image> getAllImages() {
+        // Get the current image list from database
+        return entityManager.createNamedQuery("Image.findAll", ImageImpl.class).getResultList();
+    }
+
+    @Override
+    public Image getImageById(String id) {
+        // Get image by id, should be a only one result
+        try {
+            return entityManager.createNamedQuery("Image.findById", ImageImpl.class).setParameter("id", id).getSingleResult();
+        } catch (NoResultException e) {
+            logger.debug("Try to get image <{}> but not exist.", id);
+            return null;
+        }
+    }
+
+    @Override
+    public List<? extends Image> getAllImagesByName(String imageName) {
+        // Get image by name, return all possible images
+        return entityManager.createNamedQuery("Image.findByName", ImageImpl.class).setParameter("name", "%" + imageName.toLowerCase() + "%").getResultList();
+    }
+
+    @Override
+    public Image getSingleImageByName(String imageName) {
+        // Get image by name, return single result
+        try {
+            return entityManager.createNamedQuery("Image.findByName", ImageImpl.class).setParameter("name", "%" + imageName.toLowerCase() + "%").getSingleResult();
+        } catch (NoResultException e) {
+            logger.debug("Try to get image with title <{}> but not exist.", imageName);
+            return null;
+        }
+    }
+
+    @Override
+    public ImageFile getImageFileById(String id) {
+        // Get image by id, should be a only one result
+        try {
+            return entityManager.createNamedQuery("ImageFile.findById", ImageFileImpl.class).setParameter("id", id).getSingleResult();
+        } catch (NoResultException e) {
+            logger.debug("Try to get image file <{}> but not exist.", id);
+            return null;
+        }
+    }
+
+    @Override
     public void persist(List<Movie> movies) {
         for (Movie movie : movies) {
             if (movie.getClass() == MovieImpl.class) {
@@ -151,6 +186,20 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
+    public void persist(Image image) {
+        if (image.getClass() == ImageImpl.class) {
+            entityManager.persist(image);
+        }
+    }
+
+    @Override
+    public void persist(ImageFile imageFile) {
+        if (imageFile.getClass() == ImageFileImpl.class) {
+            entityManager.persist(imageFile);
+        }
+    }
+
+    @Override
     public void merge(Movie movie) {
         if (movie.getClass() == MovieImpl.class) {
             entityManager.merge(movie);
@@ -179,6 +228,20 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
+    public void merge(Image image) {
+        if (image.getClass() == ImageImpl.class) {
+            entityManager.merge(image);
+        }
+    }
+
+    @Override
+    public void merge(ImageFile imageFile) {
+        if (imageFile.getClass() == ImageFileImpl.class) {
+            entityManager.merge(imageFile);
+        }
+    }
+
+    @Override
     public void remove(Movie movie) {
         if (movie.getClass() == MovieImpl.class) {
             entityManager.remove(movie);
@@ -203,6 +266,20 @@ public class PersistenceServiceImpl implements PersistenceService {
     public void remove(MovieImage movieImage) {
         if (movieImage.getClass() == MovieImageImpl.class) {
             entityManager.remove(movieImage);
+        }
+    }
+
+    @Override
+    public void remove(Image image) {
+        if (image.getClass() == ImageImpl.class) {
+            entityManager.remove(image);
+        }
+    }
+
+    @Override
+    public void remove(ImageFile imageFile) {
+        if (imageFile.getClass() == ImageFileImpl.class) {
+            entityManager.remove(imageFile);
         }
     }
 

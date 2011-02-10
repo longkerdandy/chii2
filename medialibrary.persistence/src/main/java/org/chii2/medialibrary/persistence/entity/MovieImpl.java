@@ -21,7 +21,6 @@ import java.util.UUID;
         @NamedQuery(name = "Movie.findByName",
                 query = "SELECT m FROM MOVIE m join m.information i WHERE LOWER(i.name) LIKE :name")
 })
-
 public class MovieImpl implements Movie {
 
     // ID (Primary Key) in UUID format

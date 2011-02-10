@@ -26,6 +26,10 @@
     <reference-list id="movieProviderManager"
                     interface="org.chii2.medialibrary.api.provider.MovieInfoProviderService"/>
 
+    <!-- Chii2 Media Library Image Information Provider Service -->
+    <reference-list id="imageProviderManager"
+                    interface="org.chii2.medialibrary.api.provider.ImageInfoProviderService"/>
+
     <!-- Chii2 Media Library Core Bean -->
     <bean id="medialibraryService" class="org.chii2.medialibrary.MediaLibraryServiceImpl"
           init-method="init"
@@ -45,13 +49,22 @@
         <property name="providerServices" ref="movieProviderManager"/>
     </bean>
 
+    <!-- Chii2 Media Library Image Event Handler Bean -->
+    <bean id="imageHandler" class="org.chii2.medialibrary.event.ImageHandler"
+          init-method="init"
+          destroy-method="destroy">
+        <property name="configAdmin" ref="configAdminService"/>
+        <property name="eventAdmin" ref="eventAdminService"/>
+        <property name="persistenceService" ref="persistenceManager"/>
+        <property name="providerServices" ref="imageProviderManager"/>
+    </bean>
+
     <!-- Chii2 Media Library Core Service -->
     <service ref="medialibraryService" interface="org.chii2.medialibrary.api.core.MediaLibraryService">
     </service>
 
     <!-- Chii2 Media Library Movie Event Handler Service -->
-    <service ref="movieHandler"
-             interface="org.osgi.service.event.EventHandler">
+    <service ref="movieHandler" interface="org.osgi.service.event.EventHandler">
         <service-properties>
             <!-- Register Event Topics -->
             <entry key="event.topics">
@@ -60,6 +73,20 @@
                     <value>org/chii2/medialibrary/provider/movie/INFO_PROVIDED</value>
                     <value>org/chii2/medialibrary/provider/movie/INFO_FAILED</value>
                     <value>org/chii2/medialibrary/provider/movie/IMAGE_PROVIDED</value>
+                </list>
+            </entry>
+        </service-properties>
+    </service>
+
+    <!-- Chii2 Media Library Image Event Handler Service -->
+    <service ref="imageHandler" interface="org.osgi.service.event.EventHandler">
+        <service-properties>
+            <!-- Register Event Topics -->
+            <entry key="event.topics">
+                <list>
+                    <value>org/chii2/medialibrary/file/image/SCAN</value>
+                    <value>org/chii2/medialibrary/provider/image/INFO_PROVIDED</value>
+                    <value>org/chii2/medialibrary/provider/image/INFO_FAILED</value>
                 </list>
             </entry>
         </service-properties>

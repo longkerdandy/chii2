@@ -1,5 +1,6 @@
 package org.chii2.medialibrary.api.core;
 
+import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
  * Media Library Core Interface, provide major functionality & operations.
  */
 public interface MediaLibraryService {
-    
+
     /**
      * Scan for all kinds of media files in directories.
      * (Media type extensions and  Directories are configured in configuration file)
@@ -55,4 +56,35 @@ public interface MediaLibraryService {
      * @return Movie
      */
     public Movie getSingleMovieByName(String movieName);
+
+    /**
+     * Get all the Images
+     *
+     * @return Image List
+     */
+    public List<? extends Image> getAllImages();
+
+    /**
+     * Get Image by Image ID
+     *
+     * @param id Image ID
+     * @return Image
+     */
+    public Image getImageById(String id);
+
+    /**
+     * Get all possible image records by image name
+     *
+     * @param imageName Image Name
+     * @return Image List
+     */
+    public List<? extends Image> getAllImagesByName(String imageName);
+
+    /**
+     * Get single image record by image name, usually return first result
+     *
+     * @param imageName Image Name
+     * @return Image
+     */
+    public Image getSingleImageByName(String imageName);
 }

@@ -2,9 +2,12 @@ package org.chii2.medialibrary.shell.command;
 
 import org.apache.commons.lang.StringUtils;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
+import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.shell.command.MediaLibraryCommand;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,36 +41,85 @@ public class MediaLibraryCommandImpl implements MediaLibraryCommand {
                 if (arguments.length == 1) {
                     List<? extends Movie> movies = mediaLibrary.getAllMovies();
                     printMovieTable(movies);
-                } else if (arguments.length == 2) {
-                    UUID id = null;
-                    try {
-                        id = UUID.fromString(arguments[1]);
-                    } catch (IllegalArgumentException e) {
-                        // Do nothing
-                    }
-                    // Show single movie by movie id
-                    if (id != null) {
-                        Movie movie = mediaLibrary.getMovieById(id.toString());
+                } else {
+                    if (isUUID(getSubArrary(arguments))) {
+                        Movie movie = mediaLibrary.getMovieById(getName(getSubArrary(arguments)));
                         printMovieTable(movie);
-                    }
-                    // Show movies by movie name
-                    else {
-                        List<? extends Movie> movies = mediaLibrary.getAllMoviesByName(StringUtils.trim(arguments[1]));
+                    } else {
+                        List<? extends Movie> movies = mediaLibrary.getAllMoviesByName(getName(getSubArrary(arguments)));
                         printMovieTable(movies);
                     }
+                }
+            } else if ("image".equalsIgnoreCase(arguments[0]) || "images".equalsIgnoreCase(arguments[0])) {
+                // Show all the movies
+                if (arguments.length == 1) {
+                    List<? extends Image> images = mediaLibrary.getAllImages();
+                    printImageTable(images);
                 } else {
-                    // Show movie by movie name with space
-                    StringBuffer movieName = new StringBuffer(StringUtils.trim(arguments[1]));
-                    for (int i = 2; i < arguments.length; i++) {
-                        movieName.append(" ");
-                        movieName.append(StringUtils.trim(arguments[i]));
+                    if (isUUID(getSubArrary(arguments))) {
+                        Image image = mediaLibrary.getImageById(getName(getSubArrary(arguments)));
+                        printImageTable(image);
+                    } else {
+                        List<? extends Image> images = mediaLibrary.getAllImagesByName(getName(getSubArrary(arguments)));
+                        printImageTable(images);
                     }
-                    List<? extends Movie> movies = mediaLibrary.getAllMoviesByName(StringUtils.trim(movieName.toString()));
-                    printMovieTable(movies);
                 }
             }
         } else {
-            System.out.println("Bad parameter for <show> command, the correct usage is: \"show movies\".");
+            System.out.println("Bad parameter for <show> command, the correct usage is: \"show <movies|images>\".");
+        }
+    }
+
+    /**
+     * Whether argument is UUID
+     *
+     * @param arguments Arguments
+     * @return True if UUID
+     */
+    private boolean isUUID(String[] arguments) {
+        if (arguments.length == 1) {
+            try {
+                @SuppressWarnings("unused")
+                UUID id = UUID.fromString(arguments[0]);
+                return true;
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Parse arguments and return name or UUID
+     *
+     * @param arguments Arguments
+     * @return UUID or Name
+     */
+    private String getName(String[] arguments) {
+        if (arguments.length == 1) {
+            UUID id = null;
+            try {
+                id = UUID.fromString(arguments[1]);
+            } catch (IllegalArgumentException e) {
+                // Do nothing
+            }
+            // return id
+            if (id != null) {
+                return id.toString();
+            }
+            // return name
+            else {
+                return arguments[0];
+            }
+        } else {
+            // return name with space
+            StringBuffer name = new StringBuffer(StringUtils.trim(arguments[0]));
+            for (int i = 1; i < arguments.length; i++) {
+                name.append(" ");
+                name.append(StringUtils.trim(arguments[i]));
+            }
+            return name.toString();
         }
     }
 
@@ -77,21 +129,9 @@ public class MediaLibraryCommandImpl implements MediaLibraryCommand {
      * @param movie Movie Object
      */
     private void printMovieTable(Movie movie) {
-        if (movie != null) {
-            String[] headers = {"ID", "Name", "Year", "Rating", "Codec", "Source", "Format"};
-            String[][] content = new String[1][7];
-            content[0][0] = StringUtils.defaultString(movie.getId());
-            content[0][1] = StringUtils.defaultString(movie.getMovieName());
-            content[0][2] = StringUtils.defaultString(movie.getMovieYear());
-            content[0][3] = String.valueOf(movie.getMovieRating());
-            content[0][4] = StringUtils.defaultString(movie.getMovieCodec());
-            content[0][5] = StringUtils.defaultString(movie.getMovieSource());
-            content[0][6] = StringUtils.defaultString(movie.getMovieFormat());
-            printTable(headers, content);
-            System.out.println("Found 1 movie in Chii2 Media Library.");
-        } else {
-            System.out.println("No movie found in Chii2 Media Library.");
-        }
+        List<Movie> movieList = new ArrayList<Movie>();
+        movieList.add(movie);
+        printMovieTable(movieList);
     }
 
     /**
@@ -116,6 +156,43 @@ public class MediaLibraryCommandImpl implements MediaLibraryCommand {
             System.out.printf("Found %1$d movies in Chii2 Media Library.\n", movies.size());
         } else {
             System.out.println("No movie found in Chii2 Media Library.");
+        }
+    }
+
+    /**
+     * Print image to command line in table format
+     *
+     * @param image Image
+     */
+    private void printImageTable(Image image) {
+        List<Image> imageList = new ArrayList<Image>();
+        imageList.add(image);
+        printImageTable(imageList);
+    }
+
+    /**
+     * Print image list to command line in table format
+     *
+     * @param images Image List
+     */
+    private void printImageTable(List<? extends Image> images) {
+        if (images != null && !images.isEmpty()) {
+            String[] headers = {"ID", "Path", "Title", "Size", "Date", "Type", "Resolution", "Camera"};
+            String[][] content = new String[images.size()][8];
+            for (int i = 0; i < images.size(); i++) {
+                content[i][0] = StringUtils.defaultString(images.get(i).getId());
+                content[i][1] = StringUtils.defaultString(images.get(i).getAbsoluteName());
+                content[i][2] = StringUtils.defaultString(images.get(i).getTitle());
+                content[i][3] = String.valueOf(images.get(i).getSize());
+                content[i][4] = StringUtils.defaultString(getDate(images.get(i).getDateTaken()));
+                content[i][5] = StringUtils.defaultString(images.get(i).getType());
+                content[i][6] = StringUtils.defaultString(images.get(i).getWidth() + "x" + images.get(i).getHeight());
+                content[i][7] = StringUtils.defaultString(images.get(i).getCameraModel());
+            }
+            printTable(headers, content);
+            System.out.printf("Found %1$d images in Chii2 Media Library.\n", images.size());
+        } else {
+            System.out.println("No image found in Chii2 Media Library.");
         }
     }
 
@@ -185,6 +262,32 @@ public class MediaLibraryCommandImpl implements MediaLibraryCommand {
             System.out.print("-");
         }
         System.out.print("\n");
+    }
+
+    /**
+     * Get the sub string arrary
+     *
+     * @param array Source Array
+     * @return Sub String Array
+     */
+    private String[] getSubArrary(String[] array) {
+        String[] result = new String[array.length - 1];
+        System.arraycopy(array, 1, result, 0, result.length);
+        return result;
+    }
+
+    /**
+     * Get date string
+     *
+     * @param date Date
+     * @return Date String
+     */
+    private String getDate(Date date) {
+        if (date == null) {
+            return null;
+        } else {
+            return date.toString();
+        }
     }
 
     /**

@@ -16,8 +16,15 @@
     </bean>
 
     <!-- Chii2 Media Library Movie Factory Bean -->
-    <bean id="movieFactoryService"
+    <bean id="movieFactory"
           class="org.chii2.medialibrary.persistence.factory.MovieFactoryImpl"
+          init-method="init"
+          destroy-method="destroy">
+    </bean>
+
+    <!-- Chii2 Media Library Image Factory Bean -->
+    <bean id="imageFactory"
+          class="org.chii2.medialibrary.persistence.factory.ImageFactoryImpl"
           init-method="init"
           destroy-method="destroy">
     </bean>
@@ -28,8 +35,13 @@
     </service>
 
     <!-- Chii2 Media Library Movie Factory  Service -->
-    <service ref="movieFactoryService"
+    <service ref="movieFactory"
              interface="org.chii2.medialibrary.api.persistence.factory.MovieFactory">
+    </service>
+
+    <!-- Chii2 Media Library Image Factory  Service -->
+    <service ref="imageFactory"
+             interface="org.chii2.medialibrary.api.persistence.factory.ImageFactory">
     </service>
 
 </blueprint>

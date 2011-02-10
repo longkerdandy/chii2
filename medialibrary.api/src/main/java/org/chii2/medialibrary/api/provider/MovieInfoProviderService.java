@@ -3,7 +3,7 @@ package org.chii2.medialibrary.api.provider;
 import java.util.List;
 
 /**
- * Movie Information Provider Service, each provider can provide movie information by download from internet or something else
+ * Movie Information Provider Service, each provider can provide movie information by download from internet or somewhere else
  */
 public interface MovieInfoProviderService {
 

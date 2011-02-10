@@ -57,6 +57,11 @@
         </dependency>
         <dependency>
             <groupId>org.chii2</groupId>
+            <artifactId>chii2.medialibrary.graphicsmagickprovider</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.chii2</groupId>
             <artifactId>chii2.utility</artifactId>
             <scope>provided</scope>
         </dependency>
