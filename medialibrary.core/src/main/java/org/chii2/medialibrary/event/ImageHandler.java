@@ -114,9 +114,14 @@ public class ImageHandler implements EventHandler {
             // Loop available providers
             for (ImageInfoProviderService provider : providerServices) {
                 if (preferredProvider.equalsIgnoreCase(provider.getProviderName())) {
-                    // Matched, parse the image information
+                    // Matched
+                    // Purge current images
+                    persistenceService.deleteAllImages();
+                    // Use provider parse image information
                     provider.getImageInformation(files);
+                    // Mark match found
                     providerMatched = true;
+                    // Stop looping
                     break;
                 }
             }

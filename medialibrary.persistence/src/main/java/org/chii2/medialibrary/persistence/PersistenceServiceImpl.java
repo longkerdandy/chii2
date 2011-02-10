@@ -138,6 +138,12 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
+    public void deleteAllImages() {
+        // Delete all images
+        entityManager.createNamedQuery("Image.deleteAll", ImageImpl.class).executeUpdate();
+    }
+
+    @Override
     public ImageFile getImageFileById(String id) {
         // Get image by id, should be a only one result
         try {

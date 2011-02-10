@@ -96,6 +96,11 @@ public interface PersistenceService {
     public Image getSingleImageByName(String imageName);
 
     /**
+     * Delete all images in library
+     */
+    public void deleteAllImages();
+
+    /**
      * Get Image File by ID
      *
      * @param id Image File ID

@@ -18,7 +18,9 @@ import java.util.UUID;
         @NamedQuery(name = "Image.findById",
                 query = "SELECT i FROM IMAGE i WHERE i.id = :id"),
         @NamedQuery(name = "Image.findByName",
-                query = "SELECT i FROM IMAGE i join i.file i WHERE LOWER(i.title) LIKE :name")
+                query = "SELECT i FROM IMAGE i join i.file i WHERE LOWER(i.title) LIKE :name"),
+        @NamedQuery(name = "Image.deleteAll",
+                query = "DELETE FROM IMAGE i")
 })
 public class ImageImpl implements Image {
 
