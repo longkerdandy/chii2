@@ -23,6 +23,7 @@
         <module>mediaserver.api</module>
         <module>mediaserver.core</module>
         <module>medialibrary.graphicsmagickprovider</module>
+        <module>mediaserver.chii2library</module>
     </modules>
 
     <repositories>

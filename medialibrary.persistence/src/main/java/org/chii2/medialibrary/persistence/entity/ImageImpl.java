@@ -19,6 +19,8 @@ import java.util.UUID;
                 query = "SELECT i FROM IMAGE i WHERE i.id = :id"),
         @NamedQuery(name = "Image.findByName",
                 query = "SELECT i FROM IMAGE i join i.file i WHERE LOWER(i.title) LIKE :name"),
+        @NamedQuery(name = "Image.findByAlbum",
+                query = "SELECT i FROM IMAGE i join i.file i WHERE LOWER(i.album) = :album"),
         @NamedQuery(name = "Image.deleteAll",
                 query = "DELETE FROM IMAGE i")
 })
@@ -85,6 +87,11 @@ public class ImageImpl implements Image {
     @Override
     public String getTitle() {
         return file.getTitle();
+    }
+
+    @Override
+    public String getAlbum() {
+        return file.getAlbum();
     }
 
     @Override

@@ -155,6 +155,18 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
+    public List<String> getAllImageAlbums() {
+        // Get all image albums in database
+        return entityManager.createNamedQuery("ImageFile.findAllAlbums", String.class).getResultList();
+    }
+
+    @Override
+    public List<? extends Image> getImagesByAlbum(String album) {
+        // Get images by album
+        return entityManager.createNamedQuery("Image.findByAlbum", ImageImpl.class).setParameter("album", album.toLowerCase()).getResultList();
+    }
+
+    @Override
     public void persist(List<Movie> movies) {
         for (Movie movie : movies) {
             if (movie.getClass() == MovieImpl.class) {

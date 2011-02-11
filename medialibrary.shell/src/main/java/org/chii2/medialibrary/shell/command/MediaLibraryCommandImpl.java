@@ -177,17 +177,18 @@ public class MediaLibraryCommandImpl implements MediaLibraryCommand {
      */
     private void printImageTable(List<? extends Image> images) {
         if (images != null && !images.isEmpty()) {
-            String[] headers = {"ID", "Path", "Title", "Size", "Date", "Type", "Resolution", "Camera"};
-            String[][] content = new String[images.size()][8];
+            String[] headers = {"ID", "Path", "Album", "Title", "Size", "Date", "Type", "Resolution", "Camera"};
+            String[][] content = new String[images.size()][9];
             for (int i = 0; i < images.size(); i++) {
                 content[i][0] = StringUtils.defaultString(images.get(i).getId());
                 content[i][1] = StringUtils.defaultString(images.get(i).getAbsoluteName());
-                content[i][2] = StringUtils.defaultString(images.get(i).getTitle());
-                content[i][3] = String.valueOf(images.get(i).getSize());
-                content[i][4] = StringUtils.defaultString(getDate(images.get(i).getDateTaken()));
-                content[i][5] = StringUtils.defaultString(images.get(i).getType());
-                content[i][6] = StringUtils.defaultString(images.get(i).getWidth() + "x" + images.get(i).getHeight());
-                content[i][7] = StringUtils.defaultString(images.get(i).getCameraModel());
+                content[i][2] = StringUtils.defaultString(images.get(i).getAlbum());
+                content[i][3] = StringUtils.defaultString(images.get(i).getTitle());
+                content[i][4] = String.valueOf(images.get(i).getSize());
+                content[i][5] = StringUtils.defaultString(getDate(images.get(i).getDateTaken()));
+                content[i][6] = StringUtils.defaultString(images.get(i).getType());
+                content[i][7] = StringUtils.defaultString(images.get(i).getWidth() + "x" + images.get(i).getHeight());
+                content[i][8] = StringUtils.defaultString(images.get(i).getCameraModel());
             }
             printTable(headers, content);
             System.out.printf("Found %1$d images in Chii2 Media Library.\n", images.size());

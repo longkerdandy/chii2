@@ -88,6 +88,7 @@ public class ImageAnalyzer implements Runnable {
                     imageFile.setFocalLength(getString(result[13]));
                     imageFile.setFilePath(getFilePath(result[0]));
                     imageFile.setTitle(getFileTitle(result[1]));
+                    imageFile.setAlbum(getFileAlbum(result[0]));
                     // Add file
                     image.setFile(imageFile);
                     // Add to result
@@ -228,6 +229,17 @@ public class ImageAnalyzer implements Runnable {
     private String getFilePath(String absoluteName) {
         File file = new File(absoluteName);
         return file.getParent();
+    }
+
+    /**
+     * Convert the GraphicMagick output String to Image File information String
+     *
+     * @param absoluteName Absolute file name
+     * @return File Parent Name
+     */
+    private String getFileAlbum(String absoluteName) {
+        File file = new File(absoluteName);
+        return file.getParentFile().getName();
     }
 
     /**

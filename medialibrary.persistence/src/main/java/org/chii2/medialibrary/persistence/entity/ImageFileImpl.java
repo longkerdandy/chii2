@@ -15,7 +15,9 @@ import java.util.UUID;
         @NamedQuery(name = "ImageFile.findAll",
                 query = "SELECT i FROM IMAGE_FILE i"),
         @NamedQuery(name = "ImageFile.findById",
-                query = "SELECT i FROM IMAGE_FILE i WHERE i.id = :id")
+                query = "SELECT i FROM IMAGE_FILE i WHERE i.id = :id"),
+        @NamedQuery(name = "ImageFile.findAllAlbums",
+                query = "SELECT DISTINCT i.album FROM IMAGE_FILE i")
 })
 public class ImageFileImpl implements ImageFile {
 
@@ -43,6 +45,10 @@ public class ImageFileImpl implements ImageFile {
     // Image Title
     @Column(name = "TITLE")
     private String title;
+
+    // Image Album
+    @Column(name = "ALBUM")
+    private String album;
 
     // Image Type
     @Column(name = "IMAGE_TYPE")
@@ -154,6 +160,16 @@ public class ImageFileImpl implements ImageFile {
     @Override
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    @Override
+    public String getAlbum() {
+        return album;
+    }
+
+    @Override
+    public void setAlbum(String album) {
+        this.album = album;
     }
 
     @Override

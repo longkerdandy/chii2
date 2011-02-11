@@ -97,6 +97,16 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
         return persistenceService.getSingleImageByName(imageName);
     }
 
+    @Override
+    public List<String> getAllImageAlbums() {
+        return persistenceService.getAllImageAlbums();
+    }
+
+    @Override
+    public List<? extends Image> getImagesByAlbum(String album) {
+        return persistenceService.getImagesByAlbum(album);
+    }
+
     /**
      * Inject PersistenceService
      *

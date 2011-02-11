@@ -71,6 +71,13 @@ public interface Image {
     public String getTitle();
 
     /**
+     * Get Image Album
+     *
+     * @return Image Album
+     */
+    public String getAlbum();
+
+    /**
      * Get Image Type
      *
      * @return Type

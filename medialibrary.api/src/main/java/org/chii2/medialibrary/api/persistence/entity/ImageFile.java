@@ -92,6 +92,20 @@ public interface ImageFile {
     public void setTitle(String title);
 
     /**
+     * Get Image Album
+     *
+     * @return Image Album
+     */
+    public String getAlbum();
+
+    /**
+     * Set Image Album
+     *
+     * @param album Image Album
+     */
+    public void setAlbum(String album);
+
+    /**
      * Get Image Type
      *
      * @return Type

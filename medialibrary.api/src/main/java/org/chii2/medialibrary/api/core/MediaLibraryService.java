@@ -87,4 +87,20 @@ public interface MediaLibraryService {
      * @return Image
      */
     public Image getSingleImageByName(String imageName);
+
+    /**
+     * Get all image albums
+     *
+     * @return Image Albums
+     */
+    public List<String> getAllImageAlbums();
+
+    /**
+     * Get images by image album
+     *
+     *
+     * @param album Image Album
+     * @return Images
+     */
+    public List<? extends Image> getImagesByAlbum(String album);
 }
