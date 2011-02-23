@@ -75,6 +75,11 @@
             <artifactId>chii2.mediaserver.core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.chii2</groupId>
+            <artifactId>chii2.mediaserver.http</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

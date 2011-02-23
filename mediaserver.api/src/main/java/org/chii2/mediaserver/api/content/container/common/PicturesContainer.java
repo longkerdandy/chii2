@@ -1,23 +1,25 @@
-package org.chii2.mediaserver.upnp.content.wmc;
+package org.chii2.mediaserver.api.content.container.common;
 
-import org.chii2.mediaserver.upnp.content.VisualContainer;
+import org.chii2.mediaserver.api.content.container.VisualContainer;
+import org.chii2.mediaserver.api.library.Library;
 import org.teleal.cling.support.model.DIDLObject;
 import org.teleal.cling.support.model.WriteStatus;
 
 /**
- * Root Container for Windows Media Connect (Windows Media Player) related devices
+ * Image Container for XBox
+ * Contains all containers and items relating to pictures
  */
-public class RootContainer extends VisualContainer {
+public class PicturesContainer extends VisualContainer {
 
-    public RootContainer() {
-        super();
+    public PicturesContainer(Library library) {
+        super(library);
 
-        // Root Container ID: 0
-        setId("0");
-        // There is no parent container for Root
-        setParentID("-1");
+        // Pictures Container ID: 3
+        setId("3");
+        // Parent container is Root Container
+        setParentID("0");
         // Title TODO: This should be I18N
-        setTitle("Root");
+        setTitle("Pictures");
         // May used in Container Property Creator (part of UPnP protocol standard)
         setCreator("System");
         // May used in Container Property Clazz (part of UPnP protocol standard)
@@ -32,7 +34,7 @@ public class RootContainer extends VisualContainer {
 
     @Override
     public void loadContents() {
-        addContainer(new PicturesContainer());
+        addContainer(new PicturesFoldersContainer(library));
         setChildCount(1);
     }
 }

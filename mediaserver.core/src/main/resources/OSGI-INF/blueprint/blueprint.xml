@@ -2,24 +2,24 @@
 
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
-    <!-- Chii2 Media Server HTTP Bean -->
-    <bean id="mediaserverHttpService" class="org.chii2.mediaserver.http.HttpServerServiceImpl"
-          init-method="init"
-          destroy-method="destroy">
-    </bean>
+    <!-- Media Library Core Service -->
+    <reference id="mediaLibraryManager" interface="org.chii2.medialibrary.api.core.MediaLibraryService">
+    </reference>
+
+    <!-- Media Server HTTP  Service -->
+    <reference id="httpServerService" interface="org.chii2.mediaserver.api.http.HttpServerService">
+    </reference>
 
     <!-- Chii2 Media Server Core Bean -->
-    <bean id="mediaserverService" class="org.chii2.mediaserver.upnp.MediaServerServiceImpl"
+    <bean id="mediaServerService" class="org.chii2.mediaserver.upnp.MediaServerServiceImpl"
           init-method="init"
           destroy-method="destroy">
+        <property name="mediaLibrary" ref="mediaLibraryManager"/>
+        <property name="httpService" ref="httpServerService"/>
     </bean>
 
-    <!-- Chii2 Media Library HTTP Service -->
-    <service ref="mediaserverHttpService" interface="org.chii2.mediaserver.api.http.HttpServerService">
-    </service>
-
     <!-- Chii2 Media Library Core Service -->
-    <service ref="mediaserverService" interface="org.chii2.mediaserver.api.upnp.MediaServerService">
+    <service ref="mediaServerService" interface="org.chii2.mediaserver.api.upnp.MediaServerService">
     </service>
 
 </blueprint>

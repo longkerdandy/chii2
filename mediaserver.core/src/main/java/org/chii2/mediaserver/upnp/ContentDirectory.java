@@ -1,7 +1,11 @@
 package org.chii2.mediaserver.upnp;
 
-import org.chii2.mediaserver.api.upnp.content.ContentManager;
-import org.chii2.mediaserver.upnp.content.wmc.WMCContentManager;
+import org.chii2.mediaserver.api.content.container.VisualContainer;
+import org.chii2.mediaserver.api.content.container.common.PicturesContainer;
+import org.chii2.mediaserver.api.content.container.common.PicturesFoldersContainer;
+import org.chii2.mediaserver.api.content.container.common.PicturesStorageFolderContainer;
+import org.chii2.mediaserver.api.content.container.common.RootContainer;
+import org.chii2.mediaserver.api.library.Library;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teleal.cling.support.contentdirectory.AbstractContentDirectoryService;
@@ -16,12 +20,18 @@ import org.teleal.cling.support.model.item.Item;
  * ContentDirectory Service for UPnP AV/DLNA Media Server
  */
 public class ContentDirectory extends AbstractContentDirectoryService {
-
+    // Library
+    private Library library;
     // Logger
-    private Logger logger;
+    private Logger logger = LoggerFactory.getLogger("org.chii2.mediaserver.core");
 
-    public ContentDirectory() {
-        logger = LoggerFactory.getLogger("org.chii2.mediaserver.core");
+    /**
+     * Constructor
+     *
+     * @param library Library
+     */
+    public ContentDirectory(Library library) {
+        this.library = library;
     }
 
     @Override
@@ -29,16 +39,13 @@ public class ContentDirectory extends AbstractContentDirectoryService {
                                String filter,
                                long firstResult, long maxResults,
                                SortCriterion[] orderBy) throws ContentDirectoryException {
-        logger.debug("ContentDirectory receive browse request with ObjectID:<{}>, BrowseFlag:<{}>.", objectID, browseFlag);
+        logger.debug(String.format("ContentDirectory receive browse request with ObjectID:%s, BrowseFlag:%s, Filter:%s, FirstResult:%s, MaxResults:%s, SortCriterion:%s.", objectID, browseFlag, filter, firstResult, maxResults, orderBy.toString()));
 
         try {
+            // Result
             DIDLContent didlContent = new DIDLContent();
-
-            // TODO: When the request is XBox or WMP, choose WMCContentManager
-            ContentManager contentManager = new WMCContentManager();
-
             // Search and get the object from the given id
-            DIDLObject didlObject = contentManager.findObjectWithId(objectID);
+            DIDLObject didlObject = findObjectById(objectID);
 
             // Not found, return empty result
             if (didlObject == null) {
@@ -86,11 +93,43 @@ public class ContentDirectory extends AbstractContentDirectoryService {
                     }
                 }
             }
+
+            // Return result
             logger.info("Browsing result count: <{}> and total matches: <{}>", count, totalMatches);
             return new BrowseResult(new DIDLParser().generate(didlContent), count, totalMatches);
         } catch (Exception e) {
             logger.error("ContentDirectory process browse request with exception:{}", e.getMessage());
             throw new ContentDirectoryException(ContentDirectoryErrorCode.CANNOT_PROCESS, e.getMessage());
+        }
+    }
+
+    /**
+     * Find the object (may be container or item) by id
+     *
+     * @param id Object ID (usually provided from ContentDirectory Browse or Search action)
+     * @return Object or Null if nothing found
+     */
+    public DIDLObject findObjectById(String id) {
+        if (id.equalsIgnoreCase("0")) {
+            VisualContainer container = new RootContainer(library);
+            container.loadContents();
+            return container;
+        } else if (id.equalsIgnoreCase("3")) {
+            VisualContainer container = new PicturesContainer(library);
+            container.loadContents();
+            return container;
+        } else if (id.equalsIgnoreCase("16")) {
+            VisualContainer container = new PicturesFoldersContainer(library);
+            container.loadContents();
+            return container;
+        } else if (library.isPicturesStorageFolder(id)) {
+            VisualContainer container = new PicturesStorageFolderContainer(id, library.getContainerTitle(id), library);
+            container.loadContents();
+            return container;
+        } else if (library.isPhotoItem(id)) {
+            return library.getPhotoById(id);
+        } else {
+            return null;
         }
     }
 }

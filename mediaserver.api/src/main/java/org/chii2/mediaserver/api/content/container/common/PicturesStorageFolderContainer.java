@@ -1,0 +1,52 @@
+package org.chii2.mediaserver.api.content.container.common;
+
+import org.chii2.mediaserver.api.content.container.VisualContainer;
+import org.chii2.mediaserver.api.content.item.common.PhotoItem;
+import org.chii2.mediaserver.api.library.Library;
+import org.teleal.cling.support.model.DIDLObject;
+import org.teleal.cling.support.model.WriteStatus;
+
+import java.util.List;
+
+/**
+ * Image Container for Windows Media Connect (Windows Media Player) related devices
+ * Represent folders in storage device, contain pictures or sub folder
+ */
+public class PicturesStorageFolderContainer extends VisualContainer {
+
+    public PicturesStorageFolderContainer(String id, String title, Library library) {
+        super(library);
+
+        // Pictures Storage Folder Container ID
+        setId(id);
+        // Parent container is Root Container
+        setParentID("16");
+        // Title
+        setTitle(title);
+        // May used in Container Property Creator (part of UPnP protocol standard)
+        setCreator("System");
+        // May used in Container Property Clazz (part of UPnP protocol standard)
+        setClazz(new DIDLObject.Class("object.container.storageFolder"));
+        // Restricted
+        setRestricted(true);
+        // Searchable
+        setSearchable(false);
+        // Writable
+        setWriteStatus(WriteStatus.NOT_WRITABLE);
+    }
+
+    @Override
+    public void loadContents() {
+        // Read from library
+        List<PhotoItem> photos = library.getPhotosByAlbum(getTitle(), getId());
+        // Add children
+        if (photos != null) {
+            for (PhotoItem photo : photos) {
+                addItem(photo);
+            }
+            setChildCount(photos.size());
+        } else {
+            setChildCount(0);
+        }
+    }
+}

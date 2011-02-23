@@ -100,7 +100,7 @@ public class MediaLibraryCommandImpl implements MediaLibraryCommand {
         if (arguments.length == 1) {
             UUID id = null;
             try {
-                id = UUID.fromString(arguments[1]);
+                id = UUID.fromString(arguments[0]);
             } catch (IllegalArgumentException e) {
                 // Do nothing
             }

@@ -1,21 +1,29 @@
-package org.chii2.mediaserver.upnp.content.wmc;
+package org.chii2.mediaserver.api.content.container.common;
 
-import org.chii2.mediaserver.upnp.content.VisualContainer;
+import org.chii2.mediaserver.api.content.container.VisualContainer;
+import org.chii2.mediaserver.api.library.Library;
 import org.teleal.cling.support.model.DIDLObject;
 import org.teleal.cling.support.model.WriteStatus;
 
+import java.util.List;
+
 /**
- * Image Container for Windows Media Connect (Windows Media Player) related devices
+ * Image Container for XBox
  * Contains all containers and pictures represent folders in storage
  */
 public class PicturesFoldersContainer extends VisualContainer {
 
-    public PicturesFoldersContainer() {
-        super();
+    /**
+     * Constructor
+     *
+     * @param library Library
+     */
+    public PicturesFoldersContainer(Library library) {
+        super(library);
 
         // Pictures Folders Container ID: 16
         setId("16");
-        // Parent container is Root Container
+        // Parent container is Pictures Container
         setParentID("3");
         // Title TODO: This should be I18N
         setTitle("Pictures/Folders");
@@ -33,7 +41,16 @@ public class PicturesFoldersContainer extends VisualContainer {
 
     @Override
     public void loadContents() {
-        addContainer(new PicturesStorageFolderContainer("99999", "Singapore"));
-        setChildCount(1);
+        // Load from library
+        List<PicturesStorageFolderContainer> containers = library.getPicturesStorageFolders();
+        // Add children
+        if (containers != null) {
+            for (PicturesStorageFolderContainer container : containers) {
+                addContainer(container);
+            }
+            setChildCount(containers.size());
+        } else {
+            setChildCount(0);
+        }
     }
 }

@@ -1,6 +1,9 @@
 package org.chii2.mediaserver.upnp;
 
+import org.chii2.medialibrary.api.core.MediaLibraryService;
+import org.chii2.mediaserver.api.http.HttpServerService;
 import org.chii2.mediaserver.api.upnp.MediaServerService;
+import org.chii2.mediaserver.library.LibraryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teleal.cling.DefaultUpnpServiceConfiguration;
@@ -28,12 +31,12 @@ public class MediaServerServiceImpl implements MediaServerService {
     final private UDN udn = UDN.uniqueSystemIdentifier("Chii2 MediaServer v1");
     // UPnP Server
     private UpnpService upnpService = null;
+    // Library
+    private MediaLibraryService mediaLibrary;
+    // HTTP Server
+    private HttpServerService httpService;
     // Logger
-    private Logger logger;
-
-    public MediaServerServiceImpl() {
-        logger = LoggerFactory.getLogger("org.chii2.mediaserver.upnp");
-    }
+    private Logger logger = LoggerFactory.getLogger("org.chii2.mediaserver.upnp");
 
     /**
      * Life Cycle Init
@@ -99,7 +102,7 @@ public class MediaServerServiceImpl implements MediaServerService {
                         new DLNADoc[]{
                                 new DLNADoc("DMS", DLNADoc.Version.V1_5),
                         },
-                        new DLNACaps(new String[] {
+                        new DLNACaps(new String[]{
                                 "av-upload", "image-upload", "audio-upload"
                         })
                 );
@@ -110,7 +113,7 @@ public class MediaServerServiceImpl implements MediaServerService {
                 new DefaultServiceManager<ContentDirectory>(contentDirectory, null) {
                     @Override
                     protected ContentDirectory createServiceInstance() throws Exception {
-                        return new ContentDirectory();
+                        return new ContentDirectory(new LibraryImpl(mediaLibrary, httpService));
                     }
                 }
         );
@@ -236,5 +239,25 @@ public class MediaServerServiceImpl implements MediaServerService {
                         "EF0CA9E1374DC37A0D399BB5ED47F80F6C0090FFFF6F95FFF1F16F010600920311DE85F67A" +
                         "F50000000049454E44AE426082"
         );
+    }
+
+    /**
+     * Inject Media Library Service
+     *
+     * @param mediaLibrary Media Library Service
+     */
+    @SuppressWarnings("unused")
+    public void setMediaLibrary(MediaLibraryService mediaLibrary) {
+        this.mediaLibrary = mediaLibrary;
+    }
+
+    /**
+     * Inject Media Server HTTP Server Service
+     *
+     * @param httpService HTTP Server Service
+     */
+    @SuppressWarnings("unused")
+    public void setHttpService(HttpServerService httpService) {
+        this.httpService = httpService;
     }
 }

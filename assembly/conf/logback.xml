@@ -19,7 +19,7 @@
         <file>log/platform.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- rollover daily -->
-            <fileNamePattern>chii2-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>platform-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <!-- or whenever the file size reaches 10MB -->
@@ -33,6 +33,10 @@
 
     <logger name="org.chii2" level="debug" additivity="false">
         <appender-ref ref="Chii2"/>
+    </logger>
+
+    <logger name="org.apache.http" level="debug" additivity="false">
+        <appender-ref ref="OSGi"/>
     </logger>
 
     <root level="warn">
