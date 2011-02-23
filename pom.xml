@@ -119,11 +119,6 @@
             <!-- Apache Felix (OSGi framework) -->
             <dependency>
                 <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.bundlerepository</artifactId>
-                <version>1.6.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.configadmin</artifactId>
                 <version>1.2.8</version>
             </dependency>
@@ -132,86 +127,11 @@
                 <artifactId>org.apache.felix.eventadmin</artifactId>
                 <version>1.2.6</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.fileinstall</artifactId>
-                <version>3.1.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.gogo.runtime</artifactId>
-                <version>0.6.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.gogo.shell</artifactId>
-                <version>0.6.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.gogo.command</artifactId>
-                <version>0.6.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.http.jetty</artifactId>
-                <version>2.0.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.http.whiteboard</artifactId>
-                <version>2.0.4</version>
-            </dependency>
 
             <!-- Apache Aries (OSGi enterprise framework) -->
             <dependency>
-                <groupId>org.apache.aries.blueprint</groupId>
-                <artifactId>org.apache.aries.blueprint</artifactId>
-                <version>0.3-incubating-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.jndi</groupId>
-                <artifactId>org.apache.aries.jndi</artifactId>
-                <version>0.3-incubating-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.jpa</groupId>
-                <artifactId>org.apache.aries.jpa.api</artifactId>
-                <version>0.3-incubating-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.jpa</groupId>
-                <artifactId>org.apache.aries.jpa.blueprint.aries</artifactId>
-                <version>0.3-incubating-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.jpa</groupId>
-                <artifactId>org.apache.aries.jpa.container</artifactId>
-                <version>0.3-incubating-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.jpa</groupId>
-                <artifactId>org.apache.aries.jpa.container.context</artifactId>
-                <version>0.3-incubating-SNAPSHOT</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.aries.transaction</groupId>
                 <artifactId>org.apache.aries.transaction.blueprint</artifactId>
-                <version>0.3-incubating-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.transaction</groupId>
-                <artifactId>org.apache.aries.transaction.manager</artifactId>
-                <version>0.3-incubating-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries.transaction</groupId>
-                <artifactId>org.apache.aries.transaction.wrappers</artifactId>
-                <version>0.3-incubating-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.aries</groupId>
-                <artifactId>org.apache.aries.util</artifactId>
                 <version>0.3-incubating-SNAPSHOT</version>
             </dependency>
 
@@ -220,11 +140,6 @@
                 <groupId>org.apache.openjpa</groupId>
                 <artifactId>openjpa</artifactId>
                 <version>2.0.1</version>
-            </dependency>
-            <dependency>
-                <groupId>asm</groupId>
-                <artifactId>asm-all</artifactId>
-                <version>3.3</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
@@ -304,28 +219,6 @@
                 <artifactId>slf4j-api</artifactId>
                 <version>1.6.1</version>
             </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jcl-over-slf4j</artifactId>
-                <version>1.6.1</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>0.9.26</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>0.9.26</version>
-            </dependency>
-
-            <!--  Json -->
-            <dependency>
-                <groupId>com.google.code.gson</groupId>
-                <artifactId>gson</artifactId>
-                <version>1.6</version>
-            </dependency>
 
             <!-- Yaml -->
             <dependency>
@@ -339,13 +232,6 @@
                 <groupId>org.jboss.netty</groupId>
                 <artifactId>netty</artifactId>
                 <version>3.2.3.Final</version>
-            </dependency>
-
-            <!-- Web: Frameworks & Library -->
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin</artifactId>
-                <version>6.4.8</version>
             </dependency>
 
             <!-- Cling UPnP Library -->
