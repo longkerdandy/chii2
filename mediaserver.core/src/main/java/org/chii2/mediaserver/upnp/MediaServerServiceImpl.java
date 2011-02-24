@@ -14,6 +14,7 @@ import org.teleal.cling.binding.annotations.AnnotationLocalServiceBinder;
 import org.teleal.cling.model.DefaultServiceManager;
 import org.teleal.cling.model.ValidationException;
 import org.teleal.cling.model.meta.*;
+import org.teleal.cling.model.profile.HeaderDeviceDetailsProvider;
 import org.teleal.cling.model.types.*;
 import org.teleal.cling.support.connectionmanager.ConnectionManagerService;
 import org.teleal.cling.transport.impl.apache.StreamClientConfigurationImpl;
@@ -21,6 +22,8 @@ import org.teleal.cling.transport.impl.apache.StreamClientImpl;
 import org.teleal.cling.transport.spi.StreamClient;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * UPnP/DLNA Media Server
@@ -87,27 +90,49 @@ public class MediaServerServiceImpl implements MediaServerService {
      */
     public LocalDevice createUPnPDevice()
             throws ValidationException, LocalServiceBindingException {
-
+        // Device Type
         DeviceType type =
                 new UDADeviceType("MediaServer", 1);
+        // XBox360 Device Details
+        DeviceDetails xboxDetails = new DeviceDetails(
+                "Chii2 (Home-Server):1",
+                new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
+                new ModelDetails("Windows Media Connect", "Windows Media Connect", "1"),
+                "000da201238c",
+                "100000000001",
+                "http://www.chii2.org/some_user_interface/",
+                new DLNADoc[]{
+                        new DLNADoc("DMS", DLNADoc.Version.V1_5),
+                },
+                new DLNACaps(new String[]{
+                        "av-upload", "image-upload", "audio-upload"
+                })
+        );
 
-        DeviceDetails details =
-                new DeviceDetails(
-                        "Chii2 (Home-Server):1",
-                        new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
-                        new ModelDetails("Windows Media Connect", "Windows Media Connect", "1"),
-                        "000da201238c",
-                        "100000000001",
-                        "http://www.chii2.org/some_user_interface/",
-                        new DLNADoc[]{
-                                new DLNADoc("DMS", DLNADoc.Version.V1_5),
-                        },
-                        new DLNACaps(new String[]{
-                                "av-upload", "image-upload", "audio-upload"
-                        })
-                );
+        DeviceDetails psDetails = new DeviceDetails(
+                "Chii2 (Home-Server):1",
+                new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
+                new ModelDetails("Chii2 Home Server", "Chii2 Home Server", "1"),
+                "000da201238c",
+                "100000000001",
+                "http://www.chii2.org/some_user_interface/",
+                new DLNADoc[]{
+                        new DLNADoc("DMS", DLNADoc.Version.V1_5),
+                },
+                new DLNACaps(new String[]{
+                        "av-upload", "image-upload", "audio-upload"
+                })
+        );
 
-        LocalService contentDirectory =
+        // Device Details Provider
+        Map<HeaderDeviceDetailsProvider.Key, DeviceDetails> headerDetails = new HashMap<HeaderDeviceDetailsProvider.Key, DeviceDetails>();
+        headerDetails.put(new HeaderDeviceDetailsProvider.Key("User-Agent", "Xbox.*"), xboxDetails);
+        headerDetails.put(new HeaderDeviceDetailsProvider.Key("X-AV-Client-Info", ".*PLAYSTATION 3.*"), psDetails);
+        HeaderDeviceDetailsProvider provider = new HeaderDeviceDetailsProvider(psDetails, headerDetails);
+
+        // Content Directory Service
+        @SuppressWarnings("unchecked")
+        LocalService<ContentDirectory> contentDirectory =
                 new AnnotationLocalServiceBinder().read(ContentDirectory.class);
         contentDirectory.setManager(
                 new DefaultServiceManager<ContentDirectory>(contentDirectory, null) {
@@ -118,7 +143,9 @@ public class MediaServerServiceImpl implements MediaServerService {
                 }
         );
 
-        LocalService connectionManager =
+        // Connection Manager Service
+        @SuppressWarnings("unchecked")
+        LocalService<ConnectionManagerService> connectionManager =
                 new AnnotationLocalServiceBinder().read(ConnectionManagerService.class);
         connectionManager.setManager(
                 new DefaultServiceManager<ConnectionManagerService>(
@@ -127,7 +154,9 @@ public class MediaServerServiceImpl implements MediaServerService {
                 )
         );
 
-        LocalService mediaReceiverRegistrar =
+        // Media Receiver Registrar Service
+        @SuppressWarnings("unchecked")
+        LocalService<MediaReceiverRegistrar> mediaReceiverRegistrar =
                 new AnnotationLocalServiceBinder().read(MediaReceiverRegistrar.class);
         mediaReceiverRegistrar.setManager(
                 new DefaultServiceManager<MediaReceiverRegistrar>(
@@ -136,10 +165,11 @@ public class MediaServerServiceImpl implements MediaServerService {
                 )
         );
 
+        // Creeate/Start UPnP/DLNA Device
         return new LocalDevice(
                 new DeviceIdentity(udn),
                 type,
-                details,
+                provider,
                 createDefaultDeviceIcon(),
                 new LocalService[]{connectionManager, contentDirectory, mediaReceiverRegistrar}
         );
