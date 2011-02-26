@@ -3,6 +3,7 @@ package org.chii2.mediaserver.api.content.container.common;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
 import org.chii2.mediaserver.api.library.Library;
 import org.teleal.cling.support.model.DIDLObject;
+import org.teleal.cling.support.model.SortCriterion;
 import org.teleal.cling.support.model.WriteStatus;
 
 import java.util.List;
@@ -40,17 +41,20 @@ public class PicturesFoldersContainer extends VisualContainer {
     }
 
     @Override
-    public void loadContents() {
+    public void loadContents(long startIndex, long maxCount, SortCriterion[] orderBy) {
         // Load from library
-        List<PicturesStorageFolderContainer> containers = library.getPicturesStorageFolders();
+        List<PicturesStorageFolderContainer> containers = library.getPicturesStorageFolders(startIndex, maxCount, orderBy);
+        long count = library.getPicturesStorageFoldersCount();
         // Add children
-        if (containers != null) {
+        if (containers != null && count > 0) {
             for (PicturesStorageFolderContainer container : containers) {
                 addContainer(container);
             }
             setChildCount(containers.size());
+            setTotalChildCount(count);
         } else {
             setChildCount(0);
+            setTotalChildCount(0);
         }
     }
 }

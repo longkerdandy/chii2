@@ -3,6 +3,7 @@ package org.chii2.mediaserver.api.content.container.common;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
 import org.chii2.mediaserver.api.library.Library;
 import org.teleal.cling.support.model.DIDLObject;
+import org.teleal.cling.support.model.SortCriterion;
 import org.teleal.cling.support.model.WriteStatus;
 
 /**
@@ -32,8 +33,9 @@ public class RootContainer extends VisualContainer {
     }
 
     @Override
-    public void loadContents() {
+    public void loadContents(long startIndex, long maxCount, SortCriterion[] orderBy) {
         addContainer(new PicturesContainer(library));
         setChildCount(1);
+        setTotalChildCount(1);
     }
 }

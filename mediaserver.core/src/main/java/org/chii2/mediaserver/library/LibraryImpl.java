@@ -9,11 +9,10 @@ import org.chii2.mediaserver.api.http.HttpServerService;
 import org.chii2.mediaserver.api.library.Library;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.teleal.cling.support.model.SortCriterion;
 import org.teleal.common.util.MimeType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Library Service for Chii2 Media Server, which using Chii2 Media Library as backend
@@ -41,11 +40,32 @@ public class LibraryImpl implements Library {
     }
 
     @Override
-    public List<PicturesStorageFolderContainer> getPicturesStorageFolders() {
+    public List<PicturesStorageFolderContainer> getPicturesStorageFolders(long startIndex, long maxCount, SortCriterion[] orderBy) {
+        // Forge sort
+        Map<String, String> sorts = new HashMap<String, String>();
+        for (SortCriterion sort : orderBy) {
+            String field = null;
+            if ("dc:title".equalsIgnoreCase(sort.getPropertyName())) {
+                field = "album";
+            }
+            if (field != null) {
+                if (sort.isAscending()) {
+                    sorts.put(field, "asc");
+                } else {
+                    sorts.put(field, "desc");
+                }
+            }
+        }
         // Result
         List<PicturesStorageFolderContainer> containers = new ArrayList<PicturesStorageFolderContainer>();
         // Get image albums from Chii2 Media Library
-        List<String> albums = mediaLibrary.getAllImageAlbums();
+        List<String> albums;
+        try {
+            albums = mediaLibrary.getAllImageAlbums((int) startIndex, (int) maxCount, sorts);
+        } catch (IllegalArgumentException e) {
+            albums = mediaLibrary.getAllImageAlbums();
+        }
+
         // Add to result
         if (albums != null) {
             for (String album : albums) {
@@ -60,9 +80,39 @@ public class LibraryImpl implements Library {
     }
 
     @Override
-    public List<PhotoItem> getPhotosByAlbum(String album, String parentId) {
-        List<? extends Image> images = mediaLibrary.getImagesByAlbum(album);
+    public long getPicturesStorageFoldersCount() {
+        return mediaLibrary.getImageAlbumsCount();
+    }
+
+    @Override
+    public List<PhotoItem> getPhotosByAlbum(String album, String parentId, long startIndex, long maxCount, SortCriterion[] orderBy) {
+        // Forge sort
+        Map<String, String> sorts = new HashMap<String, String>();
+        for (SortCriterion sort : orderBy) {
+            String field = null;
+            if ("dc:title".equalsIgnoreCase(sort.getPropertyName())) {
+                field = "title";
+            } else if ("dc:date".equalsIgnoreCase(sort.getPropertyName())) {
+                field = "date_taken";
+            }
+            if (field != null) {
+                if (sort.isAscending()) {
+                    sorts.put(field, "asc");
+                } else {
+                    sorts.put(field, "desc");
+                }
+            }
+        }
+        // Get images from library
+        List<? extends Image> images;
+        try {
+            images = mediaLibrary.getImagesByAlbum(album, (int) startIndex, (int) maxCount, sorts);
+        } catch (IllegalArgumentException e) {
+            images = mediaLibrary.getImagesByAlbum(album);
+        }
+        // Results
         List<PhotoItem> photos = new ArrayList<PhotoItem>();
+        // Create photo item and add to results
         for (Image image : images) {
             if (image != null) {
                 String id = forgeItemId(image.getId(), parentId, PHOTO_ITEM_PREFIX);
@@ -72,6 +122,11 @@ public class LibraryImpl implements Library {
             }
         }
         return photos;
+    }
+
+    @Override
+    public long getPhotosCountByAlbum(String album) {
+        return mediaLibrary.getImagesCountByAlbum(album);
     }
 
     @Override
@@ -128,7 +183,22 @@ public class LibraryImpl implements Library {
     }
 
     @Override
-    public boolean isPicturesStorageFolder(String id) {
+    public boolean isRootContainer(String id) {
+        return ROOT_ID.equalsIgnoreCase(id);
+    }
+
+    @Override
+    public boolean isPicturesContainer(String id) {
+        return PICTURES_ID.equalsIgnoreCase(id);
+    }
+
+    @Override
+    public boolean isPicturesFoldersContainer(String id) {
+        return PICTURES_FOLDERS_ID.equalsIgnoreCase(id);
+    }
+
+    @Override
+    public boolean isPicturesStorageFolderContainer(String id) {
         return id != null && id.length() > 4 && id.substring(0, 5).equalsIgnoreCase(PICTURES_STORAGE_FOLDER_PREFIX);
     }
 

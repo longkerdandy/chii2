@@ -45,10 +45,10 @@ public class LibraryTest {
 
     @Test
     public void isPicturesStorageFolderTest() {
-        assert library.isPicturesStorageFolder("PSFC-Singapore");
-        assert library.isPicturesStorageFolder("PSFC-Universal Studios");
-        assert !library.isPicturesStorageFolder("PI-PSFC-Singapore-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
-        assert !library.isPicturesStorageFolder("PI-PSFC-Universal Studios-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
+        assert library.isPicturesStorageFolderContainer("PSFC-Singapore");
+        assert library.isPicturesStorageFolderContainer("PSFC-Universal Studios");
+        assert !library.isPicturesStorageFolderContainer("PI-PSFC-Singapore-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
+        assert !library.isPicturesStorageFolderContainer("PI-PSFC-Universal Studios-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
     }
 
     @Test

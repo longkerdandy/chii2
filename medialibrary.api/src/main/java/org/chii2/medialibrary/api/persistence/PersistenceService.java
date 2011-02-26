@@ -3,6 +3,7 @@ package org.chii2.medialibrary.api.persistence;
 import org.chii2.medialibrary.api.persistence.entity.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Persistence layer for media library
@@ -103,12 +104,49 @@ public interface PersistenceService {
     public List<String> getAllImageAlbums();
 
     /**
+     * Get image albums from index with max limit
+     *
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
+     * @return Image Albums
+     */
+    public List<String> getAllImageAlbums(int firstResult, int maxResults, Map<String, String> sorts);
+
+    /**
+     * Get the count of total image albums
+     *
+     * @return Count
+     */
+    public long getImageAlbumsCount();
+
+
+    /**
      * Get images by image album
      *
      * @param album Image Album
      * @return Images
      */
     public List<? extends Image> getImagesByAlbum(String album);
+
+    /**
+     * Get images by image album
+     *
+     * @param album       Image Album
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
+     * @return Image Albums
+     */
+    public List<? extends Image> getImagesByAlbum(String album, int firstResult, int maxResults, Map<String, String> sorts);
+
+    /**
+     * Get count of images belong to  specific album
+     *
+     * @param album Image Album
+     * @return Count
+     */
+    public long getImagesCountByAlbum(String album);
 
     /**
      * Delete all images in library

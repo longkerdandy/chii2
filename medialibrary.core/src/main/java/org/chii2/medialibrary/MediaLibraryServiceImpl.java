@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Media Library Core Interface, provide major functionality & operations.
@@ -20,11 +21,7 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     // File Service
     private FileService fileService;
     // Logger
-    private Logger logger;
-
-    public MediaLibraryServiceImpl() {
-        logger = LoggerFactory.getLogger("org.chii2.medialibrary.core");
-    }
+    private Logger logger= LoggerFactory.getLogger("org.chii2.medialibrary.core");
 
     /**
      * Life Cycle Init
@@ -103,8 +100,38 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     }
 
     @Override
+    public List<String> getAllImageAlbums(int firstResult, int maxResults) {
+        return persistenceService.getAllImageAlbums(firstResult, maxResults, null);
+    }
+
+    @Override
+    public List<String> getAllImageAlbums(int firstResult, int maxResults, Map<String, String> sorts) {
+        return persistenceService.getAllImageAlbums(firstResult, maxResults, sorts);
+    }
+
+    @Override
+    public long getImageAlbumsCount() {
+        return persistenceService.getImageAlbumsCount();
+    }
+
+    @Override
     public List<? extends Image> getImagesByAlbum(String album) {
         return persistenceService.getImagesByAlbum(album);
+    }
+
+    @Override
+    public List<? extends Image> getImagesByAlbum(String album, int firstResult, int maxResults) {
+        return persistenceService.getImagesByAlbum(album, firstResult, maxResults, null);
+    }
+
+    @Override
+    public List<? extends Image> getImagesByAlbum(String album, int firstResult, int maxResults, Map<String, String> sorts) {
+        return persistenceService.getImagesByAlbum(album, firstResult, maxResults, sorts);
+    }
+
+    @Override
+    public long getImagesCountByAlbum(String album) {
+        return persistenceService.getImagesCountByAlbum(album);
     }
 
     /**

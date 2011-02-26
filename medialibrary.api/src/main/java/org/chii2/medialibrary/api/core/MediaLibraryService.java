@@ -4,6 +4,7 @@ import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Media Library Core Interface, provide major functionality & operations.
@@ -96,11 +97,65 @@ public interface MediaLibraryService {
     public List<String> getAllImageAlbums();
 
     /**
-     * Get images by image album
+     * Get image albums from index with max limit
      *
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @return Image Albums
+     */
+    public List<String> getAllImageAlbums(int firstResult, int maxResults);
+
+    /**
+     * Get image albums from index with max limit
+     *
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
+     * @return Image Albums
+     */
+    public List<String> getAllImageAlbums(int firstResult, int maxResults, Map<String, String> sorts);
+
+    /**
+     * Get the count of total image albums
+     *
+     * @return Count
+     */
+    public long getImageAlbumsCount();
+
+    /**
+     * Get images by image album
      *
      * @param album Image Album
      * @return Images
      */
     public List<? extends Image> getImagesByAlbum(String album);
+
+    /**
+     * Get images by image album
+     *
+     * @param album       Image Album
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @return Images
+     */
+    public List<? extends Image> getImagesByAlbum(String album, int firstResult, int maxResults);
+
+    /**
+     * Get images by image album
+     *
+     * @param album       Image Album
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
+     * @return Images
+     */
+    public List<? extends Image> getImagesByAlbum(String album, int firstResult, int maxResults, Map<String, String> sorts);
+
+    /**
+     * Get count of images belong to  specific album
+     *
+     * @param album Image Album
+     * @return Count
+     */
+    public long getImagesCountByAlbum(String album);
 }

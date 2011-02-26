@@ -8,7 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Persistence layer
@@ -161,9 +165,103 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
+    public List<String> getAllImageAlbums(int firstResult, int maxResults, Map<String, String> sorts) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        // From Query
+        CriteriaQuery<String> fromQuery = builder.createQuery(String.class);
+        Root<ImageFileImpl> imageFiles = fromQuery.from(ImageFileImpl.class);
+        // Select Query
+        CriteriaQuery<String> select = fromQuery.multiselect(imageFiles.get("album"));
+        select.distinct(true);
+        if (sorts != null) {
+            List<Order> orders = new ArrayList<Order>();
+            for (Map.Entry<String, String> entry : sorts.entrySet()) {
+                String field = entry.getKey();
+                String sortType = entry.getValue();
+                if (sortType != null && sortType.equalsIgnoreCase("asc")) {
+                    orders.add(builder.asc(imageFiles.get(field)));
+                } else if (sortType != null && sortType.equalsIgnoreCase("desc")) {
+                    orders.add(builder.desc(imageFiles.get(field)));
+                }
+            }
+            select.orderBy(orders);
+        }
+        // Final Query
+        TypedQuery<String> typedQuery = entityManager.createQuery(select);
+        if (firstResult >= 0 && maxResults >= 0) {
+            return typedQuery.setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
+        } else {
+            return typedQuery.getResultList();
+        }
+    }
+
+    @Override
+    public long getImageAlbumsCount() {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        // From Query
+        CriteriaQuery<Long> fromQuery = builder.createQuery(Long.class);
+        Root<ImageFileImpl> imageFiles = fromQuery.from(ImageFileImpl.class);
+        // Select Query
+        CriteriaQuery<Long> selectQuery = fromQuery.select(builder.count(imageFiles));
+        // Final Query
+        TypedQuery<Long> typedQuery = entityManager.createQuery(selectQuery);
+        return typedQuery.getSingleResult();
+    }
+
+    @Override
     public List<? extends Image> getImagesByAlbum(String album) {
         // Get images by album
         return entityManager.createNamedQuery("Image.findByAlbum", ImageImpl.class).setParameter("album", album.toLowerCase()).getResultList();
+    }
+
+    @Override
+    public List<? extends Image> getImagesByAlbum(String album, int firstResult, int maxResults, Map<String, String> sorts) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        // From Query
+        CriteriaQuery<ImageImpl> fromQuery = builder.createQuery(ImageImpl.class);
+        Root<ImageImpl> images = fromQuery.from(ImageImpl.class);
+        Path<String> albumField = images.join("file").get("album");
+        // Select Query
+        CriteriaQuery<ImageImpl> selectQuery = fromQuery.select(images);
+        // Where Query
+        selectQuery.where(builder.equal(albumField, album));
+        // Order query
+        if (sorts != null) {
+            List<Order> orders = new ArrayList<Order>();
+            for (Map.Entry<String, String> entry : sorts.entrySet()) {
+                String field = entry.getKey();
+                String sortType = entry.getValue();
+                if (sortType != null && sortType.equalsIgnoreCase("asc")) {
+                    orders.add(builder.asc(images.join("file").get(field)));
+                } else if (sortType != null && sortType.equalsIgnoreCase("desc")) {
+                    orders.add(builder.desc(images.join("file").get(field)));
+                }
+            }
+            selectQuery.orderBy(orders);
+        }
+        // Final Query
+        TypedQuery<ImageImpl> typedQuery = entityManager.createQuery(selectQuery);
+        if (firstResult >= 0 && maxResults >= 0) {
+            return typedQuery.setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
+        } else {
+            return typedQuery.getResultList();
+        }
+    }
+
+    @Override
+    public long getImagesCountByAlbum(String album) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        // From Query
+        CriteriaQuery<Long> fromQuery = builder.createQuery(Long.class);
+        Root<ImageImpl> images = fromQuery.from(ImageImpl.class);
+        Path<String> albumField = images.join("file").get("album");
+        // Select Query
+        CriteriaQuery<Long> selectQuery = fromQuery.select(builder.count(images));
+        // Where Query
+        selectQuery.where(builder.equal(albumField, album));
+        // Final Query
+        TypedQuery<Long> typedQuery = entityManager.createQuery(selectQuery);
+        return typedQuery.getSingleResult();
     }
 
     @Override

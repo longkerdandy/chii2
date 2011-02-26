@@ -1,13 +1,14 @@
 package org.chii2.mediaserver.upnp;
 
+import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
-import org.chii2.mediaserver.api.content.container.common.PicturesContainer;
-import org.chii2.mediaserver.api.content.container.common.PicturesFoldersContainer;
-import org.chii2.mediaserver.api.content.container.common.PicturesStorageFolderContainer;
-import org.chii2.mediaserver.api.content.container.common.RootContainer;
 import org.chii2.mediaserver.api.library.Library;
+import org.chii2.mediaserver.content.common.CommonContentManager;
+import org.chii2.mediaserver.content.xbox.XBoxContentManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.teleal.cling.model.message.UpnpHeaders;
+import org.teleal.cling.protocol.sync.ReceivingAction;
 import org.teleal.cling.support.contentdirectory.AbstractContentDirectoryService;
 import org.teleal.cling.support.contentdirectory.ContentDirectoryErrorCode;
 import org.teleal.cling.support.contentdirectory.ContentDirectoryException;
@@ -16,12 +17,16 @@ import org.teleal.cling.support.model.*;
 import org.teleal.cling.support.model.container.Container;
 import org.teleal.cling.support.model.item.Item;
 
+import java.util.LinkedList;
+
 /**
  * ContentDirectory Service for UPnP AV/DLNA Media Server
  */
 public class ContentDirectory extends AbstractContentDirectoryService {
-    // Library
+    // Media Library
     private Library library;
+    // Content Manger List
+    private LinkedList<ContentManager> contentManagers;
     // Logger
     private Logger logger = LoggerFactory.getLogger("org.chii2.mediaserver.core");
 
@@ -31,105 +36,110 @@ public class ContentDirectory extends AbstractContentDirectoryService {
      * @param library Library
      */
     public ContentDirectory(Library library) {
+        super();
         this.library = library;
+        this.contentManagers = new LinkedList<ContentManager>();
+        contentManagers.add(new XBoxContentManager());
+        contentManagers.add(new CommonContentManager());
     }
 
     @Override
-    public BrowseResult browse(String objectID, BrowseFlag browseFlag,
-                               String filter,
-                               long firstResult, long maxResults,
-                               SortCriterion[] orderBy) throws ContentDirectoryException {
-        logger.debug(String.format("ContentDirectory receive browse request with ObjectID:%s, BrowseFlag:%s, Filter:%s, FirstResult:%s, MaxResults:%s, SortCriterion:%s.", objectID, browseFlag, filter, firstResult, maxResults, orderBy.toString()));
+    public BrowseResult browse(String objectID, BrowseFlag browseFlag, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) throws ContentDirectoryException {
+        logger.debug(String.format("ContentDirectory receive browse request with ObjectID:%s, BrowseFlag:%s, Filter:%s, FirstResult:%s, MaxResults:%s, SortCriterion:%s.", objectID, browseFlag, filter, startIndex, requestCount, getSortCriterionString(orderBy)));
+        // Client Headers
+        UpnpHeaders headers = ReceivingAction.getRequestMessage().getHeaders();
+        // Content Manager based on client
+        ContentManager contentManager = getContentManager(headers);
+        // Result
+        DIDLContent didlContent = new DIDLContent();
+        // Search and get the object from the given id
+        DIDLObject didlObject = contentManager.findObject(objectID, filter, startIndex, requestCount, orderBy, this.library);
 
-        try {
-            // Result
-            DIDLContent didlContent = new DIDLContent();
-            // Search and get the object from the given id
-            DIDLObject didlObject = findObjectById(objectID);
-
-            // Not found, return empty result
-            if (didlObject == null) {
-                logger.info("Object not found with ObjectID:<{}>", objectID);
+        // Not found, return empty result
+        if (didlObject == null) {
+            logger.info("Object not found with ObjectID:<{}>", objectID);
+            // TODO I'm not sure this is correct, maybe should throw a NO_SUCH_OBJECT exception, instead of empty result
+            try {
                 return new BrowseResult(new DIDLParser().generate(didlContent), 0, 0);
+            } catch (Exception e) {
+                throw new ContentDirectoryException(ContentDirectoryErrorCode.CANNOT_PROCESS, e.getMessage());
             }
+        }
 
-            int count = 0;
-            int totalMatches = 0;
-            // Browse metadata
-            if (browseFlag.equals(BrowseFlag.METADATA)) {
-                if (didlObject instanceof Container) {
-                    logger.info("Browsing metadata of container:<{}>" + didlObject.getId());
-                    didlContent.addContainer((Container) didlObject);
-                    count++;
-                    totalMatches++;
-                } else if (didlObject instanceof Item) {
-                    logger.info("Browsing metadata of item:<{}>", didlObject.getId());
-                    didlContent.addItem((Item) didlObject);
-                    count++;
-                    totalMatches++;
-                }
+        // Number of count returned
+        long numReturned = 0;
+        // Total matches
+        long totalMatches = 0;
+
+        // Browse metadata
+        if (browseFlag.equals(BrowseFlag.METADATA)) {
+            if (didlObject instanceof Container) {
+                logger.info("Browsing metadata of container:<{}>" + didlObject.getId());
+                didlContent.addContainer((Container) didlObject);
+                numReturned = totalMatches = 1;
+            } else if (didlObject instanceof Item) {
+                logger.info("Browsing metadata of item:<{}>", didlObject.getId());
+                didlContent.addItem((Item) didlObject);
+                numReturned = totalMatches = 1;
             }
-            // Browse children
-            else if (browseFlag.equals(BrowseFlag.DIRECT_CHILDREN)) {
-                if (didlObject instanceof Container) {
-                    logger.info("Browsing children of container:<{}>", didlObject.getId());
-                    Container container = (Container) didlObject;
-                    boolean maxReached = maxResults == 0;
-                    totalMatches = totalMatches + container.getContainers().size();
+        }
+        // Browse children
+        else if (browseFlag.equals(BrowseFlag.DIRECT_CHILDREN)) {
+            if (didlObject instanceof Container) {
+                logger.info("Browsing children of container:<{}>", didlObject.getId());
+                VisualContainer container = (VisualContainer) didlObject;
+                if (container.getChildCount() <= requestCount) {
                     for (Container subContainer : container.getContainers()) {
-                        if (maxReached) break;
-                        if (firstResult > 0 && count == firstResult) continue;
                         didlContent.addContainer(subContainer);
-                        count++;
-                        if (count >= maxResults) maxReached = true;
                     }
-                    totalMatches = totalMatches + container.getItems().size();
                     for (Item item : container.getItems()) {
-                        if (maxReached) break;
-                        if (firstResult > 0 && count == firstResult) continue;
                         didlContent.addItem(item);
-                        count++;
-                        if (count >= maxResults) maxReached = true;
                     }
+                    numReturned = container.getChildCount();
+                    totalMatches = container.getTotalChildCount();
+                } else {
+                    // TODO Maybe should cut the extra results
+                    throw new ContentDirectoryException(ContentDirectoryErrorCode.CANNOT_PROCESS, "Returned results count exceeds max request count limit.");
                 }
             }
+        }
 
-            // Return result
-            logger.info("Browsing result count: <{}> and total matches: <{}>", count, totalMatches);
-            return new BrowseResult(new DIDLParser().generate(didlContent), count, totalMatches);
+        // Return result
+        logger.info("Browsing result numReturned: <{}> and total matches: <{}>", numReturned, totalMatches);
+        try {
+            return new BrowseResult(new DIDLParser().generate(didlContent), numReturned, totalMatches);
         } catch (Exception e) {
-            logger.error("ContentDirectory process browse request with exception:{}", e.getMessage());
             throw new ContentDirectoryException(ContentDirectoryErrorCode.CANNOT_PROCESS, e.getMessage());
         }
     }
 
     /**
-     * Find the object (may be container or item) by id
+     * SortCriterion Array to String
      *
-     * @param id Object ID (usually provided from ContentDirectory Browse or Search action)
-     * @return Object or Null if nothing found
+     * @param sorts SortCriterion Array
+     * @return String
      */
-    public DIDLObject findObjectById(String id) {
-        if (id.equalsIgnoreCase("0")) {
-            VisualContainer container = new RootContainer(library);
-            container.loadContents();
-            return container;
-        } else if (id.equalsIgnoreCase("3")) {
-            VisualContainer container = new PicturesContainer(library);
-            container.loadContents();
-            return container;
-        } else if (id.equalsIgnoreCase("16")) {
-            VisualContainer container = new PicturesFoldersContainer(library);
-            container.loadContents();
-            return container;
-        } else if (library.isPicturesStorageFolder(id)) {
-            VisualContainer container = new PicturesStorageFolderContainer(id, library.getContainerTitle(id), library);
-            container.loadContents();
-            return container;
-        } else if (library.isPhotoItem(id)) {
-            return library.getPhotoById(id);
-        } else {
-            return null;
+    private String getSortCriterionString(SortCriterion[] sorts) {
+        StringBuilder result = new StringBuilder();
+        if (sorts != null) {
+            for (SortCriterion sort : sorts) {
+                result.append(sort);
+            }
         }
+        return result.toString();
+    }
+
+    /**
+     * Get suitable Content Manager ofr client
+     * @param headers Client UPnP (Http) Headers
+     * @return Content Manager
+     */
+    protected ContentManager getContentManager(UpnpHeaders headers) {
+        for (ContentManager contentManager : this.contentManagers) {
+            if (contentManager.isMatch(headers)) {
+                return contentManager;
+            }
+        }
+        return new CommonContentManager();
     }
 }

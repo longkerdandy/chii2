@@ -4,6 +4,7 @@ import org.chii2.mediaserver.api.content.container.VisualContainer;
 import org.chii2.mediaserver.api.content.item.common.PhotoItem;
 import org.chii2.mediaserver.api.library.Library;
 import org.teleal.cling.support.model.DIDLObject;
+import org.teleal.cling.support.model.SortCriterion;
 import org.teleal.cling.support.model.WriteStatus;
 
 import java.util.List;
@@ -36,17 +37,21 @@ public class PicturesStorageFolderContainer extends VisualContainer {
     }
 
     @Override
-    public void loadContents() {
+    public void loadContents(long startIndex, long maxCount, SortCriterion[] orderBy) {
         // Read from library
-        List<PhotoItem> photos = library.getPhotosByAlbum(getTitle(), getId());
+        List<PhotoItem> photos = library.getPhotosByAlbum(getTitle(), getId(), startIndex, maxCount, orderBy);
+        // Total count
+        long count = library.getPhotosCountByAlbum(getTitle());
         // Add children
-        if (photos != null) {
+        if (photos != null && count > 0) {
             for (PhotoItem photo : photos) {
                 addItem(photo);
             }
             setChildCount(photos.size());
+            setTotalChildCount(count);
         } else {
             setChildCount(0);
+            setTotalChildCount(0);
         }
     }
 }
