@@ -67,7 +67,7 @@ public class ImageAnalyzer implements Runnable {
             BufferedReader output = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = output.readLine()) != null) {
-                String[] result = line.split("::");
+                String[] result = line.split("::", 14);
                 if (result.length == 14) {
                     Image image = imageFactory.createImage();
                     ImageFile imageFile = imageFactory.createImageFile();
@@ -76,7 +76,7 @@ public class ImageAnalyzer implements Runnable {
                     imageFile.setFileName(getString(result[1]));
                     imageFile.setFileExtension(getString(result[2]));
                     imageFile.setType(getString(result[3]));
-                    imageFile.setSize(getLong(result[4]));
+                    imageFile.setSize(getFileSize(result[0]));
                     imageFile.setWidth(getInt(result[5]));
                     imageFile.setHeight(getInt(result[6]));
                     imageFile.setColorDepth(getInt(result[7]));
@@ -257,7 +257,26 @@ public class ImageAnalyzer implements Runnable {
                 return fileName;
             }
         } else {
-            return "";
+            return null;
+        }
+    }
+
+    /**
+     * Convert the GraphicMagick output String to Image File information String
+     *
+     * @param absoluteName Absolute file name
+     * @return File Size in bytes
+     */
+    private long getFileSize(String absoluteName) {
+        File file = new File(absoluteName);
+        if (file.exists()) {
+            try {
+                return file.length();
+            } catch (SecurityException e) {
+                return 0;
+            }
+        } else {
+            return 0;
         }
     }
 }

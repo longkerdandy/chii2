@@ -26,7 +26,9 @@ public class PhotoItem extends Photo {
         // May used in Container Property Creator (part of UPnP protocol standard)
         setCreator("System");
         //Picture Date
-        setDate(new SimpleDateFormat("yyyy-MM-dd").format(date));
+        if (date != null) {
+            setDate(new SimpleDateFormat("yyyy-MM-dd").format(date));
+        }
         // Photo Album
         setAlbum(album);
         // Description
@@ -41,7 +43,7 @@ public class PhotoItem extends Photo {
         resource.setResolution(width, height);
         // TODO: Conditional by Filter
         // resource.setColorDepth(colorDepth);
-        // resource.setSize(size);
+        resource.setSize(size);
         addResource(resource);
     }
 }

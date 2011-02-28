@@ -44,9 +44,9 @@ public class FileServiceImpl implements FileService {
     // Image file extension filter
     private List<String> imageExtFilters = Arrays.asList(".jpg", ".jpeg", ".tiff", ".tif", ".png", ".gif", ".bmp");
     // Movie Files scanner thread
-    private Thread movieScanThread;
+    private Thread movieScanThread = null;
     // Image Files scanner thread
-    private Thread imageScanThread;
+    private Thread imageScanThread = null;
     // Logger
     private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file");
 

@@ -1,5 +1,6 @@
 package org.chii2.medialibrary.file;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +35,13 @@ public class FileExtensionFilter implements FileFilter {
         }
         // Test file extension
         for (String ext : acceptableExtensions) {
-            if (ext != null && !ext.isEmpty() && file.getName().substring(file.getName().lastIndexOf('.')).equalsIgnoreCase(ext)) {
-                logger.debug("File <{}> is accepted.", file.getName());
-                return true;
+            if(StringUtils.isNotEmpty(ext)) {
+                String name = file.getName();
+                int dotIndex = name.lastIndexOf('.');
+                if (dotIndex > 0 && name.substring(dotIndex) .equalsIgnoreCase(ext)) {
+                    logger.debug("File <{}> is accepted.", file.getName());
+                    return  true;
+                }
             }
         }
         // Should not reach, in case just reject
