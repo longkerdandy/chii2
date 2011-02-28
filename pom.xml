@@ -24,6 +24,8 @@
         <module>mediaserver.core</module>
         <module>medialibrary.graphicsmagickprovider</module>
         <module>mediaserver.http</module>
+        <module>transcoder.api</module>
+        <module>transcoder.core</module>
     </modules>
 
     <repositories>
@@ -105,6 +107,17 @@
             <dependency>
                 <groupId>org.chii2</groupId>
                 <artifactId>chii2.mediaserver.http</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.chii2</groupId>
+                <artifactId>chii2.transcoder.api</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.chii2</groupId>
+                <artifactId>chii2.transcoder.core</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
 

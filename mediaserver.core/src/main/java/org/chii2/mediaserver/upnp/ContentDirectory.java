@@ -1,10 +1,12 @@
 package org.chii2.mediaserver.upnp;
 
+import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
-import org.chii2.mediaserver.api.library.Library;
+import org.chii2.mediaserver.api.http.HttpServerService;
 import org.chii2.mediaserver.content.common.CommonContentManager;
 import org.chii2.mediaserver.content.xbox.XBoxContentManager;
+import org.chii2.transcoder.api.core.TranscoderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teleal.cling.model.message.UpnpHeaders;
@@ -24,7 +26,11 @@ import java.util.LinkedList;
  */
 public class ContentDirectory extends AbstractContentDirectoryService {
     // Media Library
-    private Library library;
+    private MediaLibraryService mediaLibrary;
+    // HTTP Server
+    private HttpServerService httpServer;
+    // Transcoder
+    private TranscoderService transcoder;
     // Content Manger List
     private LinkedList<ContentManager> contentManagers;
     // Logger
@@ -33,14 +39,18 @@ public class ContentDirectory extends AbstractContentDirectoryService {
     /**
      * Constructor
      *
-     * @param library Library
+     * @param mediaLibrary Media Library
+     * @param httpServer   Http Server
+     * @param transcoder   Transcoder
      */
-    public ContentDirectory(Library library) {
+    public ContentDirectory(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder) {
         super();
-        this.library = library;
+        this.mediaLibrary = mediaLibrary;
+        this.httpServer = httpServer;
+        this.transcoder = transcoder;
         this.contentManagers = new LinkedList<ContentManager>();
-        contentManagers.add(new XBoxContentManager());
-        contentManagers.add(new CommonContentManager());
+        contentManagers.add(new XBoxContentManager(mediaLibrary, httpServer, transcoder));
+        contentManagers.add(new CommonContentManager(mediaLibrary, httpServer, transcoder));
     }
 
     @Override
@@ -53,7 +63,7 @@ public class ContentDirectory extends AbstractContentDirectoryService {
         // Result
         DIDLContent didlContent = new DIDLContent();
         // Search and get the object from the given id
-        DIDLObject didlObject = contentManager.findObject(objectID, filter, startIndex, requestCount, orderBy, this.library);
+        DIDLObject didlObject = contentManager.findObject(objectID, filter, startIndex, requestCount, orderBy);
 
         // Not found, return empty result
         if (didlObject == null) {
@@ -87,7 +97,7 @@ public class ContentDirectory extends AbstractContentDirectoryService {
         else if (browseFlag.equals(BrowseFlag.DIRECT_CHILDREN)) {
             if (didlObject instanceof Container) {
                 logger.info("Browsing children of container:<{}>", didlObject.getId());
-                VisualContainer container = (VisualContainer) didlObject;
+                Container container = (Container) didlObject;
                 if (container.getChildCount() <= requestCount) {
                     for (Container subContainer : container.getContainers()) {
                         didlContent.addContainer(subContainer);
@@ -96,7 +106,7 @@ public class ContentDirectory extends AbstractContentDirectoryService {
                         didlContent.addItem(item);
                     }
                     numReturned = container.getChildCount();
-                    totalMatches = container.getTotalChildCount();
+                    totalMatches = ((VisualContainer) container).getTotalChildCount();
                 } else {
                     // TODO Maybe should cut the extra results
                     throw new ContentDirectoryException(ContentDirectoryErrorCode.CANNOT_PROCESS, "Returned results count exceeds max request count limit.");
@@ -131,6 +141,7 @@ public class ContentDirectory extends AbstractContentDirectoryService {
 
     /**
      * Get suitable Content Manager ofr client
+     *
      * @param headers Client UPnP (Http) Headers
      * @return Content Manager
      */
@@ -140,6 +151,6 @@ public class ContentDirectory extends AbstractContentDirectoryService {
                 return contentManager;
             }
         }
-        return new CommonContentManager();
+        return new CommonContentManager(mediaLibrary, httpServer, transcoder);
     }
 }

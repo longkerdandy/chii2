@@ -10,15 +10,20 @@
     <reference id="httpServerService" interface="org.chii2.mediaserver.api.http.HttpServerService">
     </reference>
 
+    <!-- Transcoder  Service -->
+    <reference id="transcoderService" interface="org.chii2.transcoder.api.core.TranscoderService">
+    </reference>
+
     <!-- Chii2 Media Server Core Bean -->
     <bean id="mediaServerService" class="org.chii2.mediaserver.upnp.MediaServerServiceImpl"
           init-method="init"
           destroy-method="destroy">
         <property name="mediaLibrary" ref="mediaLibraryManager"/>
         <property name="httpService" ref="httpServerService"/>
+        <property name="transcoder" ref="transcoderService"/>
     </bean>
 
-    <!-- Chii2 Media Library Core Service -->
+    <!-- Chii2 Media Server Core Service -->
     <service ref="mediaServerService" interface="org.chii2.mediaserver.api.upnp.MediaServerService">
     </service>
 

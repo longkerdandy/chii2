@@ -1,5 +1,6 @@
-package org.chii2.mediaserver.api.content.item.common;
+package org.chii2.mediaserver.content.common.Item;
 
+import org.chii2.mediaserver.api.content.item.VisualItem;
 import org.teleal.cling.support.model.ProtocolInfo;
 import org.teleal.cling.support.model.Res;
 import org.teleal.cling.support.model.item.Photo;
@@ -12,7 +13,7 @@ import java.util.Date;
  * Photo Item for Windows Media Connect (Windows Media Player) related devices
  * Especially represent a photo belong to a album
  */
-public class PhotoItem extends Photo {
+public class PhotoItem extends Photo implements VisualItem {
 
     public PhotoItem(String id, String parentId, String title, Date date, String album, String description, String longDescription, String url, MimeType mime, int width, int height, long colorDepth, long size) {
         super();

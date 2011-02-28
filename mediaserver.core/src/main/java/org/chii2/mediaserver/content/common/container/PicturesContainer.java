@@ -1,19 +1,23 @@
-package org.chii2.mediaserver.api.content.container.common;
+package org.chii2.mediaserver.content.common.container;
 
+import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
-import org.chii2.mediaserver.api.library.Library;
 import org.teleal.cling.support.model.DIDLObject;
 import org.teleal.cling.support.model.SortCriterion;
 import org.teleal.cling.support.model.WriteStatus;
+import org.teleal.cling.support.model.container.Container;
 
 /**
  * Image Container for XBox
  * Contains all containers and items relating to pictures
  */
-public class PicturesContainer extends VisualContainer {
+public class PicturesContainer extends Container implements VisualContainer {
 
-    public PicturesContainer(Library library) {
-        super(library);
+    // Total Child Count
+    private long totalChildCount;
+
+    public PicturesContainer() {
+        super();
 
         // Pictures Container ID: 3
         setId("3");
@@ -34,8 +38,18 @@ public class PicturesContainer extends VisualContainer {
     }
 
     @Override
-    public void loadContents(long startIndex, long maxCount, SortCriterion[] orderBy) {
-        addContainer(new PicturesFoldersContainer(library));
+    public long getTotalChildCount() {
+        return this.totalChildCount;
+    }
+
+    @Override
+    public void setTotalChildCount(long totalChildCount) {
+        this.totalChildCount = totalChildCount;
+    }
+
+    @Override
+    public void loadContents(long startIndex, long maxCount, SortCriterion[] orderBy, ContentManager contentManager) {
+        addContainer(new PicturesFoldersContainer());
         setChildCount(1);
         setTotalChildCount(1);
     }

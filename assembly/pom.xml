@@ -80,6 +80,16 @@
             <artifactId>chii2.mediaserver.http</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.chii2</groupId>
+            <artifactId>chii2.transcoder.api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.chii2</groupId>
+            <artifactId>chii2.transcoder.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

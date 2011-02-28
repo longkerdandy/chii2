@@ -3,7 +3,7 @@ package org.chii2.mediaserver.upnp;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.mediaserver.api.http.HttpServerService;
 import org.chii2.mediaserver.api.upnp.MediaServerService;
-import org.chii2.mediaserver.library.LibraryImpl;
+import org.chii2.transcoder.api.core.TranscoderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teleal.cling.DefaultUpnpServiceConfiguration;
@@ -38,6 +38,8 @@ public class MediaServerServiceImpl implements MediaServerService {
     private MediaLibraryService mediaLibrary;
     // HTTP Server
     private HttpServerService httpService;
+    // Transcoder
+    private TranscoderService transcoder;
     // Logger
     private Logger logger = LoggerFactory.getLogger("org.chii2.mediaserver.upnp");
 
@@ -138,7 +140,7 @@ public class MediaServerServiceImpl implements MediaServerService {
                 new DefaultServiceManager<ContentDirectory>(contentDirectory, null) {
                     @Override
                     protected ContentDirectory createServiceInstance() throws Exception {
-                        return new ContentDirectory(new LibraryImpl(mediaLibrary, httpService));
+                        return new ContentDirectory(mediaLibrary, httpService, transcoder);
                     }
                 }
         );
@@ -289,5 +291,14 @@ public class MediaServerServiceImpl implements MediaServerService {
     @SuppressWarnings("unused")
     public void setHttpService(HttpServerService httpService) {
         this.httpService = httpService;
+    }
+
+    /**
+     * Inject Transcoder Service
+     * @param transcoder Transcoder Service
+     */
+    @SuppressWarnings("unused")
+    public void setTranscoder(TranscoderService transcoder) {
+        this.transcoder = transcoder;
     }
 }

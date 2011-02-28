@@ -22,6 +22,7 @@ import org.apache.http.util.EntityUtils;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.mediaserver.api.http.HttpServerService;
+import org.chii2.transcoder.api.core.TranscoderService;
 import org.chii2.util.ConfigUtils;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -44,6 +45,8 @@ public class NHttpServerServiceImpl implements HttpServerService {
     private ConfigurationAdmin configAdmin;
     // Injected Media Library Service
     private MediaLibraryService mediaLibrary;
+    // Transcoder
+    private TranscoderService transcoder;
     //Configuration FIle
     private final static String CONFIG_FILE = "org.chii2.mediaserver.http";
     // Server Host Address configuration
@@ -125,7 +128,7 @@ public class NHttpServerServiceImpl implements HttpServerService {
 
         // Start Server
         if (this.host != null && this.port > 0) {
-            Thread thread = new RequestListenerThread(port, host, threadCount, mediaLibrary);
+            Thread thread = new RequestListenerThread(port, host, threadCount, mediaLibrary, transcoder);
             thread.setDaemon(false);
             thread.start();
         } else {
@@ -149,6 +152,13 @@ public class NHttpServerServiceImpl implements HttpServerService {
     @Override
     public int getPort() {
         return port;
+    }
+
+    @Override
+    public String forgeImageUrl(String profile, String imageId) {
+        String url = "http://" + getHost().getHostAddress() + ":" + getPort() + "/" + profile +"/image/" + imageId;
+        logger.info("Forge image url: <{}>.", url);
+        return url;
     }
 
     /**
@@ -195,15 +205,27 @@ public class NHttpServerServiceImpl implements HttpServerService {
     }
 
     /**
+     * Inject Transcoder Service
+     *
+     * @param transcoder Transcoder Service
+     */
+    @SuppressWarnings("unused")
+    public void setTranscoder(TranscoderService transcoder) {
+        this.transcoder = transcoder;
+    }
+
+    /**
      * Request Handler
      */
     private static class UPnPHttpHandler implements HttpRequestHandler {
 
         private final MediaLibraryService mediaLibrary;
+        private final TranscoderService transcoder;
 
-        public UPnPHttpHandler(MediaLibraryService mediaLibrary) {
+        public UPnPHttpHandler(MediaLibraryService mediaLibrary, TranscoderService transcoder) {
             super();
             this.mediaLibrary = mediaLibrary;
+            this.transcoder = transcoder;
         }
 
         public void handle(
@@ -227,18 +249,22 @@ public class NHttpServerServiceImpl implements HttpServerService {
             String target = request.getRequestLine().getUri();
             logger.debug("Receive HTTP request for target <{}>.", target);
             String type = getTypeFromTarget(target);
+            String profile = getProfileFromTarget(target);
             String id = getIdFromTarget(target);
-            // TODO Transcoding
 
             // Query the library and get the file
             File file = null;
+            String mime = null;
             if ("image".equalsIgnoreCase(type)) {
                 Image image = mediaLibrary.getImageById(id);
                 if (image != null) {
-                    file = new File(image.getAbsoluteName());
+                    File imageFile = new File(image.getAbsoluteName());
+                    String imageType = image.getType();
+                    mime = transcoder.getImageTranscodedMime(profile, imageType);
+                    file = transcoder.getImageTranscodedFile(profile, imageType, imageFile);
                 }
             }
-            if (file == null) {
+            if (file == null || mime == null) {
                 response.setStatusCode(HttpStatus.SC_NOT_FOUND);
                 logger.debug("Chii2 Media Server Http Server request empty file.");
             } else if (!file.exists()) {
@@ -249,7 +275,7 @@ public class NHttpServerServiceImpl implements HttpServerService {
                 logger.debug("Chii2 Media Server Http Server cannot read file <{}>.", file.getPath());
             } else {
                 response.setStatusCode(HttpStatus.SC_OK);
-                NFileEntity body = new NFileEntity(file, "image/jpeg");
+                NFileEntity body = new NFileEntity(file, mime);
                 response.setEntity(body);
                 logger.debug("Chii2 Media Server Http Server serving file <{}>.", file.getPath());
             }
@@ -267,9 +293,31 @@ public class NHttpServerServiceImpl implements HttpServerService {
             }
             if (target != null && StringUtils.isNotEmpty(target)) {
                 int index = target.indexOf('/');
+                if (index > 0 && target.length() > index + 2) {
+                    target = target.substring(index + 1);
+                    index =  target.indexOf('/');
+                    if (index > 0) {
+                        return target.substring(0, index);
+                    }
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Get media type from url target
+         *
+         * @param target URL target
+         * @return Media Type
+         */
+        private String getProfileFromTarget(String target) {
+            if (target != null && target.startsWith("/") && target.length() > 1) {
+                target = target.substring(1);
+            }
+            if (target != null && StringUtils.isNotEmpty(target)) {
+                int index = target.indexOf('/');
                 if (index > 0) {
                     return target.substring(0, index);
-
                 }
             }
             return null;
@@ -339,7 +387,7 @@ public class NHttpServerServiceImpl implements HttpServerService {
         private final HttpParams params;
         private final BufferingHttpServiceHandler handler;
 
-        public RequestListenerThread(int port, InetAddress address, int threadCount, MediaLibraryService library) {
+        public RequestListenerThread(int port, InetAddress address, int threadCount, MediaLibraryService library, TranscoderService transcoder) {
 
             this.port = port;
             this.address = address;
@@ -369,7 +417,7 @@ public class NHttpServerServiceImpl implements HttpServerService {
 
             // Set up request handlers
             HttpRequestHandlerRegistry reqistry = new HttpRequestHandlerRegistry();
-            reqistry.register("*", new UPnPHttpHandler(library));
+            reqistry.register("*", new UPnPHttpHandler(library, transcoder));
             handler.setHandlerResolver(reqistry);
 
             // Provide an event logger

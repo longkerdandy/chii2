@@ -1,71 +1,44 @@
 package org.chii2.mediaserver.content.xbox;
 
-import org.chii2.mediaserver.api.content.ContentManager;
-import org.chii2.mediaserver.api.content.container.VisualContainer;
-import org.chii2.mediaserver.api.content.container.common.PicturesContainer;
-import org.chii2.mediaserver.api.content.container.common.PicturesFoldersContainer;
-import org.chii2.mediaserver.api.content.container.common.PicturesStorageFolderContainer;
-import org.chii2.mediaserver.api.content.container.common.RootContainer;
-import org.chii2.mediaserver.api.library.Library;
+import org.chii2.medialibrary.api.core.MediaLibraryService;
+import org.chii2.mediaserver.api.http.HttpServerService;
+import org.chii2.mediaserver.content.common.CommonContentManager;
+import org.chii2.transcoder.api.core.TranscoderService;
 import org.teleal.cling.model.message.UpnpHeaders;
-import org.teleal.cling.support.model.DIDLObject;
-import org.teleal.cling.support.model.SortCriterion;
 
 import java.util.List;
 
 /**
  * Content Manger for XBox360
  */
-public class XBoxContentManager implements ContentManager{
+public class XBoxContentManager extends CommonContentManager{
+
+    /**
+     * Constructor
+     *
+     * @param mediaLibrary Media Library
+     * @param httpServer   Http Server
+     * @param transcoder   Transcoder
+     */
+    public XBoxContentManager(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder) {
+        super(mediaLibrary, httpServer, transcoder);
+
+    }
+
+    @Override
+    public String getClientProfile() {
+        return TranscoderService.PROFILE_XBOX;
+    }
 
     @Override
     public boolean isMatch(UpnpHeaders headers) {
         if (headers != null) {
             // If user agent contains Xbox, is should be a Xbox client
-            List<String> valueList = headers.get("User-agent");
-            for (String userAgent : valueList) {
-                if (userAgent.contains("Xbox")) {
-                    return true;
-                }
+            List<String> userAgent = headers.get("User-agent");
+            if (getClientProfile().equalsIgnoreCase(transcoder.getClientProfile(userAgent))) {
+                return true;
             }
         }
         return false;
-    }
-
-    @Override
-    public DIDLObject findObject(String objectId, String filter, long startIndex, long requestCount, SortCriterion[] orderBy, Library library) {
-        // Root Container
-        if (library.isRootContainer(objectId)) {
-            VisualContainer container = new RootContainer(library);
-            container.loadContents(startIndex, requestCount, orderBy);
-            return container;
-        }
-        // Pictures Container
-        else if (library.isPicturesContainer(objectId)) {
-            VisualContainer container = new PicturesContainer(library);
-            container.loadContents(startIndex, requestCount, orderBy);
-            return container;
-        }
-        // Pictures Folders Container
-        else if (library.isPicturesFoldersContainer(objectId)) {
-            VisualContainer container = new PicturesFoldersContainer(library);
-            container.loadContents(startIndex, requestCount, orderBy);
-            return container;
-        }
-        // Pictures Storage Folder Container (Dynamic)
-        else if (library.isPicturesStorageFolderContainer(objectId)) {
-            VisualContainer container = new PicturesStorageFolderContainer(objectId, library.getContainerTitle(objectId), library);
-            container.loadContents(startIndex, requestCount, orderBy);
-            return container;
-        }
-        // Photo Item
-        else if (library.isPhotoItem(objectId)) {
-            return library.getPhotoById(objectId);
-        }
-        // Invalid
-        else {
-            // TODO Maybe should throw a NO_SUCH_OBJECT exception, instead of null result
-            return null;
-        }
     }
 }
