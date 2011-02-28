@@ -64,6 +64,8 @@ public class MediaLibraryCommandImpl implements MediaLibraryCommand {
                         printImageTable(images);
                     }
                 }
+            } else {
+                System.out.println("Bad parameter for <show> command, the correct usage is: \"show <movies|images>\".");
             }
         } else {
             System.out.println("Bad parameter for <show> command, the correct usage is: \"show <movies|images>\".");
