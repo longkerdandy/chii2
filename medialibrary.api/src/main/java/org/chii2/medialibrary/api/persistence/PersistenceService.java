@@ -68,9 +68,12 @@ public interface PersistenceService {
     /**
      * Get all the Images
      *
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
      * @return Image List
      */
-    public List<? extends Image> getAllImages();
+    public List<? extends Image> getAllImages(int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get Image by Image ID
@@ -83,25 +86,13 @@ public interface PersistenceService {
     /**
      * Get all possible image records by image name
      *
-     * @param imageName Image Name
+     * @param imageName   Image Name
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
      * @return Image List
      */
-    public List<? extends Image> getAllImagesByName(String imageName);
-
-    /**
-     * Get single image record by image name, usually return first result
-     *
-     * @param imageName Image Name
-     * @return Image
-     */
-    public Image getSingleImageByName(String imageName);
-
-    /**
-     * Get all image albums
-     *
-     * @return Image Albums
-     */
-    public List<String> getAllImageAlbums();
+    public List<? extends Image> getAllImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get image albums from index with max limit
@@ -119,15 +110,6 @@ public interface PersistenceService {
      * @return Count
      */
     public long getImageAlbumsCount();
-
-
-    /**
-     * Get images by image album
-     *
-     * @param album Image Album
-     * @return Images
-     */
-    public List<? extends Image> getImagesByAlbum(String album);
 
     /**
      * Get images by image album

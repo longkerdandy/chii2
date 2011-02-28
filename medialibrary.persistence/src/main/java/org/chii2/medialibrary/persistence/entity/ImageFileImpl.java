@@ -11,14 +11,6 @@ import java.util.UUID;
  */
 @Entity(name = "IMAGE_FILE")
 @Table(name = "IMAGE_FILE")
-@NamedQueries({
-        @NamedQuery(name = "ImageFile.findAll",
-                query = "SELECT i FROM IMAGE_FILE i"),
-        @NamedQuery(name = "ImageFile.findById",
-                query = "SELECT i FROM IMAGE_FILE i WHERE i.id = :id"),
-        @NamedQuery(name = "ImageFile.findAllAlbums",
-                query = "SELECT DISTINCT i.album FROM IMAGE_FILE i")
-})
 public class ImageFileImpl implements ImageFile {
 
     // ID (Primary Key) in UUID format

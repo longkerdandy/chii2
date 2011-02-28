@@ -13,14 +13,6 @@ import java.util.UUID;
 @Entity(name = "IMAGE")
 @Table(name = "IMAGE")
 @NamedQueries({
-        @NamedQuery(name = "Image.findAll",
-                query = "SELECT i FROM IMAGE i"),
-        @NamedQuery(name = "Image.findById",
-                query = "SELECT i FROM IMAGE i WHERE i.id = :id"),
-        @NamedQuery(name = "Image.findByName",
-                query = "SELECT i FROM IMAGE i join i.file f WHERE LOWER(f.title) LIKE :name"),
-        @NamedQuery(name = "Image.findByAlbum",
-                query = "SELECT i FROM IMAGE i join i.file f WHERE LOWER(f.album) = :album"),
         @NamedQuery(name = "Image.deleteAll",
                 query = "DELETE FROM IMAGE i")
 })

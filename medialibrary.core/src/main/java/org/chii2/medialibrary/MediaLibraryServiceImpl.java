@@ -76,7 +76,17 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
 
     @Override
     public List<? extends Image> getAllImages() {
-        return persistenceService.getAllImages();
+        return persistenceService.getAllImages(-1,-1, null);
+    }
+
+    @Override
+    public List<? extends Image> getAllImages(int firstResult, int maxResults) {
+        return persistenceService.getAllImages(firstResult,maxResults, null);
+    }
+
+    @Override
+    public List<? extends Image> getAllImages(int firstResult, int maxResults, Map<String, String> sorts) {
+        return persistenceService.getAllImages(firstResult,maxResults, sorts);
     }
 
     @Override
@@ -86,17 +96,22 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
 
     @Override
     public List<? extends Image> getAllImagesByName(String imageName) {
-        return persistenceService.getAllImagesByName(imageName);
+        return persistenceService.getAllImagesByName(imageName, -1 ,-1, null);
     }
 
     @Override
-    public Image getSingleImageByName(String imageName) {
-        return persistenceService.getSingleImageByName(imageName);
+    public List<? extends Image> getAllImagesByName(String imageName, int firstResult, int maxResults) {
+        return persistenceService.getAllImagesByName(imageName, firstResult,maxResults, null);
+    }
+
+    @Override
+    public List<? extends Image> getAllImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts) {
+        return persistenceService.getAllImagesByName(imageName, firstResult,maxResults, sorts);
     }
 
     @Override
     public List<String> getAllImageAlbums() {
-        return persistenceService.getAllImageAlbums();
+        return persistenceService.getAllImageAlbums(-1 ,-1, null);
     }
 
     @Override
@@ -116,7 +131,7 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
 
     @Override
     public List<? extends Image> getImagesByAlbum(String album) {
-        return persistenceService.getImagesByAlbum(album);
+        return persistenceService.getImagesByAlbum(album,-1 ,-1, null);
     }
 
     @Override

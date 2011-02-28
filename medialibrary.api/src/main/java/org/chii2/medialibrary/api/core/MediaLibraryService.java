@@ -66,6 +66,25 @@ public interface MediaLibraryService {
     public List<? extends Image> getAllImages();
 
     /**
+     * Get all the Images
+     *
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @return Image List
+     */
+    public List<? extends Image> getAllImages(int firstResult, int maxResults);
+
+    /**
+     * Get all the Images
+     *
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
+     * @return Image List
+     */
+    public List<? extends Image> getAllImages(int firstResult, int maxResults, Map<String, String> sorts);
+
+    /**
      * Get Image by Image ID
      *
      * @param id Image ID
@@ -82,12 +101,25 @@ public interface MediaLibraryService {
     public List<? extends Image> getAllImagesByName(String imageName);
 
     /**
-     * Get single image record by image name, usually return first result
+     * Get image records by image name
      *
-     * @param imageName Image Name
-     * @return Image
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param imageName   Image Name
+     * @return Image List
      */
-    public Image getSingleImageByName(String imageName);
+    public List<? extends Image> getAllImagesByName(String imageName, int firstResult, int maxResults);
+
+    /**
+     * Get image records by image name
+     *
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
+     * @param imageName   Image Name
+     * @return Image List
+     */
+    public List<? extends Image> getAllImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get all image albums
