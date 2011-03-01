@@ -42,8 +42,7 @@ public class PhotoItem extends Photo implements VisualItem {
         resource.setValue(url);
         resource.setProtocolInfo(new ProtocolInfo(mime));
         resource.setResolution(width, height);
-        // TODO: Conditional by Filter
-        // resource.setColorDepth(colorDepth);
+        resource.setColorDepth(colorDepth);
         resource.setSize(size);
         addResource(resource);
     }

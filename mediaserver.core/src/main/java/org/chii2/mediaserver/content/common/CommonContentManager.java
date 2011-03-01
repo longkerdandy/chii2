@@ -188,9 +188,11 @@ public class CommonContentManager implements ContentManager {
                 String id = forgeItemId(image.getId(), parentId, PHOTO_ITEM_PREFIX);
                 String url = httpServer.forgeImageUrl(getClientProfile(), image.getId());
                 String profile = getClientProfile();
+                // TODO GraphicsMagick return 8bits with TrueType, not sure it is correct. Also should we return 8 or 256
+                long colorDepth = image.getColorDepth();
                 MimeType mime = new MimeType("image", transcoder.getImageTranscodedType(profile, image.getType()));
                 if (StringUtils.isNotEmpty(id)) {
-                    photos.add(new PhotoItem(id, parentId, image.getTitle(), image.getDateTaken(), image.getAlbum(), null, null, url, mime, image.getWidth(), image.getHeight(), image.getColorDepth(), image.getSize()));
+                    photos.add(new PhotoItem(id, parentId, image.getTitle(), image.getDateTaken(), image.getAlbum(), null, null, url, mime, image.getWidth(), image.getHeight(), colorDepth, image.getSize()));
                 }
             }
         }
@@ -210,8 +212,10 @@ public class CommonContentManager implements ContentManager {
             String parentId = getItemParentId(id);
             String url = httpServer.forgeImageUrl(getClientProfile(), image.getId());
             String profile = getClientProfile();
+            // TODO GraphicsMagick return 8bits with TrueType, not sure it is correct. Also should we return 8 or 256
+            long colorDepth = image.getColorDepth();
             MimeType mime = new MimeType("image", transcoder.getImageTranscodedType(profile, image.getType()));
-            return new PhotoItem(id, parentId, image.getTitle(), image.getDateTaken(), image.getAlbum(), null, null, url, mime, image.getWidth(), image.getHeight(), image.getColorDepth(), image.getSize());
+            return new PhotoItem(id, parentId, image.getTitle(), image.getDateTaken(), image.getAlbum(), null, null, url, mime, image.getWidth(), image.getHeight(), colorDepth, image.getSize());
         } else {
             return null;
         }
