@@ -2,6 +2,7 @@ package org.chii2.mediaserver.http;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.*;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
@@ -18,6 +19,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.SyncBasicHttpParams;
 import org.apache.http.protocol.*;
 import org.apache.http.nio.protocol.BufferingHttpServiceHandler;
+import org.apache.http.util.EncodingUtils;
 import org.apache.http.util.EntityUtils;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.medialibrary.api.persistence.entity.Image;
@@ -28,6 +30,7 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.rmi.server.UnicastRef;
 
 import java.io.File;
 import java.io.IOException;
@@ -156,9 +159,28 @@ public class NHttpServerServiceImpl implements HttpServerService {
 
     @Override
     public String forgeImageUrl(String profile, String imageId) {
-        String url = "http://" + getHost().getHostAddress() + ":" + getPort() + "/" + profile +"/image/" + imageId;
+        String url = "http://" + getHost().getHostAddress() + ":" + getPort() + "/" + profile + "/image/" + imageId;
         logger.info("Forge image url: <{}>.", url);
         return url;
+    }
+
+    @Override
+    public URI forgeMovieUrl(String profile, String movieId) {
+        URI uri = null;
+        try {
+            // XBox doesn't recognize query path like "?hl=en&q=XX", it will cut it off
+            if (TranscoderService.PROFILE_XBOX.equalsIgnoreCase(profile)) {
+                uri = new URI("http://" + getHost().getHostAddress() + ":" + getPort() + "/" + profile + "/movie/" + movieId);
+            }
+            // TODO: Currently we're doing the same thing as XBox, this may need changed to a more common way with query path
+            else {
+                uri = new URI("http://" + getHost().getHostAddress() + ":" + getPort() + "/" + profile + "/movie/" + movieId);
+            }
+        } catch (URISyntaxException ignore) {
+            // This should not happens since we create the url ourselves.
+        }
+        logger.info("Forge movie url for {}: <{}>.", profile, uri.toString());
+        return uri;
     }
 
     /**
@@ -248,9 +270,9 @@ public class NHttpServerServiceImpl implements HttpServerService {
 
             String target = request.getRequestLine().getUri();
             logger.debug("Receive HTTP request for target <{}>.", target);
-            String type = getTypeFromTarget(target);
             String profile = getProfileFromTarget(target);
-            String id = getIdFromTarget(target);
+            String type = getTypeFromTarget(target, profile);
+            String id = getIdFromTarget(target, profile);
 
             // Query the library and get the file
             File file = null;
@@ -263,6 +285,12 @@ public class NHttpServerServiceImpl implements HttpServerService {
                     mime = transcoder.getImageTranscodedMime(profile, imageType);
                     file = transcoder.getImageTranscodedFile(profile, imageType, imageFile);
                 }
+            } else if ("movie".equalsIgnoreCase(type)) {
+                file = new File("/home/longkerdandy/Videos/SampleVideos/Wildlife.wmv");
+                mime = "video/x-ms-wmv";
+            }  else if ("moviethumb".equalsIgnoreCase(type)) {
+                file = new File("/home/longkerdandy/Videos/the-king-s-speech-original.jpg");
+                mime = "image/jpeg";
             }
             if (file == null || mime == null) {
                 response.setStatusCode(HttpStatus.SC_NOT_FOUND);
@@ -287,7 +315,21 @@ public class NHttpServerServiceImpl implements HttpServerService {
          * @param target URL target
          * @return Media Type
          */
-        private String getTypeFromTarget(String target) {
+        private String getTypeFromTarget(String target, String profile) {
+            String type = null;
+            String thumb = null;
+
+            // This specially doing for XBox thumbnail, since XBox won't works with AlbumArtURI, it just append albumArt=true in resource url
+            try {
+                for (NameValuePair nameValuePair : URLEncodedUtils.parse(new URI(target), "ISO-8859-1")) {
+                    if ("albumArt".equalsIgnoreCase(nameValuePair.getName()) && "true".equalsIgnoreCase(nameValuePair.getValue())) {
+                       thumb = "thumb";
+                    }
+                }
+            } catch (URISyntaxException ignore) {
+                // This won't happens, nad won't matters
+            }
+
             if (target != null && target.startsWith("/") && target.length() > 1) {
                 target = target.substring(1);
             }
@@ -295,13 +337,18 @@ public class NHttpServerServiceImpl implements HttpServerService {
                 int index = target.indexOf('/');
                 if (index > 0 && target.length() > index + 2) {
                     target = target.substring(index + 1);
-                    index =  target.indexOf('/');
+                    index = target.indexOf('/');
                     if (index > 0) {
-                        return target.substring(0, index);
+                        type = target.substring(0, index);
                     }
                 }
             }
-            return null;
+
+            if (type != null && thumb != null) {
+                type = type + thumb;
+            }
+
+            return type;
         }
 
         /**
@@ -329,7 +376,8 @@ public class NHttpServerServiceImpl implements HttpServerService {
          * @param target URL Target
          * @return Media Id
          */
-        private String getIdFromTarget(String target) {
+        private String getIdFromTarget(String target, String profile) {
+            // TODO: logic may need change if forgeUrl changed
             if (target != null && target.endsWith("/") && target.length() > 1) {
                 target = target.substring(0, target.length());
             }
@@ -337,9 +385,9 @@ public class NHttpServerServiceImpl implements HttpServerService {
                 int index = target.lastIndexOf('/');
                 if (index > 0) {
                     String id = target.substring(index + 1);
-                    int transIndex = id.indexOf('#');
-                    if (transIndex > 0) {
-                        return id.substring(0, transIndex);
+                    int queryIndex = id.indexOf('?');
+                    if (queryIndex > 0) {
+                        return id.substring(0, queryIndex);
                     } else {
                         return id;
                     }

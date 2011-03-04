@@ -60,6 +60,8 @@ public class ContentDirectory extends AbstractContentDirectoryService {
         UpnpHeaders headers = ReceivingAction.getRequestMessage().getHeaders();
         // Content Manager based on client
         ContentManager contentManager = getContentManager(headers);
+        // DIDL Parser
+        DIDLParser parser = contentManager.getParser();
         // Result
         DIDLContent didlContent = new DIDLContent();
         // Search and get the object from the given id
@@ -70,7 +72,7 @@ public class ContentDirectory extends AbstractContentDirectoryService {
             logger.info("Object not found with ObjectID:<{}>", objectID);
             // TODO I'm not sure this is correct, maybe should throw a NO_SUCH_OBJECT exception, instead of empty result
             try {
-                return new BrowseResult(new DIDLParser().generate(didlContent), 0, 0);
+                return new BrowseResult(parser.generate(didlContent), 0, 0);
             } catch (Exception e) {
                 throw new ContentDirectoryException(ContentDirectoryErrorCode.CANNOT_PROCESS, e.getMessage());
             }
@@ -117,10 +119,16 @@ public class ContentDirectory extends AbstractContentDirectoryService {
         // Return result
         logger.info("Browsing result numReturned: <{}> and total matches: <{}>", numReturned, totalMatches);
         try {
-            return new BrowseResult(new DIDLParser().generate(didlContent), numReturned, totalMatches);
+            return new BrowseResult(parser.generate(didlContent), numReturned, totalMatches);
         } catch (Exception e) {
             throw new ContentDirectoryException(ContentDirectoryErrorCode.CANNOT_PROCESS, e.getMessage());
         }
+    }
+
+    @Override
+    public BrowseResult search(String containerId, String searchCriteria, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) throws ContentDirectoryException {
+        logger.debug(String.format("ContentDirectory receive search request with ContainerID:%s, SearchCriteria:%s, Filter:%s, FirstResult:%s, MaxResults:%s, SortCriterion:%s.", containerId, searchCriteria, filter, startIndex, requestCount, getSortCriterionString(orderBy)));
+        return super.search(containerId, searchCriteria, filter, startIndex, requestCount, orderBy);
     }
 
     /**

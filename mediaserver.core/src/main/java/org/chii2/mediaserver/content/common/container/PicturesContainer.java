@@ -2,27 +2,48 @@ package org.chii2.mediaserver.content.common.container;
 
 import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
+import org.chii2.mediaserver.content.common.CommonContentManager;
 import org.teleal.cling.support.model.DIDLObject;
 import org.teleal.cling.support.model.SortCriterion;
 import org.teleal.cling.support.model.WriteStatus;
 import org.teleal.cling.support.model.container.Container;
 
 /**
- * Image Container for XBox
+ * Image Container
  * Contains all containers and items relating to pictures
  */
 public class PicturesContainer extends Container implements VisualContainer {
 
+    // Filter
+    private String filter;
     // Total Child Count
     private long totalChildCount;
 
-    public PicturesContainer() {
+    /**
+     * Constructor
+     *
+     * @param filter Content Filter
+     */
+    public PicturesContainer(String filter) {
+        this(filter, CommonContentManager.PICTURES_ID, CommonContentManager.ROOT_ID);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param filter   Content Filter
+     * @param id       Container ID
+     * @param parentId Parent ID
+     */
+    public PicturesContainer(String filter, String id, String parentId) {
         super();
 
+        this.filter = filter;
+
         // Pictures Container ID: 3
-        setId("3");
+        setId(id);
         // Parent container is Root Container
-        setParentID("0");
+        setParentID(parentId);
         // Title TODO: This should be I18N
         setTitle("Pictures");
         // May used in Container Property Creator (part of UPnP protocol standard)
@@ -49,7 +70,7 @@ public class PicturesContainer extends Container implements VisualContainer {
 
     @Override
     public void loadContents(long startIndex, long maxCount, SortCriterion[] orderBy, ContentManager contentManager) {
-        addContainer(new PicturesFoldersContainer());
+        addContainer(new PicturesFoldersContainer(filter));
         setChildCount(1);
         setTotalChildCount(1);
     }

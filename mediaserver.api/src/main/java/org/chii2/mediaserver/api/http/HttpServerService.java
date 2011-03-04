@@ -1,6 +1,7 @@
 package org.chii2.mediaserver.api.http;
 
 import java.net.InetAddress;
+import java.net.URI;
 
 /**
  * Http Server Service for UPnP/DLNA Media Server
@@ -29,4 +30,13 @@ public interface HttpServerService {
      * @return Image URL
      */
     public String forgeImageUrl(String profile, String imageId);
+
+    /**
+     * Forge Movie Item URL
+     *
+     * @param profile Client Profile
+     * @param movieId Movie ID
+     * @return Image URL
+     */
+    public URI forgeMovieUrl(String profile, String movieId);
 }

@@ -8,42 +8,80 @@ import org.teleal.common.util.MimeType;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
- * Photo Item for Windows Media Connect (Windows Media Player) related devices
+ * Photo Item
  * Especially represent a photo belong to a album
  */
 public class PhotoItem extends Photo implements VisualItem {
 
-    public PhotoItem(String id, String parentId, String title, Date date, String album, String description, String longDescription, String url, MimeType mime, int width, int height, long colorDepth, long size) {
+    // Filter
+    private String filter;
+
+    /**
+     * Constructor
+     *
+     * @param filter   Content Filter
+     * @param id       Item ID
+     * @param parentId Item Parent ID
+     * @param title    Item Title
+     */
+    protected PhotoItem(String filter, String id, String parentId, String title) {
         super();
+
+        this.filter = filter;
 
         // Item ID
         setId(id);
         // Item Parent ID
         setParentID(parentId);
         // Item Title
-        setTitle(title);
-        // May used in Container Property Creator (part of UPnP protocol standard)
-        setCreator("System");
+        if (filter.contains("dc:title")) {
+            setTitle(title);
+        }
+        //  Creator (part of UPnP protocol standard)
+        if (filter.contains("dc:creator")) {
+            setCreator("System");
+        }
+    }
+
+    /**
+     * Constructor
+     *
+     * @param filter          Content Filter
+     * @param id              Item ID
+     * @param parentId        Item Parent ID
+     * @param title           Item Title
+     * @param date            Photo Date
+     * @param album           Photo Album
+     * @param description     Item Description
+     * @param longDescription Item Long Description
+     */
+    public PhotoItem(String filter, String id, String parentId, String title, Date date, String album, String description, String longDescription, List<Res> resources) {
+
+        this(filter, id, parentId, title);
+
         //Picture Date
-        if (date != null) {
+        if (filter.contains("dc:date") && date != null) {
             setDate(new SimpleDateFormat("yyyy-MM-dd").format(date));
         }
         // Photo Album
-        setAlbum(album);
+        if (filter.contains("upnp:album")) {
+            setAlbum(album);
+        }
         // Description
-        setDescription(description);
+        if (filter.contains("dc:description")) {
+            setDescription(description);
+        }
         // Long Description
-        setLongDescription(longDescription);
+        if (filter.contains("upnp:longDescription")) {
+            setLongDescription(longDescription);
+        }
 
         // Resources
-        Res resource = new Res();
-        resource.setValue(url);
-        resource.setProtocolInfo(new ProtocolInfo(mime));
-        resource.setResolution(width, height);
-        resource.setColorDepth(colorDepth);
-        resource.setSize(size);
-        addResource(resource);
+        for (Res resource : resources) {
+            addResource(resource);
+        }
     }
 }

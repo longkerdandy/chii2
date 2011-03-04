@@ -99,7 +99,7 @@ public class MediaServerServiceImpl implements MediaServerService {
         DeviceDetails xboxDetails = new DeviceDetails(
                 "Chii2 (Home-Server):1",
                 new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
-                new ModelDetails("Windows Media Connect", "Windows Media Connect", "1"),
+                new ModelDetails("Windows Media Player Sharing", "Windows Media Player Sharing", "12"),
                 "000da201238c",
                 "100000000001",
                 "http://www.chii2.org/some_user_interface/",

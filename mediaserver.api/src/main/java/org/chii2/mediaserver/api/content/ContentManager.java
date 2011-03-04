@@ -3,6 +3,7 @@ package org.chii2.mediaserver.api.content;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
 import org.chii2.mediaserver.api.content.item.VisualItem;
 import org.teleal.cling.model.message.UpnpHeaders;
+import org.teleal.cling.support.contentdirectory.DIDLParser;
 import org.teleal.cling.support.model.DIDLObject;
 import org.teleal.cling.support.model.SortCriterion;
 
@@ -19,6 +20,13 @@ public interface ContentManager {
      * @return Client Profile
      */
     public String getClientProfile();
+
+    /**
+     * Get DIDL Parser for current Content Manager
+     *
+     * @return DIDL Parser
+     */
+    public DIDLParser getParser();
 
     /**
      * Whether this Content Manager match client heads.
@@ -44,12 +52,13 @@ public interface ContentManager {
     /**
      * Get all Pictures Storage Folder Containers in library
      *
+     * @param filter     Content Filter
      * @param startIndex Start Index
      * @param maxCount   Max Results Count
      * @param orderBy    Sort Criterion
      * @return List of Pictures Storage Folder Container
      */
-    public List<? extends VisualContainer> getPicturesStorageFolders(long startIndex, long maxCount, SortCriterion[] orderBy);
+    public List<? extends VisualContainer> getPicturesStorageFolders(String filter, long startIndex, long maxCount, SortCriterion[] orderBy);
 
     /**
      * Get the total Pictures Storage Folder Containers count in library
@@ -63,12 +72,25 @@ public interface ContentManager {
      *
      * @param album      Photo Album
      * @param parentId   Parent Container ID
+     * @param filter     Content Filter
      * @param startIndex Start Index
      * @param maxCount   Max Results Count
      * @param orderBy    Sort Criterion
      * @return List of Photo Item
      */
-    public List<? extends VisualItem> getPhotosByAlbum(String album, String parentId, long startIndex, long maxCount, SortCriterion[] orderBy);
+    public List<? extends VisualItem> getPhotosByAlbum(String album, String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy);
+
+    /**
+     * Get movies
+     *
+     * @param filter     Content Filer
+     * @param parentId   Parent Container ID
+     * @param startIndex Start Index
+     * @param maxCount   Max Results Count
+     * @param orderBy    Sort Criterion
+     * @return List of Movie Item
+     */
+    public List<? extends VisualItem> getMovies(String filter, String parentId, long startIndex, long maxCount, SortCriterion[] orderBy);
 
     /**
      * Get total photos count by photo album
@@ -81,10 +103,11 @@ public interface ContentManager {
     /**
      * Get photo by photo id
      *
-     * @param id ID
+     * @param id     ID
+     * @param filter Content Filter
      * @return Photo Item
      */
-    public VisualItem getPhotoById(String id);
+    public VisualItem getPhotoById(String id, String filter);
 
     /**
      * Get Container's Title from Container's ID. (By removing the container prefix)
@@ -169,4 +192,27 @@ public interface ContentManager {
      */
     public boolean isPhotoItem(String id);
 
+    /**
+     * ID is Video Container
+     *
+     * @param id ID
+     * @return True if ID is Video Container
+     */
+    public boolean isVideoContainer(String id);
+
+    /**
+     * ID is Video Folders Container
+     *
+     * @param id ID
+     * @return True if ID is Video Folders Container
+     */
+    public boolean isVideoFoldersContainer(String id);
+
+    /**
+     * ID is Movie Base Storage Folder Container
+     *
+     * @param id ID
+     * @return True if ID is Movie Base Storage Folder Container
+     */
+    public boolean isMovieBaseStorageFolderContainer(String id);
 }

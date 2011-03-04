@@ -5,6 +5,8 @@ import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
+import org.chii2.mediaserver.api.content.item.VisualItem;
+import org.chii2.mediaserver.content.common.Item.MovieItem;
 import org.chii2.mediaserver.content.common.Item.PhotoItem;
 import org.chii2.mediaserver.content.common.container.PicturesContainer;
 import org.chii2.mediaserver.content.common.container.*;
@@ -15,11 +17,12 @@ import org.chii2.transcoder.api.core.TranscoderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teleal.cling.model.message.UpnpHeaders;
-import org.teleal.cling.support.model.DIDLObject;
-import org.teleal.cling.support.model.SortCriterion;
+import org.teleal.cling.support.contentdirectory.DIDLParser;
+import org.teleal.cling.support.model.*;
 import org.teleal.cling.support.model.container.Container;
 import org.teleal.common.util.MimeType;
 
+import java.net.URI;
 import java.util.*;
 
 /**
@@ -28,14 +31,22 @@ import java.util.*;
 public class CommonContentManager implements ContentManager {
     // Root Container ID
     public static String ROOT_ID = "0";
+    // Video Container
+    public static String VIDEO_ID = "2";
     // Pictures Container
     public static String PICTURES_ID = "3";
+    // Video Folders Container
+    public static String VIDEO_FOLDERS_ID = "15";
     // Pictures Folders Container
     public static String PICTURES_FOLDERS_ID = "16";
+    // Movie Storage Folders Container as a Base Container
+    public static String MOVIE_BASE_STORAGE_FOLDER_ID = "1501";
     // Pictures Storage Folder Container ID Prefix
     public static String PICTURES_STORAGE_FOLDER_PREFIX = "PSFC-";
     // Photo Item ID Prefix
     public static String PHOTO_ITEM_PREFIX = "PI-";
+    // Movie Item ID Prefix
+    public static String MOVIE_ITEM_PREFIX = "MI-";
     // Media Library
     protected MediaLibraryService mediaLibrary;
     // HTTP Server
@@ -66,6 +77,11 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
+    public DIDLParser getParser() {
+        return new DIDLParser();
+    }
+
+    @Override
     public boolean isMatch(UpnpHeaders headers) {
         // Always return true
         return true;
@@ -75,32 +91,55 @@ public class CommonContentManager implements ContentManager {
     public DIDLObject findObject(String objectId, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
         // Root Container
         if (isRootContainer(objectId)) {
-            VisualContainer container = new RootContainer();
+            VisualContainer container = new RootContainer(filter);
             container.loadContents(startIndex, requestCount, orderBy, this);
             return (Container) container;
         }
+
+        /** ------------------------- Pictures -------------------------**/
         // Pictures Container
         else if (isPicturesContainer(objectId)) {
-            VisualContainer container = new PicturesContainer();
+            VisualContainer container = new PicturesContainer(filter);
             container.loadContents(startIndex, requestCount, orderBy, this);
             return (Container) container;
         }
         // Pictures Folders Container
         else if (isPicturesFoldersContainer(objectId)) {
-            VisualContainer container = new PicturesFoldersContainer();
+            VisualContainer container = new PicturesFoldersContainer(filter);
             container.loadContents(startIndex, requestCount, orderBy, this);
             return (Container) container;
         }
         // Pictures Storage Folder Container (Dynamic)
         else if (isPicturesStorageFolderContainer(objectId)) {
-            VisualContainer container = new PicturesStorageFolderContainer(objectId, getContainerTitle(objectId));
+            VisualContainer container = new PicturesStorageFolderContainer(filter, objectId, getContainerTitle(objectId));
             container.loadContents(startIndex, requestCount, orderBy, this);
             return (Container) container;
         }
         // Photo Item
         else if (isPhotoItem(objectId)) {
-            return getPhotoById(objectId);
+            return getPhotoById(objectId, filter);
         }
+
+        /** ------------------------- Video -------------------------**/
+        // Video Container
+        else if (isVideoContainer(objectId)) {
+            VisualContainer container = new VideoContainer(filter);
+            container.loadContents(startIndex, requestCount, orderBy, this);
+            return (Container) container;
+        }
+        // Video Folders Container
+        else if (isVideoFoldersContainer(objectId)) {
+            VisualContainer container = new VideoFoldersContainer(filter);
+            container.loadContents(startIndex, requestCount, orderBy, this);
+            return (Container) container;
+        }
+        // Movie Base Storage Folder Container
+        else if (isMovieBaseStorageFolderContainer(objectId)) {
+            VisualContainer container = new MovieBaseStorageFolderContainer(filter);
+            container.loadContents(startIndex, requestCount, orderBy, this);
+            return (Container) container;
+        }
+
         // Invalid
         else {
             // TODO Maybe should throw a NO_SUCH_OBJECT exception, instead of null result
@@ -109,7 +148,7 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
-    public List<PicturesStorageFolderContainer> getPicturesStorageFolders(long startIndex, long maxCount, SortCriterion[] orderBy) {
+    public List<PicturesStorageFolderContainer> getPicturesStorageFolders(String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
         // Forge sort
         Map<String, String> sorts = new HashMap<String, String>();
         for (SortCriterion sort : orderBy) {
@@ -140,7 +179,7 @@ public class CommonContentManager implements ContentManager {
             for (String album : albums) {
                 if (StringUtils.isNotEmpty(album)) {
                     String id = forgeContainerId(album, PICTURES_STORAGE_FOLDER_PREFIX);
-                    containers.add(new PicturesStorageFolderContainer(id, album));
+                    containers.add(new PicturesStorageFolderContainer(filter, id, album));
                 }
             }
             return containers;
@@ -155,7 +194,7 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
-    public List<PhotoItem> getPhotosByAlbum(String album, String parentId, long startIndex, long maxCount, SortCriterion[] orderBy) {
+    public List<PhotoItem> getPhotosByAlbum(String album, String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
         // Forge sort
         Map<String, String> sorts = new HashMap<String, String>();
         for (SortCriterion sort : orderBy) {
@@ -188,15 +227,77 @@ public class CommonContentManager implements ContentManager {
                 String id = forgeItemId(image.getId(), parentId, PHOTO_ITEM_PREFIX);
                 String url = httpServer.forgeImageUrl(getClientProfile(), image.getId());
                 String profile = getClientProfile();
-                // TODO GraphicsMagick return 8bits with TrueType, not sure it is correct. Also should we return 8 or 256
-                long colorDepth = image.getColorDepth();
                 MimeType mime = new MimeType("image", transcoder.getImageTranscodedType(profile, image.getType()));
+                // Resources
+                List<Res> resources = new ArrayList<Res>();
+                Res resource = new Res();
+                resource.setValue(url);
+                resource.setProtocolInfo(new ProtocolInfo(mime));
+                if (filter.contains("res@resolution")) {
+                    resource.setResolution(image.getWidth(), image.getHeight());
+                }
+                if (filter.contains("res@colorDepth")) {
+                    // TODO Only adjust True Color here, may need more condition
+                    if ("TrueColor".equalsIgnoreCase(image.getColorType())) {
+                        resource.setColorDepth((long) 24);
+                    } else {
+                        resource.setColorDepth((long) image.getColorDepth());
+                    }
+                }
+                if (filter.contains("res@size")) {
+                    resource.setSize(image.getSize());
+                }
+                resources.add(resource);
+
                 if (StringUtils.isNotEmpty(id)) {
-                    photos.add(new PhotoItem(id, parentId, image.getTitle(), image.getDateTaken(), image.getAlbum(), null, null, url, mime, image.getWidth(), image.getHeight(), colorDepth, image.getSize()));
+                    photos.add(new PhotoItem(filter, id, parentId, image.getTitle(), image.getDateTaken(), image.getAlbum(), null, null, resources));
                 }
             }
         }
         return photos;
+    }
+
+    @Override
+    public List<? extends VisualItem> getMovies(String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
+        List<MovieItem> movies = new ArrayList<MovieItem>();
+        String id = forgeItemId(UUID.randomUUID().toString(), parentId, MOVIE_ITEM_PREFIX);
+        String title = "Wildlife";
+        URI uri = httpServer.forgeMovieUrl(getClientProfile(), id);
+        String[] genres = {"Unknown Genre"};
+        PersonWithRole[] actors = {new PersonWithRole("Unknown Actor")};
+        // Resources
+        List<Res> resources = new ArrayList<Res>();
+        Res resource = new Res();
+        resource.setValue(uri.toString());
+        resource.setProtocolInfo(new ProtocolInfo(Protocol.HTTP_GET, "*", "video/x-ms-wmv", "DLNA.ORG_OP=01;DLNA.ORG_FLAGS=01500000000000000000000000000000"));
+        if (filter.contains("res@resolution")) {
+            resource.setResolution(1280, 720);
+        }
+        if (filter.contains("res@duration")) {
+            resource.setDuration("0:00:30.000");
+        }
+        if (filter.contains("res@colorDepth")) {
+            resource.setColorDepth((long) 24);
+        }
+        if (filter.contains("res@size")) {
+            resource.setSize((long) 26246026);
+        }
+        if (filter.contains("res@bitrate")) {
+            resource.setBitrate((long) 766771);
+        }
+        if (filter.contains("res@nrAudioChannels")) {
+            resource.setNrAudioChannels((long) 2);
+        }
+        if (filter.contains("res@sampleFrequency ")) {
+            resource.setSampleFrequency((long) 44100);
+        }
+        if (filter.contains("res@bitsPerSample")) {
+            resource.setBitsPerSample((long) 201);
+        }
+        resources.add(resource);
+
+        movies.add(new MovieItem(filter, id, parentId, title, null, null, genres, null, null, null, actors, null, null, null, resources));
+        return movies;
     }
 
     @Override
@@ -205,17 +306,36 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
-    public PhotoItem getPhotoById(String id) {
+    public PhotoItem getPhotoById(String id, String filter) {
         String libraryId = getItemLibraryId(id);
         Image image = mediaLibrary.getImageById(libraryId);
         if (image != null) {
             String parentId = getItemParentId(id);
             String url = httpServer.forgeImageUrl(getClientProfile(), image.getId());
             String profile = getClientProfile();
-            // TODO GraphicsMagick return 8bits with TrueType, not sure it is correct. Also should we return 8 or 256
-            long colorDepth = image.getColorDepth();
             MimeType mime = new MimeType("image", transcoder.getImageTranscodedType(profile, image.getType()));
-            return new PhotoItem(id, parentId, image.getTitle(), image.getDateTaken(), image.getAlbum(), null, null, url, mime, image.getWidth(), image.getHeight(), colorDepth, image.getSize());
+            // Resources
+            List<Res> resources = new ArrayList<Res>();
+            Res resource = new Res();
+            resource.setValue(url);
+            resource.setProtocolInfo(new ProtocolInfo(mime));
+            if (filter.contains("res@resolution")) {
+                resource.setResolution(image.getWidth(), image.getHeight());
+            }
+            if (filter.contains("res@colorDepth")) {
+                // TODO Only adjust True Color here, may need more condition
+                if ("TrueColor".equalsIgnoreCase(image.getColorType())) {
+                    resource.setColorDepth((long) 24);
+                } else {
+                    resource.setColorDepth((long) image.getColorDepth());
+                }
+            }
+            if (filter.contains("res@size")) {
+                resource.setSize(image.getSize());
+            }
+            resources.add(resource);
+
+            return new PhotoItem(filter, id, parentId, image.getTitle(), image.getDateTaken(), image.getAlbum(), null, null, resources);
         } else {
             return null;
         }
@@ -296,4 +416,20 @@ public class CommonContentManager implements ContentManager {
     public boolean isPhotoItem(String id) {
         return id != null && id.length() > 3 && id.substring(0, 3).equalsIgnoreCase(PHOTO_ITEM_PREFIX);
     }
+
+    @Override
+    public boolean isVideoContainer(String id) {
+        return VIDEO_ID.equalsIgnoreCase(id);
+    }
+
+    @Override
+    public boolean isVideoFoldersContainer(String id) {
+        return VIDEO_FOLDERS_ID.equalsIgnoreCase(id);
+    }
+
+    @Override
+    public boolean isMovieBaseStorageFolderContainer(String id) {
+        return MOVIE_BASE_STORAGE_FOLDER_ID.equalsIgnoreCase(id);
+    }
+
 }
