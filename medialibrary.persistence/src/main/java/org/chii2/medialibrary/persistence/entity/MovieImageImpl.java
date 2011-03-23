@@ -7,10 +7,6 @@ import java.util.UUID;
 
 @Entity(name = "MOVIE_IMAGE")
 @Table(name = "MOVIE_IMAGE")
-@NamedQueries({
-        @NamedQuery(name = "MovieImage.findById",
-                query = "SELECT m FROM MOVIE_IMAGE m WHERE m.id = :id")
-})
 public class MovieImageImpl implements MovieImage {
 
     // ID (Primary Key) in UUID format
@@ -18,9 +14,13 @@ public class MovieImageImpl implements MovieImage {
     @Column(name = "ID")
     private String id;
 
-    // Type
+    // Content Type
+    @Column(name = "CONTENT_TYPE")
+    private String contentType;
+
+    // Image Type
     @Column(name = "IMAGE_TYPE")
-    private String type;
+    private String imageType;
 
     // Size
     @Column(name = "SIZE")
@@ -66,13 +66,23 @@ public class MovieImageImpl implements MovieImage {
     }
 
     @Override
-    public String getType() {
-        return type;
+    public String getContentType() {
+        return contentType;
     }
 
     @Override
-    public void setType(String type) {
-        this.type = type;
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    @Override
+    public String getImageType() {
+        return imageType;
+    }
+
+    @Override
+    public void setImageType(String imageType) {
+        this.imageType = imageType;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.chii2.medialibrary.event;
 
+import org.apache.commons.lang.StringUtils;
 import org.chii2.medialibrary.api.file.FileService;
 import org.chii2.medialibrary.api.persistence.PersistenceService;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
@@ -7,6 +8,7 @@ import org.chii2.medialibrary.api.persistence.entity.MovieFile;
 import org.chii2.medialibrary.api.persistence.entity.MovieImage;
 import org.chii2.medialibrary.api.persistence.entity.MovieInfo;
 import org.chii2.medialibrary.api.persistence.factory.MovieFactory;
+import org.chii2.medialibrary.api.provider.MovieFileInfoProviderService;
 import org.chii2.medialibrary.api.provider.MovieInfoProviderService;
 import org.chii2.util.ConfigUtils;
 import org.osgi.service.cm.Configuration;
@@ -16,8 +18,6 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import regex2.Matcher;
-import regex2.Pattern;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,42 +36,32 @@ public class MovieHandler implements EventHandler {
     private PersistenceService persistenceService;
     // Injected MovieFactory
     private MovieFactory movieFactory;
-    // Injected list of Movie Information Provider Service
-    private List<MovieInfoProviderService> providerServices;
-    // Movie File Patterns
-    private List<Pattern> moviePatterns = new ArrayList<Pattern>() {{
-        add(Pattern.compile("^(?<name>[\\w\\.\\-\\']+)\\.\\(?(?<year>\\d{4})\\)?(?<info>(\\.\\w+)+)\\-\\[?(?<group>\\w+)\\]?\\.((?<disk>\\w+)\\.)?(?<ext>[\\w\\-]+)$", Pattern.CASE_INSENSITIVE));
-    }};
-    // Movie Name Separator Pattern
-    private Pattern movieSeparatorPattern = Pattern.compile("[\\._]", Pattern.CASE_INSENSITIVE);
-    // Movie Source Pattern
-    private Pattern movieSourcePattern = Pattern.compile("(?<source>BDRip|BluRay|HD-DVD|DVDRip|TVRip|HDTVRip|CAM|TS|DVDScr|Scr|R5)", Pattern.CASE_INSENSITIVE);
-    // Movie Video Codec Pattern
-    private Pattern movieVideoCodecPattern = Pattern.compile("(?<video_codec>XviD|DivX|DivX5|H264|X264)", Pattern.CASE_INSENSITIVE);
-    // Movie Audio Codec Pattern
-    private Pattern movieAudioCodecPattern = Pattern.compile("(?<audio_codec>AC3|DTS)", Pattern.CASE_INSENSITIVE);
-    // Movie Video Resolution Pattern
-    private Pattern movieResolutionPattern = Pattern.compile("(?<resolution>\\d+p)", Pattern.CASE_INSENSITIVE);
-    // Preferred Movie Providers
-    private List<String> movieProviders = Arrays.asList("TMDb");
+    // Injected list of Movie Online Information Provider Service
+    private List<MovieInfoProviderService> onlineProviderServices;
+    // Injected list of Movie File Information Provider Service
+    private List<MovieFileInfoProviderService> fileProviderServices;
+    // Preferred Movie File Information Providers
+    private List<String> movieFileInfoProviders = Arrays.asList("MediaInfo");
+    // Preferred Movie Online Information Providers
+    private List<String> movieOnlineInfoProviders = Arrays.asList("TMDb");
+    // Force to refresh/update movie's information
+    private boolean forceInfoUpdate = true;
+    // Poster fetch count
+    private int posterCount = 3;
+    // Backdrop fetch count
+    private int backdropCount = 3;
     //Configuration FIle
     private final static String CONFIG_FILE = "org.chii2.medialibrary.core";
-    // Movie file name extract filter key from configuration file
-    private final static String MOVIE_FILE_PATTERN = "movie.file.pattern";
-    // Movie file name separator key from configuration file
-    private final static String MOVIE_NAME_SEPARATOR_PATTERN = "movie.file.name.separator";
-    // Movie file source block extract filter key from configuration file
-    private final static String MOVIE_SOURCE_PATTERN = "movie.file.source.pattern";
-    // Movie file video codec block extract filter key from configuration file
-    private final static String MOVIE_VIDEO_CODEC_PATTERN = "movie.file.video.codec.pattern";
-    // Movie file audio codec block extract filter key from configuration file
-    private final static String MOVIE_AUDIO_CODEC_PATTERN = "movie.file.audio.codec.pattern";
-    // Movie file video resolution block extract filter key from configuration file
-    private final static String MOVIE_RESOLUTION_PATTERN = "movie.file.video.resolution.pattern";
-    // Preferred Movie Provider
-    private final static String MOVIE_PROVIDER = "movie.provider";
-    // Extract Disk Number Pattern
-    private Pattern diskNumPattern = Pattern.compile("\\w*(?<number>\\d+)");
+    // Preferred Movie File Information Provider Config Key
+    private final static String MOVIE_FILE_INFO_PROVIDER = "movie.file.info.provider";
+    // Preferred Movie Online Information Provider Config Key
+    private final static String MOVIE_ONLINE_INFO_PROVIDER = "movie.online.info.provider";
+    // Force to refresh/update movie's information Config Key
+    private final static String MOVIE_FORCE_INFORMATION_UPDATE = "movie.force.update";
+    // Poster Fetch Count Config Key
+    private final static String MOVIE_POSTER_COUNT = "movie.poster.count";
+    // Backdrop Fetch Count Config Key
+    private final static String MOVIE_BACKDROP_COUNT = "movie.backdrop.count";
     // Logger
     private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.event");
 
@@ -93,67 +83,49 @@ public class MovieHandler implements EventHandler {
         if (props == null || props.isEmpty()) {
             logger.error("MovieHandler load configuration <{}> with error.", CONFIG_FILE);
         } else {
-            // Load movie file name parse patterns
-            List<Pattern> namePatterns = ConfigUtils.loadPatterns(props, MOVIE_FILE_PATTERN);
-            if (namePatterns != null && !namePatterns.isEmpty()) {
-                moviePatterns = namePatterns;
-                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_FILE_PATTERN);
+            // Load movie file information providers configuration
+            List<String> movieFileInfoProviders = ConfigUtils.loadConfigurations(props, MOVIE_FILE_INFO_PROVIDER);
+            if (movieFileInfoProviders != null && !movieFileInfoProviders.isEmpty()) {
+                this.movieFileInfoProviders = movieFileInfoProviders;
+                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_FILE_INFO_PROVIDER);
             } else {
-                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_FILE_PATTERN);
+                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_FILE_INFO_PROVIDER);
             }
 
-            // Load movie name separator pattern
-            Pattern fileSeparatorPattern = ConfigUtils.loadPattern(props, MOVIE_NAME_SEPARATOR_PATTERN);
-            if (fileSeparatorPattern != null) {
-                movieSeparatorPattern = fileSeparatorPattern;
-                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_NAME_SEPARATOR_PATTERN);
+            // Load movie online information providers configuration
+            List<String> movieOnlineInfoProviders = ConfigUtils.loadConfigurations(props, MOVIE_ONLINE_INFO_PROVIDER);
+            if (movieOnlineInfoProviders != null && !movieOnlineInfoProviders.isEmpty()) {
+                this.movieOnlineInfoProviders = movieOnlineInfoProviders;
+                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_ONLINE_INFO_PROVIDER);
             } else {
-                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_NAME_SEPARATOR_PATTERN);
+                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_ONLINE_INFO_PROVIDER);
             }
 
-            // Load movie source pattern
-            Pattern sourcePattern = ConfigUtils.loadPattern(props, MOVIE_SOURCE_PATTERN);
-            if (sourcePattern != null) {
-                movieSourcePattern = sourcePattern;
-                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_SOURCE_PATTERN);
+            // Load force update information
+            String forceInfoUpdate = ConfigUtils.loadConfiguration(props, MOVIE_FORCE_INFORMATION_UPDATE);
+            if (StringUtils.isNotBlank(forceInfoUpdate)) {
+                this.forceInfoUpdate = Boolean.parseBoolean(forceInfoUpdate);
+                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_FORCE_INFORMATION_UPDATE);
             } else {
-                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_SOURCE_PATTERN);
+                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_FORCE_INFORMATION_UPDATE);
             }
 
-            // Load movie video codec pattern
-            Pattern videoCodecPattern = ConfigUtils.loadPattern(props, MOVIE_VIDEO_CODEC_PATTERN);
-            if (videoCodecPattern != null) {
-                movieVideoCodecPattern = videoCodecPattern;
-                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_VIDEO_CODEC_PATTERN);
+            // Load force update information
+            String posterCount = ConfigUtils.loadConfiguration(props, MOVIE_POSTER_COUNT);
+            if (StringUtils.isNotBlank(posterCount)) {
+                this.posterCount = Integer.parseInt(posterCount);
+                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_POSTER_COUNT);
             } else {
-                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_VIDEO_CODEC_PATTERN);
+                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_POSTER_COUNT);
             }
 
-            // Load movie audio codec pattern
-            Pattern audioCodecPattern = ConfigUtils.loadPattern(props, MOVIE_AUDIO_CODEC_PATTERN);
-            if (audioCodecPattern != null) {
-                movieAudioCodecPattern = audioCodecPattern;
-                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_AUDIO_CODEC_PATTERN);
+            // Load force update information
+            String backdropCount = ConfigUtils.loadConfiguration(props, MOVIE_BACKDROP_COUNT);
+            if (StringUtils.isNotBlank(backdropCount)) {
+                this.backdropCount = Integer.parseInt(backdropCount);
+                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_BACKDROP_COUNT);
             } else {
-                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_AUDIO_CODEC_PATTERN);
-            }
-
-            // Load movie video resolution pattern
-            Pattern videoResolutionPattern = ConfigUtils.loadPattern(props, MOVIE_RESOLUTION_PATTERN);
-            if (videoResolutionPattern != null) {
-                movieResolutionPattern = videoResolutionPattern;
-                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_RESOLUTION_PATTERN);
-            } else {
-                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_RESOLUTION_PATTERN);
-            }
-
-            // Load movie providers configuration
-            List<String> providers = ConfigUtils.loadConfigurations(props, MOVIE_PROVIDER);
-            if (providers != null && !providers.isEmpty()) {
-                movieProviders = providers;
-                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_PROVIDER);
-            } else {
-                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_PROVIDER);
+                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_BACKDROP_COUNT);
             }
         }
     }
@@ -170,11 +142,29 @@ public class MovieHandler implements EventHandler {
     public void handleEvent(Event event) {
         // Movie Scan Event
         if (FileService.MOVIE_SCAN_TOPIC.equals(event.getTopic())) {
-            // Get List of file names from event, this should be fine
+            // Get list of File from event, this should be fine
             @SuppressWarnings("unchecked")
-            List<File> files = (List<File>) event.getProperty("files");
+            List<File> files = (List<File>) event.getProperty(FileService.FILE_PROPERTY);
             logger.debug("Receive a movie scan event with {} records.", files.size());
-            doScanProcess(files);
+            notifyProviderFetchFileInfo(files, new ArrayList<String>());
+        }
+        // Movie FIle Information Provided Event
+        else if (MovieFileInfoProviderService.MOVIE_FILE_INFO_PROVIDED_TOPIC.equals(event.getTopic())) {
+            // Get list of Movie from event, this should be fine
+            @SuppressWarnings("unchecked")
+            List<MovieFile> movieFiles = (List<MovieFile>) event.getProperty(MovieFileInfoProviderService.MOVIE_FILE_INFO_PROPERTY);
+            logger.debug("Receive a movie file information provided event with {} records.", movieFiles.size());
+            synchronizeFileInfo(movieFiles, this.forceInfoUpdate);
+        }
+        // Movie FIle Information Failed Event
+        else if (MovieFileInfoProviderService.MOVIE_FILE_INFO_FAILED_TOPIC.equals(event.getTopic())) {
+            // Get list of Movie from event, this should be fine
+            @SuppressWarnings("unchecked")
+            List<File> files = (List<File>) event.getProperty(MovieFileInfoProviderService.MOVIE_FILE_PROPERTY);
+            @SuppressWarnings("unchecked")
+            List<String> excludeProviders = (List<String>) event.getProperty(MovieFileInfoProviderService.EXCLUDE_PROVIDERS_PROPERTY);
+            logger.debug("Receive a movie file information failed event, will try for another provider.");
+            notifyProviderFetchFileInfo(files, excludeProviders);
         }
         // Movie Information Provided Event
         else if (MovieInfoProviderService.MOVIE_INFO_PROVIDED_TOPIC.equals(event.getTopic())) {
@@ -182,26 +172,19 @@ public class MovieHandler implements EventHandler {
             @SuppressWarnings("unchecked")
             List<MovieInfo> info = (List<MovieInfo>) event.getProperty(MovieInfoProviderService.MOVIE_INFO_PROPERTY);
             logger.debug("Receive a movie information provided event with {} information.", info.size());
-            doInfoProvidedProcess(movieId, info);
+            synchronizeInfo(movieId, info);
         }
         // Movie Information provided Failed Event
         else if (MovieInfoProviderService.MOVIE_INFO_FAILED_TOPIC.equals(event.getTopic())) {
-            String movieId = (String) event.getProperty(MovieInfoProviderService.MOVIE_ID_PROPERTY);
-            String movieName = (String) event.getProperty(MovieInfoProviderService.MOVIE_NAME_PROPERTY);
-            String movieYear = (String) event.getProperty(MovieInfoProviderService.MOVIE_YEAR_PROPERTY);
-            @SuppressWarnings("unchecked")
-            List<String> excludedProviders = (List<String>) event.getProperty(MovieInfoProviderService.EXCLUDE_PROVIDERS_PROPERTY);
-            logger.debug("Receive a movie information failed event.");
-            // Try to re-fetch the movie information, through another provider maybe
-            notifyProviderFetchInfo(movieId, movieName, movieYear, excludedProviders);
+            // Currently, do nothing here
         }
         // Movie Image Provided Event
         else if (MovieInfoProviderService.MOVIE_IMAGE_PROVIDED_TOPIC.equals(event.getTopic())) {
             String imageId = (String) event.getProperty(MovieInfoProviderService.IMAGE_ID_PROPERTY);
             byte[] imageContent = (byte[]) event.getProperty(MovieInfoProviderService.IMAGE_CONTENT_PROPERTY);
-            logger.debug("Receive a image provided event.");
+            logger.debug("Receive a movie image {} provided event.", imageId);
             // Try to update image in database
-            doImageProvidedProcess(imageId, imageContent);
+            synchronizeImage(imageId, imageContent);
         }
     }
 
@@ -211,15 +194,18 @@ public class MovieHandler implements EventHandler {
      * @param imageId      Image ID
      * @param imageContent Image Content
      */
-    private void doImageProvidedProcess(String imageId, byte[] imageContent) {
+    private void synchronizeImage(String imageId, byte[] imageContent) {
         // Get the image from database
         MovieImage image = persistenceService.getMovieImageById(imageId);
-        // Add Image save back to database
-        image.setImage(imageContent);
-
-        logger.debug("Update image <{}>.", imageId);
-        // Save back to database
-        persistenceService.merge(image);
+        if (image != null) {
+            // Add Image save back to database
+            image.setImage(imageContent);
+            // Save back to database
+            persistenceService.merge(image);
+            logger.debug("Movie image {} merged into database.", imageId);
+        } else {
+            logger.debug("Movie image {} not found in database.", imageId);
+        }
     }
 
     /**
@@ -228,15 +214,25 @@ public class MovieHandler implements EventHandler {
      * @param movieId Movie ID
      * @param info    Movie Information
      */
-    private void doInfoProvidedProcess(String movieId, List<MovieInfo> info) {
+    private void synchronizeInfo(String movieId, List<MovieInfo> info) {
         // Get movie from database
         Movie movie = persistenceService.getMovieById(movieId);
-        // Add information
-        for (MovieInfo movieInfo : info) {
-            movie.addInfo(movieInfo);
+
+        // Null, Return
+        if (movie == null) {
+            return;
         }
 
-        logger.debug("Update movie <{}> image.", movieId);
+        // Remove current info
+        if (movie.getInfoCount() > 0) {
+            for (MovieInfo movieInfo : movie.getInfo()) {
+                persistenceService.remove(movieInfo);
+            }
+        }
+
+        // Set new info
+        movie.setInfo(info);
+
         // Save into database        
         persistenceService.merge(movie);
 
@@ -249,137 +245,183 @@ public class MovieHandler implements EventHandler {
     }
 
     /**
-     * Parse the scanned movie files and sync to the database
+     * Synchronize Movie Files to database
      *
-     * @param files Scanned Movie Files
+     * @param movieFiles      Movie Files
+     * @param forceInfoUpdate True to force movie information update (even information already existed)
      */
-    private void doScanProcess(List<File> files) {
-        // List of movie files
-        List<MovieFile> movieFiles = new ArrayList<MovieFile>();
-
-        // Loop and parse the files
-        for (File file : files) {
-            // Parse file into movie file
-            MovieFile movieFile = parseFile(file);
-            // Add to list
-            movieFiles.add(movieFile);
-        }
-
-        // Synchronize the scanned movies to the database
-        synchronize(movieFiles);
-        logger.debug("Try to synchronize {} movies files.", movieFiles.size());
-    }
-
-    /**
-     * Synchronize to the database
-     *
-     * @param movieFiles Movie Files
-     */
-    private void synchronize(List<MovieFile> movieFiles) {
-        // Movie List
-        List<Movie> movies = new ArrayList<Movie>();
-
-        // Loop and create a list of movies
-        loop:
+    private void synchronizeFileInfo(List<MovieFile> movieFiles, boolean forceInfoUpdate) {
+        // Current Movie Files from database, and will be compared after looping
+        List<? extends MovieFile> currentFiles = persistenceService.getMovieFiles(-1, -1, null);
+        // Present Movie Files
+        List<MovieFile> presentFiles = new ArrayList<MovieFile>();
+        // Loop files
         for (MovieFile movieFile : movieFiles) {
-            // Loop current movies seem it the file shouldIncl to any group
-            for (Movie movie : movies) {
-                if (movie.shouldIncl(movieFile)) {
+            // Try to get the movie file in database which point to the same file in disk
+            MovieFile dbMovieFile = persistenceService.getMovieFileByAbsoluteName(movieFile.getAbsoluteName());
+            // Database doesn't contain current movie file
+            if (dbMovieFile == null) {
+                Movie movie = persistenceService.getMoviesContainFile(movieFile.getFilePath(), movieFile.getMovieName());
+                // Database doesn't contain a movie this movie file belong to, create a new movie
+                if (movie == null) {
+                    movie = movieFactory.createMovie();
                     movie.addFile(movieFile);
-                    continue loop;
+                    persistenceService.merge(movie);
+                    //
+                }
+                // Database already has a movie this movie file should be included, add file to movie
+                else {
+                    movie.addFile(movieFile);
+                    persistenceService.merge(movie);
                 }
             }
-
-            // If not shouldIncl to a exist movie group, create a new one
-            Movie movie = movieFactory.createMovie();
-            movie.addFile(movieFile);
-            movies.add(movie);
+            // Database contains the movie file, we will update it
+            else {
+                movieFile.setId(dbMovieFile.getId());
+                persistenceService.merge(movieFile);
+                // Add to present movie file list
+                presentFiles.add(dbMovieFile);
+            }
         }
 
-        // Get current database movie records
-        List<? extends Movie> dbMovies = persistenceService.getAllMovies();
-
-        // Compare database and input list
+        // Remove unnecessary movie files from database
         loop:
-        for (Movie dbMovie : dbMovies) {
-            for (Movie movie : movies) {
-                if (compareMovie(movie, dbMovie)) {
-                    // If they reference to the same files, fill the file id with the value from database, and make a merge
-                    for (MovieFile movieFile : movie.getFiles()) {
-                        movieFile.setId(dbMovie.getFileIdByName(movieFile.getAbsoluteName()));
-                        logger.debug("Update movie file <{}>.", movieFile.getId());
-                        // Update movie file information
-                        persistenceService.merge(movieFile);
-                        // If database doesn't contain movie information, try get it. The should not happen
-                        if (dbMovie.getInfoCount() == 0) {
-                            // Request provider to fetch movie information
-                            notifyProviderFetchInfo(dbMovie.getId(), movie.getGuessedMovieName(), movie.getGuessedMovieYear(), new ArrayList<String>());
-                        }
-                    }
-
-                    // Remove the matched ones from list
-                    movies.remove(movie);
-
-                    // Because match has been found, continue to loop next database movie file
+        for (MovieFile currentFile : currentFiles) {
+            for (MovieFile presentFile : presentFiles) {
+                // Current Movie File is still present, continue to next one
+                if (currentFile.getId().equals(presentFile.getId())) {
+                    presentFiles.remove(presentFile);
                     continue loop;
                 }
             }
-            logger.debug("Remove movie <{}>.", dbMovie.getId());
-            // If no match found, remove the movie from database
-            persistenceService.remove(dbMovie);
-        }
-        logger.debug("Save <{}> movies.", movies.size());
-        // After looping, only newly added movies left in the list, persist them
-        persistenceService.persist(movies);
 
-        // Request provider to fetch movie information
+            // Here means current Movie File is not present any more, remove it
+            // Movie contains the movie file
+            Movie movie = persistenceService.getMoviesContainFile(currentFile.getId());
+            // Shouldn't be null, already been removed, is that possible?
+            if (movie != null) {
+                // Movie contains this file only, and since the file is going to be removed, we just removed the movie
+                if (movie.getFilesCount() == 1) {
+                    persistenceService.remove(movie);
+                }
+                // Movie contains other files
+                else {
+                    movie.removeFile(currentFile);
+                    persistenceService.remove(currentFile);
+                    // TODO: not sure this logic is correct, do I need this?
+                    persistenceService.merge(movie);
+                }
+            }
+        }
+
+        // Notify providers fetch movie info (online information)
+        List<? extends Movie> movies = persistenceService.getMovies(-1, -1, null);
         for (Movie movie : movies) {
-            notifyProviderFetchInfo(movie.getId(), movie.getGuessedMovieName(), movie.getGuessedMovieYear(), new ArrayList<String>());
+            // Movie already contains information
+            if (movie.getInfoCount() > 0) {
+                // Force to update movie information
+                if (forceInfoUpdate) {
+                    notifyProviderFetchOnlineInfo(movie);
+                }
+            }
+            // Movie without information
+            else {
+                notifyProviderFetchOnlineInfo(movie);
+            }
         }
     }
 
     /**
-     * Notify the provider to fetch movie information
+     * Notify Movie File Information Provider to analyze movie files and extract metadata information
      *
-     * @param movieId          Movie Id
-     * @param movieName        Movie Name (Guessed)
-     * @param movieYear       Movie Released Year (Guessed)
-     * @param excludeProviders Exclude Movie Providers (Which may already failed)
+     * @param files            Movie Files
+     * @param excludeProviders Excluded Providers (which may already prove failed)
      */
-    private void notifyProviderFetchInfo(String movieId, String movieName, String movieYear, List<String> excludeProviders) {
-        if (!providerServices.isEmpty()) {
+    private void notifyProviderFetchFileInfo(List<File> files, List<String> excludeProviders) {
+        if (!fileProviderServices.isEmpty()) {
             // Find the provider based on configuration order and use it to fetch movie information
-            loop:
-            for (String preferredProvider : movieProviders) {
+            for (String preferredProvider : movieFileInfoProviders) {
                 // If the provider on the exclude list (which usually already failed), continue to next
                 if (excludeProviders != null && excludeProviders.contains(preferredProvider)) {
                     continue;
                 }
                 // Loop the current provider see whether preferred provider is available
-                for (MovieInfoProviderService provider : providerServices) {
+                for (MovieFileInfoProviderService provider : fileProviderServices) {
                     if (preferredProvider.equalsIgnoreCase(provider.getProviderName())) {
-                        logger.debug("Try to get movie <{}> information with <{}> provider.", movieName, provider.getProviderName());
-                        // Try to get movie information from the internet provider (this tends to work background)
-                        provider.getMovieInformationByName(movieId, movieName, movieYear, excludeProviders);
+                        logger.debug("Try to get movie file information with <{}> provider.", provider.getProviderName());
+                        // Try to get movie file information from the provider (this tends to work background)
+                        provider.getMovieFileInformation(files, excludeProviders);
                         // Once matched, stop looping
-                        break loop;
+                        return;
                     }
                 }
             }
+        }
+
+        // If nothing matched
+        logger.error("No valid Movie File Information Provider presents, please check configuration and module status.");
+    }
+
+    /**
+     * Notify the provider to fetch movie online information
+     *
+     * @param movie Movie
+     */
+    @SuppressWarnings({"LoopStatementThatDoesntLoop"})
+    private void notifyProviderFetchOnlineInfo(Movie movie) {
+        // Provider matched
+        boolean hasMatched = false;
+
+        if (!onlineProviderServices.isEmpty()) {
+            String movieName = null;
+            int movieYear = -1;
+            // All the movie files should have the same movie name and year, we just use the first available one
+            for (MovieFile movieFile : movie.getFiles()) {
+                if (StringUtils.isNotBlank(movieFile.getMovieName())) {
+                    movieName = movieFile.getMovieName();
+                    movieYear = movieFile.getYear();
+                }
+                break;
+            }
+
+            // Find providers based on configuration and use each provider to fetch movie information
+            for (String preferredProvider : movieOnlineInfoProviders) {
+                // Loop the current provider see whether preferred provider is available
+                for (MovieInfoProviderService provider : onlineProviderServices) {
+                    if (preferredProvider.equalsIgnoreCase(provider.getProviderName())) {
+                        // Mark as matched
+                        hasMatched = true;
+
+                        if (StringUtils.isNotBlank(movieName)) {
+                            logger.debug("Try to get movie <{}> information with <{}> provider.", movieName, provider.getProviderName());
+                            // Try to get movie information from the internet provider (this tends to work background)
+                            if (movieYear > 0) {
+                                provider.getMovieInformationByName(movie.getId(), movieName, movieYear, 1, this.posterCount, this.backdropCount);
+                            } else {
+                                provider.getMovieInformationByName(movie.getId(), movieName, 1, this.posterCount, this.backdropCount);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!hasMatched) {
+            logger.error("No valid Movie Online Information Provider presents, please check configuration and module status.");
         }
     }
 
     /**
      * Notify the provider to fetch movie image
      *
-     * @param imageId         Image ID
+     * @param imageId          Image ID
      * @param url              URL
      * @param originalProvider Original Provider
      */
     private void notifyProviderFetchImage(String imageId, String url, String originalProvider) {
-        if (!providerServices.isEmpty()) {
+        if (!onlineProviderServices.isEmpty()) {
             // Loop the current provider see whether original provider is available
-            for (MovieInfoProviderService provider : providerServices) {
+            for (MovieInfoProviderService provider : onlineProviderServices) {
                 if (originalProvider.equalsIgnoreCase(provider.getProviderName())) {
                     logger.debug("Try to get movie image <{}> with <{}> provider.", imageId, provider.getProviderName());
                     // Try to get movie image from the internet provider (this tends to work background)
@@ -390,202 +432,21 @@ public class MovieHandler implements EventHandler {
             }
 
             // If original provider not presented, find the provider based on configuration order and use it to fetch image
-            loop:
-            for (String preferredProvider : movieProviders) {
+            for (String preferredProvider : movieOnlineInfoProviders) {
                 // Loop the current provider see whether preferred provider is available
-                for (MovieInfoProviderService provider : providerServices) {
+                for (MovieInfoProviderService provider : onlineProviderServices) {
                     if (preferredProvider.equalsIgnoreCase(provider.getProviderName())) {
                         logger.debug("Try to get movie image <{}> with <{}> provider.", imageId, provider.getProviderName());
                         // Try to get movie image from the internet provider (this tends to work background)
                         provider.getMovieImageByUrl(imageId, url);
                         // Once matched, stop looping
-                        break loop;
+                        return;
                     }
                 }
             }
         }
-    }
 
-    /**
-     * Compare whether two movie is the same (has same files)
-     *
-     * @param movie1 First movie
-     * @param movie2 Second movie
-     * @return True if two move is the same
-     */
-    private boolean compareMovie(Movie movie1, Movie movie2) {
-        // If contains different number of files, not the same
-        if (movie1.getFilesCount() != movie2.getFilesCount()) {
-            return false;
-        }
-
-        // Loop to see whether all files are matched
-        Loop:
-        for (MovieFile movieFile1 : movie1.getFiles()) {
-            for (MovieFile movieFile2 : movie2.getFiles()) {
-                // If reference to the same file, loop another file
-                if (movieFile1.getAbsoluteName().equals(movieFile2.getAbsoluteName())) {
-                    continue Loop;
-                }
-            }
-
-            // If no match found, two movie are not equal
-            return false;
-        }
-
-        // If all files are matched, teo movie are equal
-        return true;
-    }
-
-    /**
-     * Parse file name and convert into MovieFile
-     *
-     * @param file File
-     * @return MovieFile
-     */
-    private MovieFile parseFile(File file) {
-        // Regexp matcher to be used
-        Matcher matcher = null;
-
-        // Create a MovieFile from factory
-        MovieFile movieFile = movieFactory.createMovieFile();
-
-        // Set MovieFile fields
-        movieFile.setAbsoluteName(file.getAbsolutePath()); // Absolute File Name(Path)
-        movieFile.setFilePath(file.getParent()); // File Path
-        movieFile.setFileName(file.getName()); // File Name
-
-        // Loop and parse file name
-        for (Pattern pattern : moviePatterns) {
-            if (matcher != null) {
-                matcher.reset();
-            }
-            // Match file name
-            matcher = pattern.matcher(file.getName());
-            if (matcher.find() && matcher.groupCount() > 0) {
-
-                // Match movie name
-                String movieName = matcher.group("name");
-                if (movieName != null && !movieName.isEmpty()) {
-                    // Movie Name contains only words and spaces
-                    movieFile.setMovieName(movieName.replaceAll(movieSeparatorPattern.toString(), " "));
-                }
-
-                // Match movie year
-                movieFile.setYear(matcher.group("year"));
-
-                //Match disk number
-                String disk = matcher.group("disk");
-                if (disk != null && !disk.isEmpty()) {
-                    movieFile.setDiskNum(parseDiskNum(disk));
-                }
-
-                // Match release group
-                movieFile.setGroup(matcher.group("group"));
-
-                // Match file extension
-                movieFile.setFileExtension(matcher.group("ext"));
-
-                // A information block may contains other attribute
-                String movieInfo = matcher.group("info");
-                // If no movie info block matched, try to get each attribute
-                if (movieInfo == null || movieInfo.isEmpty()) {
-                    movieFile.setSource(matcher.group("source")); // Source
-                    movieFile.setVideoCodec(matcher.group("video_codec")); // Video Codec
-                    movieFile.setAudioCodec(matcher.group("audio_codec")); // Audio Codec
-                    movieFile.setResolution(matcher.group("resolution")); // Resolution
-                }
-                // If info matched, try to parse info into separate attribute
-                else {
-                    // Match file source
-                    matcher.reset();
-                    matcher = movieSourcePattern.matcher(movieInfo);
-                    if (matcher.find() && matcher.groupCount() > 0) {
-                        movieFile.setSource(matcher.group("source"));
-                    }
-
-                    // Match movie video codec
-                    matcher.reset();
-                    matcher = movieVideoCodecPattern.matcher(movieInfo);
-                    if (matcher.find() && matcher.groupCount() > 0) {
-                        movieFile.setVideoCodec(matcher.group("video_codec"));
-                    }
-
-                    // Match movie audio codec
-                    matcher.reset();
-                    matcher = movieAudioCodecPattern.matcher(movieInfo);
-                    if (matcher.find() && matcher.groupCount() > 0) {
-                        movieFile.setAudioCodec(matcher.group("audio_codec"));
-                    }
-
-                    // Match video resolution
-                    matcher.reset();
-                    matcher = movieResolutionPattern.matcher(movieInfo);
-                    if (matcher.find() && matcher.groupCount() > 0) {
-                        movieFile.setResolution(matcher.group("resolution"));
-                    }
-
-                }
-                // Once matched, Stop match loop
-                break;
-            }
-        }
-
-        return movieFile;
-    }
-
-    /**
-     * Parse disk information into disk order number
-     *
-     * @param disk Disk Information
-     * @return Disk Number
-     */
-    private int parseDiskNum(String disk) {
-        if (disk == null || disk.isEmpty()) {
-            return 1;
-        }
-
-        // Match "CD1" or "DVD2" or "1"
-        Matcher matcher = diskNumPattern.matcher(disk);
-        if (matcher.find() && matcher.groupCount() > 0) {
-            try {
-                return Integer.valueOf(matcher.group("number"));
-            } catch (NumberFormatException e) {
-                // This should not happens, since regexp is matched
-            }
-        }
-
-        // Get last char and turn it into a number
-        String num = disk.substring(disk.length() - 1);
-        if (num.equalsIgnoreCase("a")) return 1;
-        else if (num.equalsIgnoreCase("b")) return 2;
-        else if (num.equalsIgnoreCase("c")) return 3;
-        else if (num.equalsIgnoreCase("d")) return 4;
-        else if (num.equalsIgnoreCase("e")) return 5;
-        else if (num.equalsIgnoreCase("f")) return 6;
-        else if (num.equalsIgnoreCase("g")) return 7;
-        else if (num.equalsIgnoreCase("h")) return 8;
-        else if (num.equalsIgnoreCase("i")) return 9;
-        else if (num.equalsIgnoreCase("j")) return 10;
-        else if (num.equalsIgnoreCase("k")) return 11;
-        else if (num.equalsIgnoreCase("l")) return 12;
-        else if (num.equalsIgnoreCase("m")) return 13;
-        else if (num.equalsIgnoreCase("n")) return 14;
-        else if (num.equalsIgnoreCase("o")) return 15;
-        else if (num.equalsIgnoreCase("p")) return 16;
-        else if (num.equalsIgnoreCase("q")) return 17;
-        else if (num.equalsIgnoreCase("r")) return 18;
-        else if (num.equalsIgnoreCase("s")) return 19;
-        else if (num.equalsIgnoreCase("t")) return 20;
-        else if (num.equalsIgnoreCase("u")) return 21;
-        else if (num.equalsIgnoreCase("v")) return 22;
-        else if (num.equalsIgnoreCase("w")) return 23;
-        else if (num.equalsIgnoreCase("x")) return 24;
-        else if (num.equalsIgnoreCase("y")) return 25;
-        else if (num.equalsIgnoreCase("z")) return 26;
-
-        // None matched, just return 1
-        return 1;
+        logger.error("No valid Movie Online Information Provider presents, please check configuration and module status.");
     }
 
     /**
@@ -631,11 +492,21 @@ public class MovieHandler implements EventHandler {
     /**
      * Inject Movie Information Provider Services
      *
-     * @param providerServices Movie Information Provider Services
+     * @param onlineProviderServices Movie Information Provider Services
      */
     @SuppressWarnings("unused")
-    public void setProviderServices(List<MovieInfoProviderService> providerServices) {
-        this.providerServices = providerServices;
+    public void setOnlineProviderServices(List<MovieInfoProviderService> onlineProviderServices) {
+        this.onlineProviderServices = onlineProviderServices;
+    }
+
+    /**
+     * Inject Movie File Information Provider Services
+     *
+     * @param fileProviderServices Movie File Information Provider Services
+     */
+    @SuppressWarnings("unused")
+    public void setFileProviderServices(List<MovieFileInfoProviderService> fileProviderServices) {
+        this.fileProviderServices = fileProviderServices;
     }
 }
 

@@ -11,6 +11,8 @@ public interface FileService {
     public final static String MOVIE_SCAN_TOPIC = "org/chii2/medialibrary/file/movie/SCAN";
     // Event Topic for image scanAll
     public final static String IMAGE_SCAN_TOPIC = "org/chii2/medialibrary/file/image/SCAN";
+    // File information property in the event, which should contains the scanned file list
+    public final static String FILE_PROPERTY = "files";
 
     /**
      * Scan default directories (from configuration) for movies files

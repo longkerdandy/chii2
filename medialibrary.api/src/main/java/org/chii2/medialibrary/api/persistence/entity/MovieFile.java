@@ -1,5 +1,7 @@
 package org.chii2.medialibrary.api.persistence.entity;
 
+import java.util.Date;
+
 /**
  * Represent a movie file on the disk
  */
@@ -80,14 +82,14 @@ public interface MovieFile {
      *
      * @return Year
      */
-    public String getYear();
+    public int getYear();
 
     /**
      * Set Movie Release Year (Guessed from File Name)
      *
      * @param year Movie Release Year
      */
-    public void setYear(String year);
+    public void setYear(int year);
 
     /**
      * Get Movie Source (Guessed from File Name)
@@ -102,20 +104,6 @@ public interface MovieFile {
      * @param source Movie Source
      */
     public void setSource(String source);
-
-    /**
-     * Get Movie Resolution (Guessed from File Name)
-     *
-     * @return Movie Resolution
-     */
-    public String getResolution();
-
-    /**
-     * Set Movie Resolution (Guessed from File Name)
-     *
-     * @param resolution Movie Resolution
-     */
-    public void setResolution(String resolution);
 
     /**
      * Get Movie Video Codec (Guessed from File Name)
@@ -187,4 +175,241 @@ public interface MovieFile {
      */
     public void setFileExtension(String fileExtension);
 
+    /**
+     * Get File Format
+     *
+     * @return File Format
+     */
+    public String getFormat();
+
+    /**
+     * Set File Format
+     *
+     * @param format File Format
+     */
+    public void setFormat(String format);
+
+    /**
+     * Get File Size
+     *
+     * @return File Size
+     */
+    public long getSize();
+
+    /**
+     * Set File Size
+     *
+     * @param size File Size
+     */
+    public void setSize(long size);
+
+    /**
+     * Get Duration
+     *
+     * @return Duration
+     */
+    public long getDuration();
+
+    /**
+     * Set Duration
+     *
+     * @param duration Duration
+     */
+    public void setDuration(long duration);
+
+    /**
+     * Get MIME
+     *
+     * @return MIME
+     */
+    public String getMime();
+
+    /**
+     * Set MIME
+     *
+     * @param mime MIME
+     */
+    public void setMime(String mime);
+
+    /**
+     * Get Bit Rate
+     *
+     * @return Bit Rate
+     */
+    public long getBitRate();
+
+    /**
+     * Set Bit Rate
+     *
+     * @param bitRate Bit Rate
+     */
+    public void setBitRate(long bitRate);
+
+    /**
+     * Get Video Stream Count
+     *
+     * @return Video Stream Count
+     */
+    public int getVideoStreamCount();
+
+    /**
+     * Set Video Stream Count
+     *
+     * @param videoStreamCount Video Stream Count
+     */
+    public void setVideoStreamCount(int videoStreamCount);
+
+    /**
+     * Get Modification Date
+     *
+     * @return Modification Date
+     */
+    public Date getModificationDate();
+
+    /**
+     * Set Modification Date
+     *
+     * @param modificationDate Modification Date
+     */
+    public void setModificationDate(Date modificationDate);
+
+    /**
+     * Get Video Format
+     *
+     * @return Video Format
+     */
+    public String getVideoFormat();
+
+    /**
+     * Set Video Format
+     *
+     * @param videoFormat Video Format
+     */
+    public void setVideoFormat(String videoFormat);
+
+    /**
+     * Get Video Bit Rate
+     *
+     * @return Video Bit Rate
+     */
+    public long getVideoBitRate();
+
+    /**
+     * Set Video Bit Rate
+     *
+     * @param videoBitRate Video Bit Rate
+     */
+    public void setVideoBitRate(long videoBitRate);
+
+    /**
+     * Get Video Width
+     *
+     * @return Video Width
+     */
+    public int getVideoWidth();
+
+    /**
+     * Set Video Width
+     *
+     * @param videoWidth Video Width
+     */
+    public void setVideoWidth(int videoWidth);
+
+    /**
+     * Get Video Height
+     *
+     * @return Video Height
+     */
+    public int getVideoHeight();
+
+    /**
+     * Set Video Height
+     *
+     * @param videoHeight Video Height
+     */
+    public void setVideoHeight(int videoHeight);
+
+    /**
+     * Get Audio Stream Count
+     *
+     * @return Audio Stream Count
+     */
+    public int getAudioStreamCount();
+
+    /**
+     * Set Audio Stream Count
+     *
+     * @param audioStreamCount Audio Stream Count
+     */
+    public void setAudioStreamCount(int audioStreamCount);
+
+    /**
+     * Get Audio Format
+     *
+     * @return Audio Format
+     */
+    public String getAudioFormat();
+
+    /**
+     * Set Audio Format
+     *
+     * @param audioFormat Audio Format
+     */
+    public void setAudioFormat(String audioFormat);
+
+    /**
+     * Get Audio Bit Rate
+     *
+     * @return Audio Bit Rate
+     */
+    public long getAudioBitRate();
+
+    /**
+     * Set Audio Bit Rate
+     *
+     * @param audioBitRate Audio Bit Rate
+     */
+    public void setAudioBitRate(long audioBitRate);
+
+    /**
+     * Get Audio Channel Count
+     *
+     * @return Audio Channel Count
+     */
+    public int getAudioChannelCount();
+
+    /**
+     * Set Audio Channel Count
+     *
+     * @param audioChannelCount Audio Channel Count
+     */
+    public void setAudioChannelCount(int audioChannelCount);
+
+    /**
+     * Get Audio Sampling Rate
+     *
+     * @return Audio Sampling Rate
+     */
+    public long getAudioSamplingRate();
+
+    /**
+     * Set Audio Sampling Rate
+     *
+     * @param audioSamplingRate Audio Sampling Rate
+     */
+    public void setAudioSamplingRate(long audioSamplingRate);
+
+    /**
+     * Get Audio Language
+     *
+     * @return Audio Language
+     */
+    public String getAudioLanguage();
+
+    /**
+     * Set Audio Language
+     *
+     * @param audioLanguage Audio Language
+     */
+    public void setAudioLanguage(String audioLanguage);
 }

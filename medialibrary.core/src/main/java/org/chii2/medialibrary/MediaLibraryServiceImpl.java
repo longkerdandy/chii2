@@ -55,8 +55,18 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     }
 
     @Override
-    public List<? extends Movie> getAllMovies() {
-        return persistenceService.getAllMovies();
+    public List<? extends Movie> getMovies() {
+        return persistenceService.getMovies(-1, -1, null);
+    }
+
+    @Override
+    public List<? extends Movie> getMovies(int firstResult, int maxResults) {
+        return persistenceService.getMovies(firstResult, maxResults, null);
+    }
+
+    @Override
+    public List<? extends Movie> getMovies(int firstResult, int maxResults, Map<String, String> sorts) {
+        return persistenceService.getMovies(firstResult, maxResults, sorts);
     }
 
     @Override
@@ -65,28 +75,33 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     }
 
     @Override
-    public List<? extends Movie> getAllMoviesByName(String movieName) {
-        return persistenceService.getAllMoviesByName(movieName);
+    public List<? extends Movie> getMoviesByName(String movieName) {
+        return persistenceService.getMoviesByName(movieName, -1, -1, null);
     }
 
     @Override
-    public Movie getSingleMovieByName(String movieName) {
-        return persistenceService.getSingleMovieByName(movieName);
+    public List<? extends Movie> getMoviesByName(String movieName, int firstResult, int maxResults) {
+        return persistenceService.getMoviesByName(movieName, firstResult, maxResults, null);
     }
 
     @Override
-    public List<? extends Image> getAllImages() {
-        return persistenceService.getAllImages(-1,-1, null);
+    public List<? extends Movie> getMoviesByName(String movieName, int firstResult, int maxResults, Map<String, String> sorts) {
+        return persistenceService.getMoviesByName(movieName, firstResult, maxResults, sorts);
     }
 
     @Override
-    public List<? extends Image> getAllImages(int firstResult, int maxResults) {
-        return persistenceService.getAllImages(firstResult,maxResults, null);
+    public List<? extends Image> getImages() {
+        return persistenceService.getImages(-1, -1, null);
     }
 
     @Override
-    public List<? extends Image> getAllImages(int firstResult, int maxResults, Map<String, String> sorts) {
-        return persistenceService.getAllImages(firstResult,maxResults, sorts);
+    public List<? extends Image> getImages(int firstResult, int maxResults) {
+        return persistenceService.getImages(firstResult, maxResults, null);
+    }
+
+    @Override
+    public List<? extends Image> getImages(int firstResult, int maxResults, Map<String, String> sorts) {
+        return persistenceService.getImages(firstResult, maxResults, sorts);
     }
 
     @Override
@@ -95,33 +110,33 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     }
 
     @Override
-    public List<? extends Image> getAllImagesByName(String imageName) {
-        return persistenceService.getAllImagesByName(imageName, -1 ,-1, null);
+    public List<? extends Image> getImagesByName(String imageName) {
+        return persistenceService.getImagesByName(imageName, -1, -1, null);
     }
 
     @Override
-    public List<? extends Image> getAllImagesByName(String imageName, int firstResult, int maxResults) {
-        return persistenceService.getAllImagesByName(imageName, firstResult,maxResults, null);
+    public List<? extends Image> getImagesByName(String imageName, int firstResult, int maxResults) {
+        return persistenceService.getImagesByName(imageName, firstResult, maxResults, null);
     }
 
     @Override
-    public List<? extends Image> getAllImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts) {
-        return persistenceService.getAllImagesByName(imageName, firstResult,maxResults, sorts);
+    public List<? extends Image> getImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts) {
+        return persistenceService.getImagesByName(imageName, firstResult, maxResults, sorts);
     }
 
     @Override
-    public List<String> getAllImageAlbums() {
-        return persistenceService.getAllImageAlbums(-1 ,-1, null);
+    public List<String> getImageAlbums() {
+        return persistenceService.getImageAlbums(-1, -1, null);
     }
 
     @Override
-    public List<String> getAllImageAlbums(int firstResult, int maxResults) {
-        return persistenceService.getAllImageAlbums(firstResult, maxResults, null);
+    public List<String> getImageAlbums(int firstResult, int maxResults) {
+        return persistenceService.getImageAlbums(firstResult, maxResults, null);
     }
 
     @Override
-    public List<String> getAllImageAlbums(int firstResult, int maxResults, Map<String, String> sorts) {
-        return persistenceService.getAllImageAlbums(firstResult, maxResults, sorts);
+    public List<String> getImageAlbums(int firstResult, int maxResults, Map<String, String> sorts) {
+        return persistenceService.getImageAlbums(firstResult, maxResults, sorts);
     }
 
     @Override

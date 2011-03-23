@@ -52,7 +52,12 @@
         </dependency>
         <dependency>
             <groupId>org.chii2</groupId>
-            <artifactId>chii2.medialibrary.tmdbprovider</artifactId>
+            <artifactId>chii2.medialibrary.provider.mediainfo</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.chii2</groupId>
+            <artifactId>chii2.medialibrary.provider.tmdb</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

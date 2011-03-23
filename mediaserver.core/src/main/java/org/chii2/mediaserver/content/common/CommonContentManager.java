@@ -169,9 +169,9 @@ public class CommonContentManager implements ContentManager {
         // Get image albums from Chii2 Media Library
         List<String> albums;
         try {
-            albums = mediaLibrary.getAllImageAlbums((int) startIndex, (int) maxCount, sorts);
+            albums = mediaLibrary.getImageAlbums((int) startIndex, (int) maxCount, sorts);
         } catch (IllegalArgumentException e) {
-            albums = mediaLibrary.getAllImageAlbums();
+            albums = mediaLibrary.getImageAlbums();
         }
 
         // Add to result

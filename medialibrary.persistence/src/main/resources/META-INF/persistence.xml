@@ -4,7 +4,7 @@
              version="2.0">
 
     <persistence-unit name="MediaLibraryUnit" transaction-type="JTA">
-        <description>Persistence unit for Chii2 Media Library</description>
+        <description>Persistence Unit for Chii2 Media Library</description>
         <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
         <jta-data-source>osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/chii2db)
         </jta-data-source>

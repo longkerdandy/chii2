@@ -1,5 +1,6 @@
 package org.chii2.medialibrary.file;
 
+import org.chii2.medialibrary.api.file.FileService;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -82,7 +83,7 @@ public class FileScanner implements Runnable {
      */
     private void sendEvent(List<File> files, String topic) {
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        properties.put("files", files);
+        properties.put(FileService.FILE_PROPERTY, files);
         Event event = new Event(topic, properties);
         logger.debug("Send a file scanAll event with {} records to topic {}.", files.size(), topic);
         eventAdmin.postEvent(event);

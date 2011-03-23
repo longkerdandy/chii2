@@ -11,12 +11,6 @@ import java.util.UUID;
 
 @Entity(name = "MOVIE_INFO")
 @Table(name = "MOVIE_INFO")
-@NamedQueries({
-        @NamedQuery(name = "MovieInfo.findAll",
-                query = "SELECT m FROM MOVIE_INFO m"),
-        @NamedQuery(name = "MovieInfo.findById",
-                query = "SELECT m FROM MOVIE_INFO m WHERE m.id = :id")
-})
 public class MovieInfoImpl implements MovieInfo {
 
     // ID (Primary Key) in UUID format
@@ -141,7 +135,7 @@ public class MovieInfoImpl implements MovieInfo {
     }
 
     @Override
-    public boolean isAdult() {
+    public boolean getAdult() {
         return adult;
     }
 
@@ -309,11 +303,22 @@ public class MovieInfoImpl implements MovieInfo {
     public List<? extends MovieImage> getPosters() {
         List<MovieImageImpl> posters = new ArrayList<MovieImageImpl>();
         for (MovieImageImpl image : images) {
-            if ("poster".equalsIgnoreCase(image.getType())) {
+            if (MovieImage.POSTER_CONTENT_TYPE.equalsIgnoreCase(image.getContentType())) {
                 posters.add(image);
             }
         }
         return posters;
+    }
+
+    @Override
+    public List<? extends MovieImage> getBackdrops() {
+        List<MovieImageImpl> backdrops = new ArrayList<MovieImageImpl>();
+        for (MovieImageImpl image : images) {
+            if (MovieImage.BACKDROP_CONTENT_TYPE.equalsIgnoreCase(image.getContentType())) {
+                backdrops.add(image);
+            }
+        }
+        return backdrops;
     }
 
     @Override
@@ -325,11 +330,22 @@ public class MovieInfoImpl implements MovieInfo {
     public int getPostersCount() {
         List<MovieImageImpl> posters = new ArrayList<MovieImageImpl>();
         for (MovieImageImpl image : images) {
-            if ("poster".equalsIgnoreCase(image.getType())) {
+            if (MovieImage.POSTER_CONTENT_TYPE.equalsIgnoreCase(image.getContentType())) {
                 posters.add(image);
             }
         }
         return posters.size();
+    }
+
+    @Override
+    public int getBackdropsCount() {
+        List<MovieImageImpl> backdrops = new ArrayList<MovieImageImpl>();
+        for (MovieImageImpl image : images) {
+            if (MovieImage.BACKDROP_CONTENT_TYPE.equalsIgnoreCase(image.getContentType())) {
+                backdrops.add(image);
+            }
+        }
+        return backdrops.size();
     }
 
     @Override

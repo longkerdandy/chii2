@@ -1,6 +1,7 @@
 package org.chii2.medialibrary.provider.graphicsmagick;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.medialibrary.api.persistence.entity.ImageFile;
 import org.chii2.medialibrary.api.persistence.factory.ImageFactory;
@@ -23,7 +24,7 @@ import java.util.*;
  */
 public class ImageAnalyzer implements Runnable {
 
-    // Directories to be scanned
+    // Image Files
     private List<File> files;
     // EventAdmin
     private EventAdmin eventAdmin;
@@ -170,11 +171,7 @@ public class ImageAnalyzer implements Runnable {
         } else if ("unknown".equalsIgnoreCase(result)) {
             return 0;
         } else {
-            try {
-                return Long.parseLong(result);
-            } catch (NumberFormatException e) {
-                return 0;
-            }
+            return NumberUtils.toLong(result);
         }
     }
 
@@ -191,11 +188,7 @@ public class ImageAnalyzer implements Runnable {
         } else if ("unknown".equalsIgnoreCase(result)) {
             return 0;
         } else {
-            try {
-                return Integer.parseInt(result);
-            } catch (NumberFormatException e) {
-                return 0;
-            }
+            return NumberUtils.toInt(result);
         }
     }
 

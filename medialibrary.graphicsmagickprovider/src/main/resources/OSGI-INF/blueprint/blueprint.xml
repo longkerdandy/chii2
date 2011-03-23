@@ -10,7 +10,7 @@
     <reference id="eventAdminService"
                interface="org.osgi.service.event.EventAdmin"/>
 
-    <!-- Chii2 Media Library Movie Factory -->
+    <!-- Chii2 Media Library Image Factory -->
     <reference id="imageFactoryService"
                interface="org.chii2.medialibrary.api.persistence.factory.ImageFactory"/>
 

@@ -5,6 +5,15 @@ package org.chii2.medialibrary.api.persistence.entity;
  */
 public interface MovieImage {
 
+    // Movie Image Content Type - Poster
+    public final static String POSTER_CONTENT_TYPE = "poster";
+    // Movie Image Content Type - Backdrop
+    public final static String BACKDROP_CONTENT_TYPE = "backdrop";
+    // Movie Image Type - JPEG
+    public final static String JPEG_IMAGE_TYPE = "jpeg";
+    // Movie Image Type - PNG
+    public final static String PNG_IMAGE_TYPE = "png";
+
     /**
      * Get ID
      *
@@ -20,18 +29,32 @@ public interface MovieImage {
     public void setId(String id);
 
     /**
-     * Get Image Type (Poster Backdrop)
+     * Get Content Type (Poster Backdrop)
      *
      * @return Type
      */
-    public String getType();
+    public String getContentType();
+
+    /**
+     * Set Content Type
+     *
+     * @param type Content Type
+     */
+    public void setContentType(String type);
+
+    /**
+     * Get Image Type (JPEG PNG)
+     *
+     * @return Image Type
+     */
+    public String getImageType();
 
     /**
      * Set Image Type
      *
-     * @param type Type
+     * @param imageType Image Type
      */
-    public void setType(String type);
+    public void setImageType(String imageType);
 
     /**
      * Get Image Size

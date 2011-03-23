@@ -32,7 +32,29 @@ public interface MediaLibraryService {
      *
      * @return Movie List
      */
-    public List<? extends Movie> getAllMovies();
+    public List<? extends Movie> getMovies();
+
+    /**
+     * Get all the Movies in the Media Library.
+     *
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @return Movie List
+     */
+    public List<? extends Movie> getMovies(int firstResult, int maxResults);
+
+    /**
+     * Get all the Movies in the Media Library.
+     * The Sort Field must prefix with "file." or "info."
+     * eg. "file.duration" will reference to MovieFile duration
+     * "info.language" will reference to MovieInfo language
+     *
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
+     * @return Movie List
+     */
+    public List<? extends Movie> getMovies(int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get Movie by Movie ID
@@ -48,22 +70,38 @@ public interface MediaLibraryService {
      * @param movieName Movie Name
      * @return Movie List
      */
-    public List<? extends Movie> getAllMoviesByName(String movieName);
+    public List<? extends Movie> getMoviesByName(String movieName);
 
     /**
-     * Get single movie record by movie name, usually return first result
+     * Get all possible movie records by movie name
      *
-     * @param movieName Movie name
-     * @return Movie
+     * @param movieName   Movie Name
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @return Movie List
      */
-    public Movie getSingleMovieByName(String movieName);
+    public List<? extends Movie> getMoviesByName(String movieName, int firstResult, int maxResults);
+
+    /**
+     * Get all possible movie records by movie name
+     * The Sort Field must prefix with "file." or "info."
+     * eg. "file.duration" will reference to MovieFile duration
+     * "info.language" will reference to MovieInfo language
+     *
+     * @param movieName   Movie Name
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
+     * @return Movie List
+     */
+    public List<? extends Movie> getMoviesByName(String movieName, int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get all the Images
      *
      * @return Image List
      */
-    public List<? extends Image> getAllImages();
+    public List<? extends Image> getImages();
 
     /**
      * Get all the Images
@@ -72,7 +110,7 @@ public interface MediaLibraryService {
      * @param maxResults  Max Result
      * @return Image List
      */
-    public List<? extends Image> getAllImages(int firstResult, int maxResults);
+    public List<? extends Image> getImages(int firstResult, int maxResults);
 
     /**
      * Get all the Images
@@ -82,7 +120,7 @@ public interface MediaLibraryService {
      * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
      * @return Image List
      */
-    public List<? extends Image> getAllImages(int firstResult, int maxResults, Map<String, String> sorts);
+    public List<? extends Image> getImages(int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get Image by Image ID
@@ -98,7 +136,7 @@ public interface MediaLibraryService {
      * @param imageName Image Name
      * @return Image List
      */
-    public List<? extends Image> getAllImagesByName(String imageName);
+    public List<? extends Image> getImagesByName(String imageName);
 
     /**
      * Get image records by image name
@@ -108,7 +146,7 @@ public interface MediaLibraryService {
      * @param imageName   Image Name
      * @return Image List
      */
-    public List<? extends Image> getAllImagesByName(String imageName, int firstResult, int maxResults);
+    public List<? extends Image> getImagesByName(String imageName, int firstResult, int maxResults);
 
     /**
      * Get image records by image name
@@ -119,14 +157,14 @@ public interface MediaLibraryService {
      * @param imageName   Image Name
      * @return Image List
      */
-    public List<? extends Image> getAllImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts);
+    public List<? extends Image> getImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get all image albums
      *
      * @return Image Albums
      */
-    public List<String> getAllImageAlbums();
+    public List<String> getImageAlbums();
 
     /**
      * Get image albums from index with max limit
@@ -135,7 +173,7 @@ public interface MediaLibraryService {
      * @param maxResults  Max Result
      * @return Image Albums
      */
-    public List<String> getAllImageAlbums(int firstResult, int maxResults);
+    public List<String> getImageAlbums(int firstResult, int maxResults);
 
     /**
      * Get image albums from index with max limit
@@ -145,7 +183,7 @@ public interface MediaLibraryService {
      * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
      * @return Image Albums
      */
-    public List<String> getAllImageAlbums(int firstResult, int maxResults, Map<String, String> sorts);
+    public List<String> getImageAlbums(int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get the count of total image albums

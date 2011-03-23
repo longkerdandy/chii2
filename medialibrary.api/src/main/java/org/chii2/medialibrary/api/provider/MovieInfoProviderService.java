@@ -13,12 +13,6 @@ public interface MovieInfoProviderService {
     public final static String MOVIE_INFO_FAILED_TOPIC = "org/chii2/medialibrary/provider/movie/INFO_FAILED";
     // Movie ID property key in the movie info provided events
     public final static String MOVIE_ID_PROPERTY = "movie_id";
-    // Movie Name property key in the movie info provided events
-    public final static String MOVIE_NAME_PROPERTY = "movie_name";
-    // Movie Year property key in the movie info provided events
-    public final static String MOVIE_YEAR_PROPERTY = "movie_year";
-    // Exclude providers property key in the movie info provided events
-    public final static String EXCLUDE_PROVIDERS_PROPERTY = "exclude_providers";
     // Movie information property key in the movie info provided events
     public final static String MOVIE_INFO_PROPERTY = "movie_info";
 
@@ -42,9 +36,11 @@ public interface MovieInfoProviderService {
      *
      * @param movieId          Movie Id
      * @param movieName        Movie Name (Guessed Name)
-     * @param excludeProviders Exclude Movie Providers (Which may already failed)
+     * @param resultCount      Max result count
+     * @param posterCount      Result poster count
+     * @param backdropCount    Result backdrop count
      */
-    public void getMovieInformationByName(String movieId, String movieName, List<String> excludeProviders);
+    public void getMovieInformationByName(String movieId, String movieName, int resultCount, int posterCount, int backdropCount);
 
     /**
      * Get movie information by movie name and use year to narrow result. This usually done by searching the movie name and fetch the first result.
@@ -53,30 +49,11 @@ public interface MovieInfoProviderService {
      * @param movieId          Movie Id
      * @param movieName        Movie Name (Guessed Name)
      * @param movieYear        Movie Year (Guessed Year)
-     * @param excludeProviders Exclude Movie Providers (Which may already failed)
+     * @param resultCount      Max result count
+     * @param posterCount      Result poster count
+     * @param backdropCount    Result backdrop count
      */
-    public void getMovieInformationByName(String movieId, String movieName, String movieYear, List<String> excludeProviders);
-
-    /**
-     * Get movie information by movie name. This usually done by searching the movie name and fetch all possible results.
-     * This should be done in a asynchronous way
-     *
-     * @param movieId          Movie Id
-     * @param movieName        Movie Name (Guessed Name)
-     * @param excludeProviders Exclude Movie Providers (Which may already failed)
-     */
-    public void getAllMovieInformationByName(String movieId, String movieName, List<String> excludeProviders);
-
-    /**
-     * Get movie information by movie name and use year to narrow result. This usually done by searching the movie name and fetch all possible results.
-     * This should be done in a asynchronous way
-     *
-     * @param movieId          Movie Id
-     * @param movieName        Movie Name (Guessed Name)
-     * @param movieYear        Movie Year (Guessed Year)
-     * @param excludeProviders Exclude Movie Providers (Which may already failed)
-     */
-    public void getAllMovieInformationByName(String movieId, String movieName, String movieYear, List<String> excludeProviders);
+    public void getMovieInformationByName(String movieId, String movieName, int movieYear, int resultCount, int posterCount, int backdropCount);
 
     /**
      * Get Movie Image from image url.

@@ -11,11 +11,14 @@ import java.util.Map;
 public interface PersistenceService {
 
     /**
-     * Get all the movie records from database
+     * Get movie records from database
      *
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
      * @return List of movie records
      */
-    public List<? extends Movie> getAllMovies();
+    public List<? extends Movie> getMovies(int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get Movie by Movie ID
@@ -27,19 +30,50 @@ public interface PersistenceService {
 
     /**
      * Get all possible movie records by movie name
+     * The Sort Field must prefix with "file." or "info."
+     * eg. "file.duration" will reference to MovieFile duration
+     * "info.language" will reference to MovieInfo language
      *
-     * @param movieName Movie Name
+     * @param movieName   Movie Name
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
      * @return Movie List
      */
-    public List<? extends Movie> getAllMoviesByName(String movieName);
+    public List<? extends Movie> getMoviesByName(String movieName, int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
-     * Get single movie record by movie name, usually return first result
+     * Get possible movie contains specific file (with file id)
+     * This is likely to return only one record, which means returned Movie contains the Movie File
      *
-     * @param movieName Movie name
+     * @param fileId Movie File ID
      * @return Movie
      */
-    public Movie getSingleMovieByName(String movieName);
+    public Movie getMoviesContainFile(String fileId);
+
+    /**
+     * Get possible movie contains specific file absolute name and file movie name
+     * Movie Files with the same parent directory and file movie name are likely to group into a single Movie, and only different in disk numbers
+     * This is likely to return only one record, which means returned Movie should contains the Movie File
+     *
+     * @param absolutePath  Movie File's Absolute Path (Parent Directory)
+     * @param fileMovieName Movie File's Movie Name
+     * @return Movie
+     */
+    public Movie getMoviesContainFile(String absolutePath, String fileMovieName);
+
+    /**
+     * Get Movie Files from database
+     * The Sort Field must prefix with "file." or "info."
+     * eg. "file.duration" will reference to MovieFile duration
+     * "info.language" will reference to MovieInfo language
+     *
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
+     * @return List of Movie Files
+     */
+    public List<? extends MovieFile> getMovieFiles(int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get movie file by id
@@ -48,6 +82,15 @@ public interface PersistenceService {
      * @return Movie file
      */
     public MovieFile getMovieFileById(String id);
+
+    /**
+     * Get movie file by file's absolute name
+     * Because file's absolute path is likely to be unique, this return a single result
+     *
+     * @param absoluteName file's absolute name
+     * @return Movie File
+     */
+    public MovieFile getMovieFileByAbsoluteName(String absoluteName);
 
     /**
      * Get movie Information by id
@@ -73,7 +116,7 @@ public interface PersistenceService {
      * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
      * @return Image List
      */
-    public List<? extends Image> getAllImages(int firstResult, int maxResults, Map<String, String> sorts);
+    public List<? extends Image> getImages(int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get Image by Image ID
@@ -92,7 +135,7 @@ public interface PersistenceService {
      * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
      * @return Image List
      */
-    public List<? extends Image> getAllImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts);
+    public List<? extends Image> getImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get image albums from index with max limit
@@ -102,7 +145,7 @@ public interface PersistenceService {
      * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
      * @return Image Albums
      */
-    public List<String> getAllImageAlbums(int firstResult, int maxResults, Map<String, String> sorts);
+    public List<String> getImageAlbums(int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get the count of total image albums

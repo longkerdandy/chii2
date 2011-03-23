@@ -22,8 +22,12 @@
     <reference id="fileManager"
                interface="org.chii2.medialibrary.api.file.FileService"/>
 
-    <!-- Chii2 Media Library Movie Information Provider Service -->
-    <reference-list id="movieProviderManager"
+    <!-- Chii2 Media Library Movie File Information Provider Service -->
+    <reference-list id="fileInfoProviderManager"
+                    interface="org.chii2.medialibrary.api.provider.MovieFileInfoProviderService"/>
+
+    <!-- Chii2 Media Library Movie Online Information Provider Service -->
+    <reference-list id="movieInfoProviderManager"
                     interface="org.chii2.medialibrary.api.provider.MovieInfoProviderService"/>
 
     <!-- Chii2 Media Library Image Information Provider Service -->
@@ -46,7 +50,8 @@
         <property name="eventAdmin" ref="eventAdminService"/>
         <property name="persistenceService" ref="persistenceManager"/>
         <property name="movieFactory" ref="movieFactoryManager"/>
-        <property name="providerServices" ref="movieProviderManager"/>
+        <property name="onlineProviderServices" ref="movieInfoProviderManager"/>
+        <property name="fileProviderServices" ref="fileInfoProviderManager"/>
     </bean>
 
     <!-- Chii2 Media Library Image Event Handler Bean -->
@@ -70,6 +75,8 @@
             <entry key="event.topics">
                 <list>
                     <value>org/chii2/medialibrary/file/movie/SCAN</value>
+                    <value>org/chii2/medialibrary/provider/movie/FILE_INFO_PROVIDED</value>
+                    <value>org/chii2/medialibrary/provider/movie/FILE_INFO_FAILED</value>
                     <value>org/chii2/medialibrary/provider/movie/INFO_PROVIDED</value>
                     <value>org/chii2/medialibrary/provider/movie/INFO_FAILED</value>
                     <value>org/chii2/medialibrary/provider/movie/IMAGE_PROVIDED</value>

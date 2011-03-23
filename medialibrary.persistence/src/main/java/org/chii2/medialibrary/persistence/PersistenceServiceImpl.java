@@ -21,6 +21,8 @@ public class PersistenceServiceImpl implements PersistenceService {
 
     // Entity Manager
     private EntityManager entityManager;
+    // CriteriaBuilder
+    private CriteriaBuilder builder;
     // Logger
     private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.persistence");
 
@@ -30,6 +32,8 @@ public class PersistenceServiceImpl implements PersistenceService {
     @SuppressWarnings("unused")
     public void init() {
         logger.debug("Chii2 Media Library PersistenceService init.");
+        // init builder
+        builder = entityManager.getCriteriaBuilder();
     }
 
     /**
@@ -41,75 +45,271 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
-    public List<MovieImpl> getAllMovies() {
-        // Get the current movie files list from database
-        return entityManager.createNamedQuery("Movie.findAll", MovieImpl.class).getResultList();
+    public List<MovieImpl> getMovies(int firstResult, int maxResults, Map<String, String> sorts) {
+        // From Query
+        CriteriaQuery<MovieImpl> fromQuery = builder.createQuery(MovieImpl.class);
+        Root<MovieImpl> movies = fromQuery.from(MovieImpl.class);
+        // Select Query
+        CriteriaQuery<MovieImpl> selectQuery = fromQuery.select(movies);
+        // Order
+        if (sorts != null) {
+            List<Order> orders = new ArrayList<Order>();
+            for (Map.Entry<String, String> entry : sorts.entrySet()) {
+                String field = entry.getKey();
+                String sortType = entry.getValue();
+                if (field != null && sortType != null) {
+                    if (field.startsWith("file.")) {
+                        if (sortType.equalsIgnoreCase("asc")) {
+                            orders.add(builder.asc(movies.join("files").get(field.substring(5))));
+                        } else if (sortType.equalsIgnoreCase("desc")) {
+                            orders.add(builder.desc(movies.join("files").get(field.substring(5))));
+                        }
+                    } else if (field.startsWith("info.")) {
+                        if (sortType.equalsIgnoreCase("asc")) {
+                            orders.add(builder.asc(movies.join("information").get(field.substring(5))));
+                        } else if (sortType.equalsIgnoreCase("desc")) {
+                            orders.add(builder.desc(movies.join("information").get(field.substring(5))));
+                        }
+                    }
+                }
+            }
+            selectQuery.orderBy(orders);
+        }
+        // Final Query
+        TypedQuery<MovieImpl> typedQuery = entityManager.createQuery(selectQuery);
+        // First Result
+        if (firstResult >= 0) {
+            typedQuery.setFirstResult(firstResult);
+        }
+        // Max Results
+        if (maxResults >= 0) {
+            typedQuery.setMaxResults(maxResults);
+        }
+        return typedQuery.getResultList();
     }
 
     @Override
     public Movie getMovieById(String id) {
-        // Get movie by id, should be a only one result
+        // From Query
+        CriteriaQuery<MovieImpl> fromQuery = builder.createQuery(MovieImpl.class);
+        Root<MovieImpl> movies = fromQuery.from(MovieImpl.class);
+        // Select Query
+        CriteriaQuery<MovieImpl> selectQuery = fromQuery.select(movies);
+        // Where Query
+        selectQuery.where(builder.equal(movies.get("id"), id));
+        // Final Query
+        TypedQuery<MovieImpl> typedQuery = entityManager.createQuery(selectQuery);
         try {
-            return entityManager.createNamedQuery("Movie.findById", MovieImpl.class).setParameter("id", id).getSingleResult();
+            return typedQuery.getSingleResult();
         } catch (NoResultException e) {
-            logger.debug("Try to get movie <{}> but not exist.", id);
+            logger.debug("Try to get movie file <{}> but not exist.", id);
             return null;
         }
     }
 
     @Override
-    public List<? extends Movie> getAllMoviesByName(String movieName) {
-        // Get movie by name, return all possible movies
-        return entityManager.createNamedQuery("Movie.findByName", MovieImpl.class).setParameter("name", "%" + movieName.toLowerCase() + "%").getResultList();
+    public List<? extends Movie> getMoviesByName(String movieName, int firstResult, int maxResults, Map<String, String> sorts) {
+        // From Query
+        CriteriaQuery<MovieImpl> fromQuery = builder.createQuery(MovieImpl.class);
+        Root<MovieImpl> movies = fromQuery.from(MovieImpl.class);
+        Path<String> infoMovieNameFiled = movies.join("information").get("name");
+        Path<String> fileMovieNameFiled = movies.join("files").get("movieName");
+        // Select Query
+        CriteriaQuery<MovieImpl> selectQuery = fromQuery.select(movies);
+        // Where Query
+        selectQuery.where(builder.or(builder.like(builder.lower(infoMovieNameFiled), "%" + movieName.toLowerCase() + "%"), builder.like(builder.lower(fileMovieNameFiled), "%" + movieName.toLowerCase() + "%")));
+        // Order
+        if (sorts != null) {
+            List<Order> orders = new ArrayList<Order>();
+            for (Map.Entry<String, String> entry : sorts.entrySet()) {
+                String field = entry.getKey();
+                String sortType = entry.getValue();
+                if (field != null && sortType != null) {
+                    if (field.startsWith("file.")) {
+                        if (sortType.equalsIgnoreCase("asc")) {
+                            orders.add(builder.asc(movies.join("files").get(field.substring(5))));
+                        } else if (sortType.equalsIgnoreCase("desc")) {
+                            orders.add(builder.desc(movies.join("files").get(field.substring(5))));
+                        }
+                    } else if (field.startsWith("info.")) {
+                        if (sortType.equalsIgnoreCase("asc")) {
+                            orders.add(builder.asc(movies.join("information").get(field.substring(5))));
+                        } else if (sortType.equalsIgnoreCase("desc")) {
+                            orders.add(builder.desc(movies.join("information").get(field.substring(5))));
+                        }
+                    }
+                }
+            }
+            selectQuery.orderBy(orders);
+        }
+        // Final Query
+        TypedQuery<MovieImpl> typedQuery = entityManager.createQuery(selectQuery);
+        // First Result
+        if (firstResult >= 0) {
+            typedQuery = typedQuery.setFirstResult(firstResult);
+        }
+        // Max Results
+        if (maxResults >= 0) {
+            typedQuery = typedQuery.setMaxResults(maxResults);
+        }
+        return typedQuery.getResultList();
     }
 
     @Override
-    public Movie getSingleMovieByName(String movieName) {
-        // Get movie by name, return single result
+    public Movie getMoviesContainFile(String fileId) {
+        // From Query
+        CriteriaQuery<MovieImpl> fromQuery = builder.createQuery(MovieImpl.class);
+        Root<MovieImpl> movies = fromQuery.from(MovieImpl.class);
+        Path<String> fileIdFiled = movies.join("files").get("id");
+        // Select Query
+        CriteriaQuery<MovieImpl> selectQuery = fromQuery.select(movies);
+        // Where Query
+        selectQuery.where(builder.equal(fileIdFiled, fileId));
+        // Final Query
+        TypedQuery<MovieImpl> typedQuery = entityManager.createQuery(selectQuery);
         try {
-            return entityManager.createNamedQuery("Movie.findByName", MovieImpl.class).setParameter("name", "%" + movieName.toLowerCase() + "%").getSingleResult();
+            return typedQuery.getSingleResult();
         } catch (NoResultException e) {
-            logger.debug("Try to get movie with name <{}> but not exist.", movieName);
+            logger.debug("Try to get movie contains file <{}> but not exist.", fileId);
             return null;
         }
+    }
+
+    @Override
+    public Movie getMoviesContainFile(String absolutePath, String fileMovieName) {
+        // From Query
+        CriteriaQuery<MovieImpl> fromQuery = builder.createQuery(MovieImpl.class);
+        Root<MovieImpl> movies = fromQuery.from(MovieImpl.class);
+        Path<String> filePathFiled = movies.join("files").get("filePath");
+        Path<String> movieNameFiled = movies.join("files").get("movieName");
+        // Select Query
+        CriteriaQuery<MovieImpl> selectQuery = fromQuery.select(movies);
+        // Where Query
+        selectQuery.where(builder.and(builder.equal(filePathFiled, absolutePath), builder.equal(movieNameFiled, fileMovieName)));
+        // Final Query
+        TypedQuery<MovieImpl> typedQuery = entityManager.createQuery(selectQuery);
+        try {
+            return typedQuery.getSingleResult();
+        } catch (NoResultException e) {
+            logger.debug("Try to get movie contains file with absolute name <{}> and movie name <{}> but not exist.", absolutePath, fileMovieName);
+            return null;
+        }
+    }
+
+    @Override
+    public List<? extends MovieFile> getMovieFiles(int firstResult, int maxResults, Map<String, String> sorts) {
+        // From Query
+        CriteriaQuery<MovieFileImpl> fromQuery = builder.createQuery(MovieFileImpl.class);
+        Root<MovieFileImpl> movieFies = fromQuery.from(MovieFileImpl.class);
+        // Select Query
+        CriteriaQuery<MovieFileImpl> selectQuery = fromQuery.select(movieFies);
+        // Order
+        if (sorts != null) {
+            List<Order> orders = new ArrayList<Order>();
+            for (Map.Entry<String, String> entry : sorts.entrySet()) {
+                String field = entry.getKey();
+                String sortType = entry.getValue();
+                if (field != null && sortType != null) {
+                    if (sortType.equalsIgnoreCase("asc")) {
+                        orders.add(builder.asc(movieFies.get(field)));
+                    } else if (sortType.equalsIgnoreCase("desc")) {
+                        orders.add(builder.desc(movieFies.get(field)));
+                    }
+                }
+            }
+            selectQuery.orderBy(orders);
+        }
+        // Final Query
+        TypedQuery<MovieFileImpl> typedQuery = entityManager.createQuery(selectQuery);
+        // First Result
+        if (firstResult >= 0) {
+            typedQuery = typedQuery.setFirstResult(firstResult);
+        }
+        // Max Results
+        if (maxResults >= 0) {
+            typedQuery = typedQuery.setMaxResults(maxResults);
+        }
+        return typedQuery.getResultList();
     }
 
     @Override
     public MovieFile getMovieFileById(String id) {
-        // Get movie by id, should be a only one result
+        // From Query
+        CriteriaQuery<MovieFileImpl> fromQuery = builder.createQuery(MovieFileImpl.class);
+        Root<MovieFileImpl> movieFiles = fromQuery.from(MovieFileImpl.class);
+        // Select Query
+        CriteriaQuery<MovieFileImpl> selectQuery = fromQuery.select(movieFiles);
+        // Where Query
+        selectQuery.where(builder.equal(movieFiles.get("id"), id));
+        // Final Query
+        TypedQuery<MovieFileImpl> typedQuery = entityManager.createQuery(selectQuery);
         try {
-            return entityManager.createNamedQuery("MovieFile.findById", MovieFileImpl.class).setParameter("id", id).getSingleResult();
+            return typedQuery.getSingleResult();
         } catch (NoResultException e) {
-            logger.debug("Try to get movie <{}> but not exist.", id);
+            logger.debug("Try to get movie file <{}> but not exist.", id);
+            return null;
+        }
+    }
+
+    @Override
+    public MovieFile getMovieFileByAbsoluteName(String absoluteName) {
+        // From Query
+        CriteriaQuery<MovieFileImpl> fromQuery = builder.createQuery(MovieFileImpl.class);
+        Root<MovieFileImpl> movieFiles = fromQuery.from(MovieFileImpl.class);
+        // Select Query
+        CriteriaQuery<MovieFileImpl> selectQuery = fromQuery.select(movieFiles);
+        // Where Query
+        selectQuery.where(builder.equal(movieFiles.get("absoluteName"), absoluteName));
+        // Final Query
+        TypedQuery<MovieFileImpl> typedQuery = entityManager.createQuery(selectQuery);
+        try {
+            return typedQuery.getSingleResult();
+        } catch (NoResultException e) {
+            logger.debug("Try to get movie file <{}> but not exist.", absoluteName);
             return null;
         }
     }
 
     @Override
     public MovieInfo getMovieInfoById(String id) {
-        // Get movie by id, should be a only one result
+        // From Query
+        CriteriaQuery<MovieInfoImpl> fromQuery = builder.createQuery(MovieInfoImpl.class);
+        Root<MovieInfoImpl> movieInfo = fromQuery.from(MovieInfoImpl.class);
+        // Select Query
+        CriteriaQuery<MovieInfoImpl> selectQuery = fromQuery.select(movieInfo);
+        // Where Query
+        selectQuery.where(builder.equal(movieInfo.get("id"), id));
+        // Final Query
+        TypedQuery<MovieInfoImpl> typedQuery = entityManager.createQuery(selectQuery);
         try {
-            return entityManager.createNamedQuery("MovieInfo.findById", MovieInfoImpl.class).setParameter("id", id).getSingleResult();
+            return typedQuery.getSingleResult();
         } catch (NoResultException e) {
-            logger.debug("Try to get movie <{}> but not exist.", id);
+            logger.debug("Try to get movie info <{}> but not exist.", id);
             return null;
         }
     }
 
     @Override
-    public MovieImage getMovieImageById(String imageId) {
-        // Get movie image by id, should be a only one result
+    public MovieImage getMovieImageById(String id) {
+        // From Query
+        CriteriaQuery<MovieImageImpl> fromQuery = builder.createQuery(MovieImageImpl.class);
+        Root<MovieImageImpl> movieImages = fromQuery.from(MovieImageImpl.class);
+        // Select Query
+        CriteriaQuery<MovieImageImpl> selectQuery = fromQuery.select(movieImages);
+        // Where Query
+        selectQuery.where(builder.equal(movieImages.get("id"), id));
+        // Final Query
+        TypedQuery<MovieImageImpl> typedQuery = entityManager.createQuery(selectQuery);
         try {
-            return entityManager.createNamedQuery("MovieImage.findById", MovieImageImpl.class).setParameter("id", imageId).getSingleResult();
+            return typedQuery.getSingleResult();
         } catch (NoResultException e) {
-            logger.debug("Try to get movie image <{}> but not exist.", imageId);
+            logger.debug("Try to get movie image <{}> but not exist.", id);
             return null;
         }
     }
 
     @Override
-    public List<? extends Image> getAllImages(int firstResult, int maxResults, Map<String, String> sorts) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    public List<? extends Image> getImages(int firstResult, int maxResults, Map<String, String> sorts) {
         // From Query
         CriteriaQuery<ImageImpl> fromQuery = builder.createQuery(ImageImpl.class);
         Root<ImageImpl> images = fromQuery.from(ImageImpl.class);
@@ -131,16 +331,19 @@ public class PersistenceServiceImpl implements PersistenceService {
         }
         // Final Query
         TypedQuery<ImageImpl> typedQuery = entityManager.createQuery(selectQuery);
-        if (firstResult >= 0 && maxResults >= 0) {
-            return typedQuery.setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
-        } else {
-            return typedQuery.getResultList();
+        // First Result
+        if (firstResult >= 0) {
+            typedQuery = typedQuery.setFirstResult(firstResult);
         }
+        // Max Results
+        if (maxResults >= 0) {
+            typedQuery = typedQuery.setMaxResults(maxResults);
+        }
+        return typedQuery.getResultList();
     }
 
     @Override
     public Image getImageById(String id) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         // From Query
         CriteriaQuery<ImageImpl> fromQuery = builder.createQuery(ImageImpl.class);
         Root<ImageImpl> images = fromQuery.from(ImageImpl.class);
@@ -159,12 +362,11 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
-    public List<? extends Image> getAllImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    public List<? extends Image> getImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts) {
         // From Query
         CriteriaQuery<ImageImpl> fromQuery = builder.createQuery(ImageImpl.class);
         Root<ImageImpl> images = fromQuery.from(ImageImpl.class);
-        Path<String> name = images.join("file").get("name");
+        Path<String> name = images.join("file").get("fileName");
         // Select Query
         CriteriaQuery<ImageImpl> selectQuery = fromQuery.select(images);
         // Where Query
@@ -185,11 +387,15 @@ public class PersistenceServiceImpl implements PersistenceService {
         }
         // Final Query
         TypedQuery<ImageImpl> typedQuery = entityManager.createQuery(selectQuery);
-        if (firstResult >= 0 && maxResults >= 0) {
-            return typedQuery.setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
-        } else {
-            return typedQuery.getResultList();
+        // First Result
+        if (firstResult >= 0) {
+            typedQuery = typedQuery.setFirstResult(firstResult);
         }
+        // Max Results
+        if (maxResults >= 0) {
+            typedQuery = typedQuery.setMaxResults(maxResults);
+        }
+        return typedQuery.getResultList();
     }
 
     @Override
@@ -200,7 +406,6 @@ public class PersistenceServiceImpl implements PersistenceService {
 
     @Override
     public ImageFile getImageFileById(String id) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         // From Query
         CriteriaQuery<ImageFileImpl> fromQuery = builder.createQuery(ImageFileImpl.class);
         Root<ImageFileImpl> imageFiles = fromQuery.from(ImageFileImpl.class);
@@ -219,8 +424,7 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
-    public List<String> getAllImageAlbums(int firstResult, int maxResults, Map<String, String> sorts) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    public List<String> getImageAlbums(int firstResult, int maxResults, Map<String, String> sorts) {
         // From Query
         CriteriaQuery<String> fromQuery = builder.createQuery(String.class);
         Root<ImageFileImpl> imageFiles = fromQuery.from(ImageFileImpl.class);
@@ -242,16 +446,19 @@ public class PersistenceServiceImpl implements PersistenceService {
         }
         // Final Query
         TypedQuery<String> typedQuery = entityManager.createQuery(selectQuery);
-        if (firstResult >= 0 && maxResults >= 0) {
-            return typedQuery.setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
-        } else {
-            return typedQuery.getResultList();
+        // First Result
+        if (firstResult >= 0) {
+            typedQuery = typedQuery.setFirstResult(firstResult);
         }
+        // Max Results
+        if (maxResults >= 0) {
+            typedQuery = typedQuery.setMaxResults(maxResults);
+        }
+        return typedQuery.getResultList();
     }
 
     @Override
     public long getImageAlbumsCount() {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         // From Query
         CriteriaQuery<Long> fromQuery = builder.createQuery(Long.class);
         Root<ImageFileImpl> imageFiles = fromQuery.from(ImageFileImpl.class);
@@ -264,7 +471,6 @@ public class PersistenceServiceImpl implements PersistenceService {
 
     @Override
     public List<? extends Image> getImagesByAlbum(String album, int firstResult, int maxResults, Map<String, String> sorts) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         // From Query
         CriteriaQuery<ImageImpl> fromQuery = builder.createQuery(ImageImpl.class);
         Root<ImageImpl> images = fromQuery.from(ImageImpl.class);
@@ -289,16 +495,19 @@ public class PersistenceServiceImpl implements PersistenceService {
         }
         // Final Query
         TypedQuery<ImageImpl> typedQuery = entityManager.createQuery(selectQuery);
-        if (firstResult >= 0 && maxResults >= 0) {
-            return typedQuery.setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
-        } else {
-            return typedQuery.getResultList();
+        // First Result
+        if (firstResult >= 0) {
+            typedQuery = typedQuery.setFirstResult(firstResult);
         }
+        // Max Results
+        if (maxResults >= 0) {
+            typedQuery = typedQuery.setMaxResults(maxResults);
+        }
+        return typedQuery.getResultList();
     }
 
     @Override
     public long getImagesCountByAlbum(String album) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         // From Query
         CriteriaQuery<Long> fromQuery = builder.createQuery(Long.class);
         Root<ImageImpl> images = fromQuery.from(ImageImpl.class);

@@ -55,7 +55,7 @@ public interface MovieInfo {
      *
      * @return True if is Adult
      */
-    public boolean isAdult();
+    public boolean getAdult();
 
     /**
      * Set whether is Adult
@@ -289,6 +289,13 @@ public interface MovieInfo {
     public List<? extends MovieImage> getPosters();
 
     /**
+     * Get Movie Backdrops
+     *
+     * @return Movie Backdrops
+     */
+    public List<? extends MovieImage> getBackdrops();
+
+    /**
      * Get Movie Images Count
      *
      * @return Count of Images
@@ -301,6 +308,13 @@ public interface MovieInfo {
      * @return Count of Posters
      */
     public int getPostersCount();
+
+    /**
+     * Get Movie Backdrops Count
+     *
+     * @return Count of Backdrops
+     */
+    public int getBackdropsCount();
 
     /**
      * Add a Movie Image

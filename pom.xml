@@ -11,21 +11,25 @@
     <name>Chii2</name>
 
     <modules>
+        <module>assembly</module>
         <module>medialibrary.api</module>
         <module>medialibrary.core</module>
         <module>medialibrary.datasource</module>
         <module>medialibrary.persistence</module>
         <module>medialibrary.file</module>
-        <module>medialibrary.tmdbprovider</module>
-        <module>utility</module>
-        <module>assembly</module>
+        <module>medialibrary.provider.mediainfo</module>
+        <module>medialibrary.provider.tmdb</module>
         <module>medialibrary.shell</module>
+        <module>medialibrary.graphicsmagickprovider</module>
+
         <module>mediaserver.api</module>
         <module>mediaserver.core</module>
-        <module>medialibrary.graphicsmagickprovider</module>
         <module>mediaserver.http</module>
+
         <module>transcoder.api</module>
         <module>transcoder.core</module>
+
+        <module>utility</module>
     </modules>
 
     <repositories>
@@ -80,7 +84,12 @@
             </dependency>
             <dependency>
                 <groupId>org.chii2</groupId>
-                <artifactId>chii2.medialibrary.tmdbprovider</artifactId>
+                <artifactId>chii2.medialibrary.provider.mediainfo</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.chii2</groupId>
+                <artifactId>chii2.medialibrary.provider.tmdb</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
@@ -225,6 +234,18 @@
                 <version>1.6.1</version>
             </dependency>
 
+            <!-- Json -->
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-core-asl</artifactId>
+                <version>1.7.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-mapper-asl</artifactId>
+                <version>1.7.4</version>
+            </dependency>
+
             <!-- Yaml -->
             <dependency>
                 <groupId>org.yaml</groupId>
@@ -234,9 +255,9 @@
 
             <!-- Network: NIO -->
             <dependency>
-                <groupId>org.jboss.netty</groupId>
-                <artifactId>netty</artifactId>
-                <version>3.2.3.Final</version>
+                <groupId>com.ning</groupId>
+                <artifactId>async-http-client</artifactId>
+                <version>1.6.1</version>
             </dependency>
 
             <!-- Cling UPnP Library -->
@@ -261,6 +282,24 @@
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>5.14.9</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>1.8.5</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>0.9.26</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>0.9.26</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
