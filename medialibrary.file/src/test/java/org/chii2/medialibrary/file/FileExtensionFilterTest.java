@@ -3,6 +3,8 @@ package org.chii2.medialibrary.file;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.chii2.medialibrary.file.consumer.FileExtensionFilter;
 import org.testng.annotations.Test;
 
 /**

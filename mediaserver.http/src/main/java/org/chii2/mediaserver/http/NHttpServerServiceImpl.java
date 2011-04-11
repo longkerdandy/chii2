@@ -1,14 +1,17 @@
 package org.chii2.mediaserver.http;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.*;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
 import org.apache.http.impl.nio.reactor.DefaultListeningIOReactor;
 import org.apache.http.nio.NHttpConnection;
+import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.nio.entity.NFileEntity;
+import org.apache.http.nio.protocol.BufferingHttpServiceHandler;
 import org.apache.http.nio.protocol.EventListener;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.nio.reactor.IOReactorException;
@@ -18,19 +21,19 @@ import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.SyncBasicHttpParams;
 import org.apache.http.protocol.*;
-import org.apache.http.nio.protocol.BufferingHttpServiceHandler;
-import org.apache.http.util.EncodingUtils;
 import org.apache.http.util.EntityUtils;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.medialibrary.api.persistence.entity.Image;
+import org.chii2.medialibrary.api.persistence.entity.Movie;
+import org.chii2.mediaserver.api.dlna.DLNAProfile;
 import org.chii2.mediaserver.api.http.HttpServerService;
+import org.chii2.mediaserver.api.http.HttpUrl;
 import org.chii2.transcoder.api.core.TranscoderService;
 import org.chii2.util.ConfigUtils;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.rmi.server.UnicastRef;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +42,7 @@ import java.net.*;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * NIO HTTP Server for UPnP/DLNA Media Server
@@ -158,29 +162,8 @@ public class NHttpServerServiceImpl implements HttpServerService {
     }
 
     @Override
-    public String forgeImageUrl(String profile, String imageId) {
-        String url = "http://" + getHost().getHostAddress() + ":" + getPort() + "/" + profile + "/image/" + imageId;
-        logger.info("Forge image url: <{}>.", url);
-        return url;
-    }
-
-    @Override
-    public URI forgeMovieUrl(String profile, String movieId) {
-        URI uri = null;
-        try {
-            // XBox doesn't recognize query path like "?hl=en&q=XX", it will cut it off
-            if (TranscoderService.PROFILE_XBOX.equalsIgnoreCase(profile)) {
-                uri = new URI("http://" + getHost().getHostAddress() + ":" + getPort() + "/" + profile + "/movie/" + movieId);
-            }
-            // TODO: Currently we're doing the same thing as XBox, this may need changed to a more common way with query path
-            else {
-                uri = new URI("http://" + getHost().getHostAddress() + ":" + getPort() + "/" + profile + "/movie/" + movieId);
-            }
-        } catch (URISyntaxException ignore) {
-            // This should not happens since we create the url ourselves.
-        }
-        logger.info("Forge movie url for {}: <{}>.", profile, uri.toString());
-        return uri;
+    public URI forgeUrl(String clientProfile, String mediaType, boolean transcoded, int seriesNumber, DLNAProfile.Profile dlnaProfile, String mediaId) {
+        return HttpUrl.forgeURL(getHost().getHostAddress(), getPort(), clientProfile, mediaType, transcoded, seriesNumber, dlnaProfile, mediaId);
     }
 
     /**
@@ -269,131 +252,55 @@ public class NHttpServerServiceImpl implements HttpServerService {
             }
 
             String target = request.getRequestLine().getUri();
-            logger.debug("Receive HTTP request for target <{}>.", target);
-            String profile = getProfileFromTarget(target);
-            String type = getTypeFromTarget(target, profile);
-            String id = getIdFromTarget(target, profile);
+            Header[] ranges = request.getHeaders("RANGE");
+            logger.debug("Receive HTTP request for target <{}> with {} range.", target, ranges.length);
 
-            // Query the library and get the file
-            File file = null;
-            String mime = null;
-            if ("image".equalsIgnoreCase(type)) {
-                Image image = mediaLibrary.getImageById(id);
-                if (image != null) {
-                    File imageFile = new File(image.getAbsoluteName());
-                    String imageType = image.getType();
-                    mime = transcoder.getImageTranscodedMime(profile, imageType);
-                    file = transcoder.getImageTranscodedFile(profile, imageType, imageFile);
-                }
-            } else if ("movie".equalsIgnoreCase(type)) {
-                file = new File("/home/longkerdandy/Videos/SampleVideos/Wildlife.wmv");
-                mime = "video/x-ms-wmv";
-            }  else if ("moviethumb".equalsIgnoreCase(type)) {
-                file = new File("/home/longkerdandy/Videos/the-king-s-speech-original.jpg");
-                mime = "image/jpeg";
-            }
-            if (file == null || mime == null) {
+            //Parse URL
+            Map<String, String> map = HttpUrl.parseURL(target);
+            if (map == null) {
                 response.setStatusCode(HttpStatus.SC_NOT_FOUND);
-                logger.debug("Chii2 Media Server Http Server request empty file.");
-            } else if (!file.exists()) {
-                response.setStatusCode(HttpStatus.SC_NOT_FOUND);
-                logger.debug("Chii2 Media Server Http Server file <{}> not found.", file.getPath());
-            } else if (!file.canRead() || file.isDirectory()) {
-                response.setStatusCode(HttpStatus.SC_FORBIDDEN);
-                logger.debug("Chii2 Media Server Http Server cannot read file <{}>.", file.getPath());
+                logger.debug("Chii2 Media Server Http Server requested url parse error.");
             } else {
-                response.setStatusCode(HttpStatus.SC_OK);
-                NFileEntity body = new NFileEntity(file, mime);
-                response.setEntity(body);
-                logger.debug("Chii2 Media Server Http Server serving file <{}>.", file.getPath());
-            }
-        }
+                String clientProfile = map.get("client");
+                String type = map.get("type");
+                boolean transcoded = BooleanUtils.toBoolean(map.get("transcoded"), "1", "0");
+                int seriesNumber = NumberUtils.toInt(map.get("series"), 1);
+                DLNAProfile.Profile dlnaProfile = DLNAProfile.getProfileById(map.get("dlna"));
+                String id = map.get("id");
 
-        /**
-         * Get media type from url target
-         *
-         * @param target URL target
-         * @return Media Type
-         */
-        private String getTypeFromTarget(String target, String profile) {
-            String type = null;
-            String thumb = null;
-
-            // This specially doing for XBox thumbnail, since XBox won't works with AlbumArtURI, it just append albumArt=true in resource url
-            try {
-                for (NameValuePair nameValuePair : URLEncodedUtils.parse(new URI(target), "ISO-8859-1")) {
-                    if ("albumArt".equalsIgnoreCase(nameValuePair.getName()) && "true".equalsIgnoreCase(nameValuePair.getValue())) {
-                       thumb = "thumb";
+                // Query the library and get the file
+                HttpEntity entity = null;
+                if ("image".equalsIgnoreCase(type)) {
+                    Image image = mediaLibrary.getImageById(id);
+                    if (image != null) {
+                        File imageFile = new File(image.getAbsoluteName());
+                        String imageType = image.getType();
+                        String mime = transcoder.getImageTranscodedMime(clientProfile, imageType);
+                        File file = transcoder.getImageTranscodedFile(clientProfile, imageType, imageFile);
+                        entity = new NFileEntity(file, mime);
+                    }
+                } else if ("movie".equalsIgnoreCase(type)) {
+                    Movie movie = mediaLibrary.getMovieById(id);
+                    if (movie != null) {
+                        File file = new File(movie.getFile(seriesNumber).getAbsoluteName());
+                        String mime = DLNAProfile.getMimeByProfile(dlnaProfile);
+                        entity = new NFileEntity(file, mime);
+                    }
+                } else if ("moviethumb".equalsIgnoreCase(type)) {
+                    byte[] thumb = mediaLibrary.getMovieThumbnailById(id);
+                    if (thumb != null) {
+                        entity = new NByteArrayEntity(thumb);
                     }
                 }
-            } catch (URISyntaxException ignore) {
-                // This won't happens, nad won't matters
-            }
-
-            if (target != null && target.startsWith("/") && target.length() > 1) {
-                target = target.substring(1);
-            }
-            if (target != null && StringUtils.isNotEmpty(target)) {
-                int index = target.indexOf('/');
-                if (index > 0 && target.length() > index + 2) {
-                    target = target.substring(index + 1);
-                    index = target.indexOf('/');
-                    if (index > 0) {
-                        type = target.substring(0, index);
-                    }
+                if (entity == null) {
+                    response.setStatusCode(HttpStatus.SC_NOT_FOUND);
+                    logger.debug("Chii2 Media Server Http Server requested object not found.");
+                } else {
+                    response.setStatusCode(HttpStatus.SC_OK);
+                    response.setEntity(entity);
+                    logger.debug("Chii2 Media Server Http Server serving <{}>.", type);
                 }
             }
-
-            if (type != null && thumb != null) {
-                type = type + thumb;
-            }
-
-            return type;
-        }
-
-        /**
-         * Get media type from url target
-         *
-         * @param target URL target
-         * @return Media Type
-         */
-        private String getProfileFromTarget(String target) {
-            if (target != null && target.startsWith("/") && target.length() > 1) {
-                target = target.substring(1);
-            }
-            if (target != null && StringUtils.isNotEmpty(target)) {
-                int index = target.indexOf('/');
-                if (index > 0) {
-                    return target.substring(0, index);
-                }
-            }
-            return null;
-        }
-
-        /**
-         * Get media id from url target
-         *
-         * @param target URL Target
-         * @return Media Id
-         */
-        private String getIdFromTarget(String target, String profile) {
-            // TODO: logic may need change if forgeUrl changed
-            if (target != null && target.endsWith("/") && target.length() > 1) {
-                target = target.substring(0, target.length());
-            }
-            if (target != null && StringUtils.isNotEmpty(target)) {
-                int index = target.lastIndexOf('/');
-                if (index > 0) {
-                    String id = target.substring(index + 1);
-                    int queryIndex = id.indexOf('?');
-                    if (queryIndex > 0) {
-                        return id.substring(0, queryIndex);
-                    } else {
-                        return id;
-                    }
-                }
-            }
-            return null;
         }
     }
 

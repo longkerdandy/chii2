@@ -1,8 +1,7 @@
-package org.chii2.medialibrary.provider.mediainfo.analyzer;
+package org.chii2.medialibrary.provider.mediainfo.consumer;
 
 import org.chii2.medialibrary.api.persistence.entity.MovieFile;
 import org.chii2.medialibrary.persistence.entity.MovieFileImpl;
-import org.chii2.medialibrary.provider.mediainfo.analyzer.VideoAnalyzer;
 import org.testng.annotations.Test;
 import regex2.Pattern;
 
@@ -12,12 +11,12 @@ import java.util.List;
 /**
  * Video Analyzer Test
  */
-public class VideoAnalyzerTest {
+public class RequestConsumerTest {
 
     @Test
     public void parseFileNameTest() {
         // Mock
-        VideoAnalyzer analyzer = new VideoAnalyzer(null, null, null, null, null, null, null, null, null, null);
+        RequestConsumer analyzer = new RequestConsumer(null, null, null, null, null, null, null, null, null);
         Pattern diskNumPattern = Pattern.compile("\\w*(?<number>\\d+)");
         List<Pattern> moviePatterns = new ArrayList<Pattern>() {{
             add(Pattern.compile("^(?<name>[\\w\\.\\-\\']+)\\.\\(?(?<year>\\d{4})\\)?(?<info>(\\.\\w+)+)\\-\\[?(?<group>\\w+)\\]?\\.((?<disk>\\w+)\\.)?(?<ext>[\\w\\-]+)$", Pattern.CASE_INSENSITIVE));
@@ -42,7 +41,7 @@ public class VideoAnalyzerTest {
     @Test
     public void diskNumTest() {
         // Mock
-        VideoAnalyzer analyzer = new VideoAnalyzer(null, null, null, null, null, null, null, null, null, null);
+        RequestConsumer analyzer = new RequestConsumer(null, null, null, null, null, null, null, null, null);
         Pattern diskNumPattern = Pattern.compile("\\w*(?<number>\\d+)");
 
         // Test disk number parsing

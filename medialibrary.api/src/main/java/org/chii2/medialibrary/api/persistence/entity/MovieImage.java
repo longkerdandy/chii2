@@ -139,4 +139,18 @@ public interface MovieImage {
      * @param image Image
      */
     public void setImage(byte[] image);
+
+    /**
+     * Get MovieInfo this image belong to
+     *
+     * @return MovieInfo
+     */
+    public MovieInfo getMovieInfo();
+
+    /**
+     * Set MovieInfo this image belong to
+     *
+     * @param movieInfo MovieInfo
+     */
+    public void setMovieInfo(MovieInfo movieInfo);
 }

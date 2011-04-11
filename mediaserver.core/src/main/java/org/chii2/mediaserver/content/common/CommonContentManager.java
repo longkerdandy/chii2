@@ -6,19 +6,19 @@ import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
 import org.chii2.mediaserver.api.content.item.VisualItem;
-import org.chii2.mediaserver.content.common.Item.MovieItem;
-import org.chii2.mediaserver.content.common.Item.PhotoItem;
-import org.chii2.mediaserver.content.common.container.PicturesContainer;
-import org.chii2.mediaserver.content.common.container.*;
-import org.chii2.mediaserver.content.common.container.PicturesStorageFolderContainer;
-import org.chii2.mediaserver.content.common.container.PicturesFoldersContainer;
+import org.chii2.mediaserver.api.dlna.DLNAProfile;
 import org.chii2.mediaserver.api.http.HttpServerService;
+import org.chii2.mediaserver.content.common.Item.PhotoItem;
+import org.chii2.mediaserver.content.common.container.*;
 import org.chii2.transcoder.api.core.TranscoderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teleal.cling.model.message.UpnpHeaders;
 import org.teleal.cling.support.contentdirectory.DIDLParser;
-import org.teleal.cling.support.model.*;
+import org.teleal.cling.support.model.DIDLObject;
+import org.teleal.cling.support.model.ProtocolInfo;
+import org.teleal.cling.support.model.Res;
+import org.teleal.cling.support.model.SortCriterion;
 import org.teleal.cling.support.model.container.Container;
 import org.teleal.common.util.MimeType;
 
@@ -224,14 +224,14 @@ public class CommonContentManager implements ContentManager {
         // Create photo item and add to results
         for (Image image : images) {
             if (image != null) {
-                String id = forgeItemId(image.getId(), parentId, PHOTO_ITEM_PREFIX);
-                String url = httpServer.forgeImageUrl(getClientProfile(), image.getId());
+                String id = forgeItemId(image.getId(), 1, parentId, PHOTO_ITEM_PREFIX);
+                URI url = httpServer.forgeUrl(getClientProfile(), "image", false, 1, DLNAProfile.Profile.PROFILE_INVALID, image.getId());
                 String profile = getClientProfile();
                 MimeType mime = new MimeType("image", transcoder.getImageTranscodedType(profile, image.getType()));
                 // Resources
                 List<Res> resources = new ArrayList<Res>();
                 Res resource = new Res();
-                resource.setValue(url);
+                resource.setValue(url.toString());
                 resource.setProtocolInfo(new ProtocolInfo(mime));
                 if (filter.contains("res@resolution")) {
                     resource.setResolution(image.getWidth(), image.getHeight());
@@ -258,49 +258,6 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
-    public List<? extends VisualItem> getMovies(String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
-        List<MovieItem> movies = new ArrayList<MovieItem>();
-        String id = forgeItemId(UUID.randomUUID().toString(), parentId, MOVIE_ITEM_PREFIX);
-        String title = "Wildlife";
-        URI uri = httpServer.forgeMovieUrl(getClientProfile(), id);
-        String[] genres = {"Unknown Genre"};
-        PersonWithRole[] actors = {new PersonWithRole("Unknown Actor")};
-        // Resources
-        List<Res> resources = new ArrayList<Res>();
-        Res resource = new Res();
-        resource.setValue(uri.toString());
-        resource.setProtocolInfo(new ProtocolInfo(Protocol.HTTP_GET, "*", "video/x-ms-wmv", "DLNA.ORG_OP=01;DLNA.ORG_FLAGS=01500000000000000000000000000000"));
-        if (filter.contains("res@resolution")) {
-            resource.setResolution(1280, 720);
-        }
-        if (filter.contains("res@duration")) {
-            resource.setDuration("0:00:30.000");
-        }
-        if (filter.contains("res@colorDepth")) {
-            resource.setColorDepth((long) 24);
-        }
-        if (filter.contains("res@size")) {
-            resource.setSize((long) 26246026);
-        }
-        if (filter.contains("res@bitrate")) {
-            resource.setBitrate((long) 766771);
-        }
-        if (filter.contains("res@nrAudioChannels")) {
-            resource.setNrAudioChannels((long) 2);
-        }
-        if (filter.contains("res@sampleFrequency ")) {
-            resource.setSampleFrequency((long) 44100);
-        }
-        if (filter.contains("res@bitsPerSample")) {
-            resource.setBitsPerSample((long) 201);
-        }
-        resources.add(resource);
-
-        movies.add(new MovieItem(filter, id, parentId, title, null, null, genres, null, null, null, actors, null, null, null, resources));
-        return movies;
-    }
-
-    @Override
     public long getPhotosCountByAlbum(String album) {
         return mediaLibrary.getImagesCountByAlbum(album);
     }
@@ -311,13 +268,13 @@ public class CommonContentManager implements ContentManager {
         Image image = mediaLibrary.getImageById(libraryId);
         if (image != null) {
             String parentId = getItemParentId(id);
-            String url = httpServer.forgeImageUrl(getClientProfile(), image.getId());
+            URI url = httpServer.forgeUrl(getClientProfile(), "image", false, 1, DLNAProfile.Profile.PROFILE_INVALID, image.getId());
             String profile = getClientProfile();
             MimeType mime = new MimeType("image", transcoder.getImageTranscodedType(profile, image.getType()));
             // Resources
             List<Res> resources = new ArrayList<Res>();
             Res resource = new Res();
-            resource.setValue(url);
+            resource.setValue(url.toString());
             resource.setProtocolInfo(new ProtocolInfo(mime));
             if (filter.contains("res@resolution")) {
                 resource.setResolution(image.getWidth(), image.getHeight());
@@ -342,6 +299,17 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
+    public List<? extends VisualItem> getMovies(String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
+        // TODO: finished this later
+        return null;
+    }
+
+    @Override
+    public long getMoviesCount() {
+        return mediaLibrary.getMovieFilesCount();
+    }
+
+    @Override
     public String getContainerTitle(String id) {
         if (id != null && id.indexOf('-') > 0) {
             return id.substring(id.indexOf('-') + 1);
@@ -355,7 +323,10 @@ public class CommonContentManager implements ContentManager {
         if (id != null && id.indexOf('-') > 0) {
             String subId = id.substring(id.indexOf('-') + 1);
             if (subId.length() > uuidLength + 1) {
-                return subId.substring(0, subId.length() - uuidLength - 1);
+                String subsubId = subId.substring(0, subId.length() - uuidLength - 1);
+                if (subsubId.length() > 0 && subsubId.lastIndexOf("-") > 0) {
+                    return subsubId.substring(0, subsubId.lastIndexOf("-"));
+                }
             }
         }
 
@@ -364,20 +335,17 @@ public class CommonContentManager implements ContentManager {
 
     @Override
     public String getItemLibraryId(String id) {
-        if (id != null && id.indexOf('-') > 0) {
-            String subId = id.substring(id.indexOf('-') + 1);
-            if (subId.length() > uuidLength + 1) {
-                return subId.substring(subId.length() - uuidLength);
-            }
+        if (id.length() > uuidLength + 1) {
+            return id.substring(id.length() - uuidLength);
         }
 
         return null;
     }
 
     @Override
-    public String forgeItemId(String libraryId, String parentId, String prefix) {
+    public String forgeItemId(String libraryId, int seriesNumber, String parentId, String prefix) {
         if (libraryId != null && libraryId.length() == uuidLength) {
-            return prefix + parentId + "-" + libraryId;
+            return prefix + parentId + "-" + seriesNumber + "-" + libraryId;
         } else {
             return null;
         }

@@ -1,5 +1,6 @@
 package org.chii2.medialibrary.persistence.entity;
 
+import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.persistence.entity.MovieFile;
 
 import javax.persistence.*;
@@ -92,6 +93,14 @@ public class MovieFileImpl implements MovieFile {
     @Column(name = "VIDEO_BIT_RATE")
     private long videoBitRate;
 
+    // Video bit depth
+    @Column(name = "VIDEO_BIT_DEPTH")
+    private int videoBitDepth;
+
+    // Video frame rate
+    @Column(name = "VIDEO_FRAME_RATE")
+    private float videoFrameRate;
+
     // Video Width
     @Column(name = "VIDEO_WIDTH")
     private int videoWidth;
@@ -116,6 +125,10 @@ public class MovieFileImpl implements MovieFile {
     @Column(name = "AUDIO_BIT_RATE")
     private long audioBitRate;
 
+    // Audio bit depth
+    @Column(name = "AUDIO_BIT_DEPTH")
+    private int audioBitDepth;
+
     // Audio Channel Count
     @Column(name = "AUDIO_CHANNEL_COUNT")
     private int audioChannelCount;
@@ -127,6 +140,11 @@ public class MovieFileImpl implements MovieFile {
     // Audio Language
     @Column(name = "AUDIO_Language")
     private String audioLanguage;
+
+    // Movie
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MOVIE_ID")
+    private MovieImpl movie;
 
     /**
      * Constructor
@@ -336,6 +354,26 @@ public class MovieFileImpl implements MovieFile {
     }
 
     @Override
+    public int getVideoBitDepth() {
+        return videoBitDepth;
+    }
+
+    @Override
+    public void setVideoBitDepth(int videoBitDepth) {
+        this.videoBitDepth = videoBitDepth;
+    }
+
+    @Override
+    public float getVideoFrameRate() {
+        return videoFrameRate;
+    }
+
+    @Override
+    public void setVideoFrameRate(float videoFrameRate) {
+        this.videoFrameRate = videoFrameRate;
+    }
+
+    @Override
     public int getVideoWidth() {
         return videoWidth;
     }
@@ -396,6 +434,16 @@ public class MovieFileImpl implements MovieFile {
     }
 
     @Override
+    public int getAudioBitDepth() {
+        return audioBitDepth;
+    }
+
+    @Override
+    public void setAudioBitDepth(int audioBitDepth) {
+        this.audioBitDepth = audioBitDepth;
+    }
+
+    @Override
     public int getAudioChannelCount() {
         return audioChannelCount;
     }
@@ -423,5 +471,17 @@ public class MovieFileImpl implements MovieFile {
     @Override
     public void setAudioLanguage(String audioLanguage) {
         this.audioLanguage = audioLanguage;
+    }
+
+    @Override
+    public Movie getMovie() {
+        return movie;
+    }
+
+    @Override
+    public void setMovie(Movie movie) {
+        if (movie.getClass() == MovieImpl.class) {
+            this.movie = (MovieImpl) movie;
+        }
     }
 }

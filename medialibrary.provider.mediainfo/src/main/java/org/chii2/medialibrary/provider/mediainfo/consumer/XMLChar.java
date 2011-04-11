@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.chii2.medialibrary.provider.mediainfo.analyzer;
+package org.chii2.medialibrary.provider.mediainfo.consumer;
 
 import java.util.Arrays;
 

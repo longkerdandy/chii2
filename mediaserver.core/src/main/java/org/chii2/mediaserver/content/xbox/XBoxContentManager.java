@@ -1,7 +1,15 @@
 package org.chii2.mediaserver.content.xbox;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DurationFormatUtils;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
+import org.chii2.medialibrary.api.persistence.entity.Movie;
+import org.chii2.medialibrary.api.persistence.entity.MovieFile;
 import org.chii2.mediaserver.api.content.item.VisualItem;
+import org.chii2.mediaserver.api.dlna.DLNAFlags;
+import org.chii2.mediaserver.api.dlna.DLNAIndicator;
+import org.chii2.mediaserver.api.dlna.DLNAOperation;
+import org.chii2.mediaserver.api.dlna.DLNAProfile;
 import org.chii2.mediaserver.api.http.HttpServerService;
 import org.chii2.mediaserver.content.common.CommonContentManager;
 import org.chii2.mediaserver.content.common.Item.MovieItem;
@@ -11,10 +19,10 @@ import org.teleal.cling.support.contentdirectory.DIDLParser;
 import org.teleal.cling.support.model.*;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 /**
  * Content Manger for XBox360
@@ -46,7 +54,7 @@ public class XBoxContentManager extends CommonContentManager {
     @Override
     public boolean isMatch(UpnpHeaders headers) {
         if (headers != null) {
-            // If user agent contains Xbox, is should be a Xbox client
+            // If user agent contains XBox, is should be a XBox client
             List<String> userAgent = headers.get("User-agent");
             if (getClientProfile().equalsIgnoreCase(transcoder.getClientProfile(userAgent))) {
                 return true;
@@ -57,55 +65,141 @@ public class XBoxContentManager extends CommonContentManager {
 
     @Override
     public List<? extends VisualItem> getMovies(String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
-        List<MovieItem> movies = new ArrayList<MovieItem>();
-        String id = forgeItemId(UUID.randomUUID().toString(), parentId, MOVIE_ITEM_PREFIX);
-        String title = "Wildlife";
-        URI uri = httpServer.forgeMovieUrl(getClientProfile(), id);
-        //String url="http://192.168.1.3:8888/WMPNSSv4/262985495/0_e0ZBNzAwNEM4LTc4NjgtNDNFRC1CNTkyLTYxNDE1MTE1MzM4NX0uMC4yQzE5NTgxOQ.wmv";
-        //URI thumbUrl = httpServer.forgeMovieThumbUrl(getClientProfile(), id);
-        URI thumbUrl = null;
+        // Forge sort TODO: May need more filed in the future
+        Map<String, String> sorts = new HashMap<String, String>();
+        for (SortCriterion sort : orderBy) {
+            String field = null;
+            if ("dc:title".equalsIgnoreCase(sort.getPropertyName())) {
+                field = "info.name";
+            }
+            if (field != null) {
+                if (sort.isAscending()) {
+                    sorts.put(field, "asc");
+                } else {
+                    sorts.put(field, "desc");
+                }
+            }
+        }
+        // Get movies from media library
+        List<? extends Movie> movies;
         try {
-            thumbUrl = new URI("http://192.168.1.3:8888/WMPNSSv4/262985495/0_e0ZBNzAwNEM4LTc4NjgtNDNFRC1CNTkyLTYxNDE1MTE1MzM4NX0uMC4yQzE5NTgxOQ.wmv?albumArt=true");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            movies = mediaLibrary.getMovies((int) startIndex, (int) maxCount, sorts);
+        } catch (IllegalArgumentException e) {
+            movies = mediaLibrary.getMovies();
         }
-        String[] genres = {"Unknown Genre"};
-        PersonWithRole[] actors = {new PersonWithRole("Unknown Actor", "Performer")};
-        // Resources
-        List<Res> resources = new ArrayList<Res>();
-        XBoxRes resource = new XBoxRes();
-        resource.setValue(uri.toString());
-        resource.setProtocolInfo(new ProtocolInfo(Protocol.HTTP_GET, "*", "video/x-ms-wmv", "DLNA.ORG_OP=01;DLNA.ORG_FLAGS=01500000000000000000000000000000"));
-        if (filter.contains("res@resolution")) {
-            resource.setResolution(1280, 720);
-        }
-        if (filter.contains("res@duration")) {
-            resource.setDuration("0:00:30.000");
-        }
-        if (filter.contains("res@colorDepth")) {
-            resource.setColorDepth((long) 24);
-        }
-        if (filter.contains("res@size")) {
-            resource.setSize((long) 26246026);
-        }
-        if (filter.contains("res@bitrate")) {
-            resource.setBitrate((long) 766771);
-        }
-        if (filter.contains("res@nrAudioChannels")) {
-            resource.setNrAudioChannels((long) 2);
-        }
-        if (filter.contains("res@sampleFrequency ")) {
-            resource.setSampleFrequency((long) 44100);
-        }
-        if (filter.contains("res@bitsPerSample")) {
-            resource.setBitsPerSample((long) 201);
-        }
-        if (filter.contains("res@microsoft:codec")) {
-            resource.setMicrosoftCodec("{31435657-0000-0010-8000-00AA00389B71}");
-        }
-        resources.add(resource);
 
-        movies.add(new MovieItem(filter, id, parentId, title, null, null, genres, null, null, null, actors, null, null, thumbUrl, resources));
-        return movies;
+        // Create and fill movie information
+        List<MovieItem> movieItems = new ArrayList<MovieItem>();
+        for (Movie movie : movies) {
+            for (MovieFile movieFile : movie.getFiles()) {
+                // ID from library
+                String libraryId = movie.getId();
+                // Item ID
+                String itemId = forgeItemId(libraryId, movieFile.getDiskNum(), parentId, MOVIE_ITEM_PREFIX);
+                // Title
+                String title = movie.getTitle();
+                // Short Description TODO: not sure the overview is the best match
+                String shortDescription = movie.getOverview();
+                // Long Description
+                String longDescription = movie.getOverview();
+                // TODO: fake
+                String[] genres = {"Unknown Genre"};
+                // Rating TODO: not sure this means certification from the library, maybe should use rating
+                String rating = movie.getCertification();
+                // Language
+                String language = movie.getLanguage();
+                // Producers TODO: fake
+                Person[] producers = {new Person("Unknown Producer")};
+                // Actors TODO: fake
+                PersonWithRole[] actors = {new PersonWithRole("Unknown Actor", "Performer")};
+                // Directors TODO: fake
+                Person[] directors = {new Person("Unknown Director")};
+                // Publishers TODO: fake
+                Person[] publishers = {new Person("Unknown Publisher")};
+
+                // Resources
+                List<Res> resources = new ArrayList<Res>();
+                // Test whether original file format is acceptable, if not transcoding needed
+                DLNAProfile.Profile originalProfile = DLNAProfile.getDLNAProfile(movie.getVideoCodec(), movie.getVideoBitRate(), movie.getVideoWidth(), movie.getVideoHeight(), movie.getVideoFps(), movie.getAudioCodec(), movie.getAudioBitRate(), movie.getAudioSampleBitRate(), movie.getAudioChannels());
+                if (originalProfile != DLNAProfile.Profile.PROFILE_INVALID && transcoder.isValidProfile(getClientProfile(), originalProfile)) {
+                    // Original Resource (Not Transcoded)
+                    XBoxRes originalResource = new XBoxRes();
+                    URI originalUri = httpServer.forgeUrl(getClientProfile(), "movie", false, movieFile.getDiskNum(), originalProfile, libraryId);
+                    originalResource.setValue(originalUri.toString());
+                    String mime = DLNAProfile.getMimeByProfile(originalProfile);
+                    originalResource.setProtocolInfo(new ProtocolInfo(Protocol.HTTP_GET, "*", mime, DLNAProfile.getProfileString(originalProfile) + ";" + DLNAOperation.getDLNAOperation(false, true) + ";" + DLNAFlags.getDLNAFlags(DLNAFlags.DLNA_FLAG_STREAMING_TRANSFER_MODE, DLNAFlags.DLNA_FLAG_BACKGROUND_TRANSFERT_MODE, DLNAFlags.DLNA_FLAG_DLNA_V15)));
+                    if (filter.contains("res@resolution")) {
+                        originalResource.setResolution(movieFile.getVideoWidth(), movieFile.getVideoHeight());
+                    }
+                    if (filter.contains("res@duration")) {
+                        originalResource.setDuration(DurationFormatUtils.formatDurationHMS(movieFile.getDuration()));
+                    }
+                    if (filter.contains("res@size")) {
+                        originalResource.setSize(movieFile.getSize());
+                    }
+                    if (filter.contains("res@bitrate")) {
+                        originalResource.setBitrate(movieFile.getBitRate());
+                    }
+                    if (filter.contains("res@nrAudioChannels")) {
+                        originalResource.setNrAudioChannels((long) movieFile.getAudioChannelCount());
+                    }
+                    if (filter.contains("res@sampleFrequency ")) {
+                        originalResource.setSampleFrequency(movieFile.getAudioSamplingRate());
+                    }
+                    if (filter.contains("res@bitsPerSample")) {
+                        originalResource.setBitsPerSample((long) movieFile.getAudioBitDepth());
+                    }
+                    if (filter.contains("res@microsoft:codec")) {
+                        String codec = MicrosoftCodec.getVideoCodecId(movieFile.getVideoCodec());
+                        if (StringUtils.isNotBlank(codec)) {
+                            originalResource.setMicrosoftCodec(codec);
+                        }
+                    }
+                    // Add to resources
+                    resources.add(originalResource);
+                } else {
+                    // Transcoded
+                    DLNAProfile.Profile transcodedProfile = transcoder.getTranscodedProfile(getClientProfile(), movie.getVideoCodec(), movie.getVideoBitRate(), movie.getVideoWidth(), movie.getVideoHeight(), movie.getVideoFps(), movie.getAudioCodec(), movie.getAudioBitRate(), movie.getAudioSampleBitRate(), movie.getAudioChannels());
+                    XBoxRes transcodedResource = new XBoxRes();
+                    URI transcodedUri = httpServer.forgeUrl(getClientProfile(), "movie", true, movieFile.getDiskNum(), transcodedProfile, libraryId);
+                    transcodedResource.setValue(transcodedUri.toString());
+                    String mime = DLNAProfile.getMimeByProfile(transcodedProfile);
+                    transcodedResource.setProtocolInfo(new ProtocolInfo(Protocol.HTTP_GET, "*", mime, DLNAProfile.getProfileString(transcodedProfile) + ";" + DLNAOperation.getDLNAOperation(true, false) + ";" + DLNAIndicator.getDLNAConversionIndicator(true) + ";" + DLNAFlags.getDLNAFlags(DLNAFlags.DLNA_FLAG_STREAMING_TRANSFER_MODE, DLNAFlags.DLNA_FLAG_BACKGROUND_TRANSFERT_MODE, DLNAFlags.DLNA_FLAG_DLNA_V15)));
+                    // TODO: Since transcoded information should change
+                    if (filter.contains("res@resolution")) {
+                        transcodedResource.setResolution(movieFile.getVideoWidth(), movieFile.getVideoHeight());
+                    }
+                    if (filter.contains("res@duration")) {
+                        transcodedResource.setDuration(DurationFormatUtils.formatDurationHMS(movieFile.getDuration()));
+                    }
+                    if (filter.contains("res@size")) {
+                        transcodedResource.setSize(movieFile.getSize());
+                    }
+                    if (filter.contains("res@bitrate")) {
+                        transcodedResource.setBitrate(movieFile.getBitRate());
+                    }
+                    if (filter.contains("res@nrAudioChannels")) {
+                        transcodedResource.setNrAudioChannels((long) movieFile.getAudioChannelCount());
+                    }
+                    if (filter.contains("res@sampleFrequency ")) {
+                        transcodedResource.setSampleFrequency(movieFile.getAudioSamplingRate());
+                    }
+                    if (filter.contains("res@bitsPerSample")) {
+                        transcodedResource.setBitsPerSample((long) movieFile.getAudioBitDepth());
+                    }
+                    if (filter.contains("res@microsoft:codec")) {
+                        String codec = MicrosoftCodec.getVideoCodecId(movieFile.getVideoCodec());
+                        if (StringUtils.isNotBlank(codec)) {
+                            transcodedResource.setMicrosoftCodec(codec);
+                        }
+                    }
+                    // Add to resources
+                    resources.add(transcodedResource);
+                }
+                // Create new movie item and add to result
+                movieItems.add(new MovieItem(filter, itemId, parentId, title, shortDescription, longDescription, genres, rating, language, producers, actors, directors, publishers, resources));
+            }
+        }
+        return movieItems;
     }
 }

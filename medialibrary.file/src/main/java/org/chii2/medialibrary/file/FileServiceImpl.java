@@ -2,25 +2,29 @@ package org.chii2.medialibrary.file;
 
 import org.apache.commons.lang.StringUtils;
 import org.chii2.medialibrary.api.file.FileService;
+import org.chii2.medialibrary.file.consumer.FileExtensionFilter;
+import org.chii2.medialibrary.file.consumer.FileScanner;
 import org.chii2.util.ConfigUtils;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * FileService Implement provide watcher and scanner functionality
  */
-public class FileServiceImpl implements FileService {
-
+public class FileServiceImpl implements FileService, EventHandler {
+    // Request queue
+    protected BlockingQueue<Map<String, Object>> queue;
     // Injected ConfigAdmin Service
     private ConfigurationAdmin configAdmin;
     // Injected EventAdmin Service
@@ -43,10 +47,6 @@ public class FileServiceImpl implements FileService {
     private List<String> imageDirectories = Arrays.asList(System.getProperty("user.home") + "/Pictures");
     // Image file extension filter
     private List<String> imageExtFilters = Arrays.asList(".jpg", ".jpeg", ".tiff", ".tif", ".png", ".gif", ".bmp");
-    // Movie Files scanner thread
-    private Thread movieScanThread = null;
-    // Image Files scanner thread
-    private Thread imageScanThread = null;
     // Logger
     private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file");
 
@@ -103,6 +103,12 @@ public class FileServiceImpl implements FileService {
                 logger.error("FileService configuration <{}> is not valid.", IMAGE_EXTENSION);
             }
         }
+
+        // Init queue
+        this.queue = new LinkedBlockingQueue<Map<String, Object>>();
+
+        // Start Request Consumer
+        new Thread(new FileScanner(queue, eventAdmin)).start();
     }
 
     /**
@@ -111,6 +117,45 @@ public class FileServiceImpl implements FileService {
     @SuppressWarnings("unused")
     public void destroy() {
         logger.debug("Chii2 Media Library File Service destroy.");
+    }
+
+    @Override
+    public void handleEvent(Event event) {
+        if (FileService.MOVIE_SCAN_REQUEST_TOPIC.equals(event.getTopic())) {
+            List<File> directoryList = new ArrayList<File>();
+            for (String directory : movieDirectories) {
+                if (StringUtils.isNotBlank(directory)) {
+                    directoryList.add(new File(StringUtils.trim(directory)));
+                }
+            }
+            Map<String, Object> properties = new Hashtable<String, Object>();
+            properties.put(FileService.DIRECTORY_PROPERTY, directoryList);
+            properties.put(FileService.FILTER_PROPERTY, createFilter(movieExtFilters));
+            properties.put(FileService.TOPIC_PROPERTY, FileService.MOVIE_SCAN_PROVIDED_TOPIC);
+            // Add request to queue
+            try {
+                this.queue.put(properties);
+            } catch (InterruptedException e) {
+                logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
+            }
+        } else if (FileService.IMAGE_SCAN_REQUEST_TOPIC.equals(event.getTopic())) {
+            List<File> directoryList = new ArrayList<File>();
+            for (String directory : imageDirectories) {
+                if (StringUtils.isNotBlank(directory)) {
+                    directoryList.add(new File(StringUtils.trim(directory)));
+                }
+            }
+            Map<String, Object> properties = new Hashtable<String, Object>();
+            properties.put(FileService.DIRECTORY_PROPERTY, directoryList);
+            properties.put(FileService.FILTER_PROPERTY, createFilter(imageExtFilters));
+            properties.put(FileService.TOPIC_PROPERTY, FileService.IMAGE_SCAN_PROVIDED_TOPIC);
+            // Add request to queue
+            try {
+                this.queue.put(properties);
+            } catch (InterruptedException e) {
+                logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
+            }
+        }
     }
 
     @Override
@@ -138,7 +183,7 @@ public class FileServiceImpl implements FileService {
             } else {
                 filter = createFilter(movieExtFilters);
             }
-            scanFiles(directoryList, filter, movieScanThread, MOVIE_SCAN_TOPIC);
+            scanFiles(directoryList, filter, FileService.MOVIE_SCAN_PROVIDED_TOPIC);
         }
     }
 
@@ -167,7 +212,7 @@ public class FileServiceImpl implements FileService {
             } else {
                 filter = createFilter(imageExtFilters);
             }
-            scanFiles(directoryList, filter, imageScanThread, IMAGE_SCAN_TOPIC);
+            scanFiles(directoryList, filter, FileService.IMAGE_SCAN_PROVIDED_TOPIC);
         }
     }
 
@@ -176,16 +221,18 @@ public class FileServiceImpl implements FileService {
      *
      * @param directories Directories to be scanned
      * @param filter      File name filter
-     * @param thread      Scanner thread
      * @param topic       Event topic
      */
-    private void scanFiles(List<File> directories, FileExtensionFilter filter, Thread thread, String topic) {
-        if (thread != null && thread.isAlive()) {
-            logger.debug("A File Scanner thread already running, request discard.");
-        } else {
-            logger.debug("File Service try to start a new File Scanner thread.");
-            thread = new Thread(new FileScanner(directories, filter, eventAdmin, topic));
-            thread.start();
+    private void scanFiles(List<File> directories, FileExtensionFilter filter, String topic) {
+        Map<String, Object> properties = new Hashtable<String, Object>();
+        properties.put(FileService.DIRECTORY_PROPERTY, directories);
+        properties.put(FileService.FILTER_PROPERTY, filter);
+        properties.put(FileService.TOPIC_PROPERTY, topic);
+        // Add request to queue
+        try {
+            this.queue.put(properties);
+        } catch (InterruptedException e) {
+            logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
         }
     }
 

@@ -97,6 +97,28 @@ public interface MediaLibraryService {
     public List<? extends Movie> getMoviesByName(String movieName, int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
+     * Get Movie default thumbnail
+     *
+     * @param movieId Movie ID
+     * @return Thumbnail
+     */
+    public byte[] getMovieThumbnailById(String movieId);
+
+    /**
+     * Get Movies Count
+     *
+     * @return Count
+     */
+    public long getMoviesCount();
+
+    /**
+     * Get Movie Files Count
+     *
+     * @return Count
+     */
+    public long getMovieFilesCount();
+
+    /**
      * Get all the Images
      *
      * @return Image List

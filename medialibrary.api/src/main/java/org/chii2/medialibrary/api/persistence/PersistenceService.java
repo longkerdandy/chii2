@@ -43,26 +43,6 @@ public interface PersistenceService {
     public List<? extends Movie> getMoviesByName(String movieName, int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
-     * Get possible movie contains specific file (with file id)
-     * This is likely to return only one record, which means returned Movie contains the Movie File
-     *
-     * @param fileId Movie File ID
-     * @return Movie
-     */
-    public Movie getMoviesContainFile(String fileId);
-
-    /**
-     * Get possible movie contains specific file absolute name and file movie name
-     * Movie Files with the same parent directory and file movie name are likely to group into a single Movie, and only different in disk numbers
-     * This is likely to return only one record, which means returned Movie should contains the Movie File
-     *
-     * @param absolutePath  Movie File's Absolute Path (Parent Directory)
-     * @param fileMovieName Movie File's Movie Name
-     * @return Movie
-     */
-    public Movie getMoviesContainFile(String absolutePath, String fileMovieName);
-
-    /**
      * Get Movie Files from database
      * The Sort Field must prefix with "file." or "info."
      * eg. "file.duration" will reference to MovieFile duration
@@ -84,15 +64,6 @@ public interface PersistenceService {
     public MovieFile getMovieFileById(String id);
 
     /**
-     * Get movie file by file's absolute name
-     * Because file's absolute path is likely to be unique, this return a single result
-     *
-     * @param absoluteName file's absolute name
-     * @return Movie File
-     */
-    public MovieFile getMovieFileByAbsoluteName(String absoluteName);
-
-    /**
      * Get movie Information by id
      *
      * @param id Movie information id
@@ -107,6 +78,28 @@ public interface PersistenceService {
      * @return Image
      */
     public MovieImage getMovieImageById(String imageId);
+
+    /**
+     * Get Movie default thumbnail
+     *
+     * @param movieId Movie ID
+     * @return Thumbnail
+     */
+    public byte[] getMovieThumbnailById(String movieId);
+
+    /**
+     * Get Movies Count
+     *
+     * @return Count
+     */
+    public long getMoviesCount();
+
+    /**
+     * Get Movie Files Count
+     *
+     * @return Count
+     */
+    public long getMovieFilesCount();
 
     /**
      * Get all the Images
@@ -187,135 +180,72 @@ public interface PersistenceService {
     public ImageFile getImageFileById(String id);
 
     /**
-     * Persist a list of movies into database
-     *
-     * @param movies List of movies
+     * Delete all Movie Information
      */
-    public void persist(List<Movie> movies);
+    public void deleteMovieInfo();
 
     /**
-     * Persist a movie into database
+     * Synchronize Movie Files to database
      *
-     * @param movie Movie
+     * @param movieFiles Movie Files
      */
-    public void persist(Movie movie);
+    public void synchronize(List<MovieFile> movieFiles);
 
     /**
-     * Persist a movie file into database
+     * Synchronize Movie Information to database
      *
-     * @param movieFile Movie file
+     * @param movieId Movie ID
+     * @param info    Movie Information List
      */
-    public void persist(MovieFile movieFile);
+    public void synchronize(String movieId, List<MovieInfo> info);
 
     /**
-     * Persist a movie information into database
+     * Persis entity into database, proxy to EntityManager.persist
+     * If A is a new entity, it becomes managed.
+     * If A is an existing managed entity, it is ignored. However, the persist operation cascades as defined below.
+     * If A is a removed entity, it becomes managed.
+     * If A is a detached entity, an IllegalArgumentException is thrown.
+     * The persist operation recurses on all relation fields of A whose cascades include CascadeType.PERSIST.
      *
-     * @param movieInfo Movie information
+     * @param entity Entity
      */
-    public void persist(MovieInfo movieInfo);
+    public void persist(Object entity);
 
     /**
-     * Persist a movie image into database
+     * Merge entity into database, proxy to EntityManager.merge
+     * If A is a detached entity, its state is copied into existing managed instance A' of the same entity identity, or a new managed copy of A is created.
+     * If A is a new entity, a new managed entity A' is created and the state of A is copied into A'.
+     * If A is an existing managed entity, it is ignored. However, the merge operation still cascades as defined below.
+     * If A is a removed entity, an IllegalArgumentException is thrown.
+     * The merge operation recurses on all relation fields of A whose cascades include CascadeType.MERGE.
      *
-     * @param movieImage Movie image
+     * @param entity Entity
+     * @param <T>    Entity Class
+     * @return Managed Entity
      */
-    public void persist(MovieImage movieImage);
+    public <T> T merge(T entity);
 
     /**
-     * Persist a image into database
+     * Remove entity into database, proxy to EntityManager.remove
+     * If A is a new entity, it is ignored. However, the remove operation cascades as defined below.
+     * If A is an existing managed entity, it becomes removed.
+     * If A is a removed entity, it is ignored.
+     * If A is a detached entity, an IllegalArgumentException is thrown.
+     * The remove operation recurses on all relation fields of A whose cascades include CascadeType.REMOVE.
      *
-     * @param image Image
+     * @param entity Entity
      */
-    public void persist(Image image);
+    public void remove(Object entity);
 
     /**
-     * Persist a image file into database
+     * Refresh entity with database, proxy to EntityManager.refresh
+     * If A is a new entity, it is ignored. However, the refresh operation cascades as defined below.
+     * If A is an existing managed entity, its state is refreshed from the datastore.
+     * If A is a removed entity, it is ignored.
+     * If A is a detached entity, an IllegalArgumentException is thrown.
+     * The refresh operation recurses on all relation fields of A whose cascades include CascadeType.REFRESH.
      *
-     * @param imageFile Image File
+     * @param entity Entity
      */
-    public void persist(ImageFile imageFile);
-
-    /**
-     * Merge a movie into database
-     *
-     * @param movie Movie
-     */
-    public void merge(Movie movie);
-
-    /**
-     * Merge a movie file into database
-     *
-     * @param movieFile Movie File
-     */
-    public void merge(MovieFile movieFile);
-
-    /**
-     * Merge a movie information into database
-     *
-     * @param movieInfo Movie information
-     */
-    public void merge(MovieInfo movieInfo);
-
-    /**
-     * Merge a movie image into database
-     *
-     * @param movieImage Movie Image
-     */
-    public void merge(MovieImage movieImage);
-
-    /**
-     * Merge a image into database
-     *
-     * @param image Image
-     */
-    public void merge(Image image);
-
-    /**
-     * Merge a image file into database
-     *
-     * @param imageFile Image File
-     */
-    public void merge(ImageFile imageFile);
-
-    /**
-     * Remove a movie from database
-     *
-     * @param movie Movie
-     */
-    public void remove(Movie movie);
-
-    /**
-     * Remove a movie file from database
-     *
-     * @param movieFile Movie File
-     */
-    public void remove(MovieFile movieFile);
-
-    /**
-     * Remove a movie information from database
-     *
-     * @param movieInfo Movie Information
-     */
-    public void remove(MovieInfo movieInfo);
-
-    /**
-     * Remove a movie image from database
-     *
-     * @param movieImage Movie Image
-     */
-    public void remove(MovieImage movieImage);
-
-    /**
-     * Remove a image from database
-     *
-     * @param image Image
-     */
-    public void remove(Image image);
-
-    /**
-     * Remove a image file from database
-     *
-     * @param imageFile Image File
-     */
-    public void remove(ImageFile imageFile);
+    public void refresh(Object entity);
 }

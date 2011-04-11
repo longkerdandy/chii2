@@ -24,7 +24,19 @@
     </bean>
 
     <!-- Chii2 Media Library MediaInfo Provider Service -->
-    <service ref="miProvider" interface="org.chii2.medialibrary.api.provider.MovieFileInfoProviderService">
+    <service ref="miProvider">
+        <interfaces>
+            <value>org.chii2.medialibrary.api.provider.MovieFileInfoProviderService</value>
+            <value>org.osgi.service.event.EventHandler</value>
+        </interfaces>
+        <service-properties>
+            <!-- Register Event Topics -->
+            <entry key="event.topics">
+                <list>
+                    <value>org/chii2/medialibrary/provider/movie/FILE_INFO_REQUEST</value>
+                </list>
+            </entry>
+        </service-properties>
     </service>
 
 </blueprint>

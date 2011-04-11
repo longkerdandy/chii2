@@ -1,4 +1,4 @@
-package org.chii2.medialibrary.file;
+package org.chii2.medialibrary.file.consumer;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;

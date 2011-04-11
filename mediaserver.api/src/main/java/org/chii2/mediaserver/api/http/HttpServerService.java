@@ -1,5 +1,7 @@
 package org.chii2.mediaserver.api.http;
 
+import org.chii2.mediaserver.api.dlna.DLNAProfile;
+
 import java.net.InetAddress;
 import java.net.URI;
 
@@ -23,20 +25,15 @@ public interface HttpServerService {
     public int getPort();
 
     /**
-     * Forge Image Item URL
+     * Forge Media Item URL
      *
-     * @param profile Client Profile
-     * @param imageId Image ID
-     * @return Image URL
+     * @param clientProfile Client Profile
+     * @param mediaType     Media Type
+     * @param transcoded    Transcoded or not
+     * @param seriesNumber  Series Number
+     * @param dlnaProfile   DLNA Profile
+     * @param mediaId       Movie ID
+     * @return Movie URL
      */
-    public String forgeImageUrl(String profile, String imageId);
-
-    /**
-     * Forge Movie Item URL
-     *
-     * @param profile Client Profile
-     * @param movieId Movie ID
-     * @return Image URL
-     */
-    public URI forgeMovieUrl(String profile, String movieId);
+    public URI forgeUrl(String clientProfile, String mediaType, boolean transcoded, int seriesNumber, DLNAProfile.Profile dlnaProfile, String mediaId);
 }

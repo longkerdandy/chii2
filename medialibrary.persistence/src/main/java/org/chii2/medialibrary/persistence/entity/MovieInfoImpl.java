@@ -1,5 +1,6 @@
 package org.chii2.medialibrary.persistence.entity;
 
+import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.persistence.entity.MovieImage;
 import org.chii2.medialibrary.api.persistence.entity.MovieInfo;
 
@@ -85,7 +86,7 @@ public class MovieInfoImpl implements MovieInfo {
     private Date releasedDate;
 
     // List of movie images
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "movieInfo")
     private List<MovieImageImpl> images = new ArrayList<MovieImageImpl>();
 
     // Version
@@ -93,9 +94,14 @@ public class MovieInfoImpl implements MovieInfo {
     private int version;
 
     // Last Modified Date
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "LAST_MODIFIED")
     private Date lastModified;
+
+    // Movie
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MOVIE_ID")
+    private MovieImpl movie;
 
     /**
      * Constructor
@@ -349,11 +355,23 @@ public class MovieInfoImpl implements MovieInfo {
     }
 
     @Override
+    public void setImages(List<MovieImage> images) {
+        this.images.clear();
+        for (MovieImage image : images) {
+            if (image.getClass() == MovieImage.class) {
+                this.images.add((MovieImageImpl) image);
+                image.setMovieInfo(this);
+            }
+        }
+    }
+
+    @Override
     public void addImage(MovieImage image) {
         if (image.getClass() == MovieImageImpl.class) {
             MovieImageImpl movieImage = (MovieImageImpl) image;
             if (!images.contains(movieImage)) {
                 images.add(movieImage);
+                movieImage.setMovieInfo(this);
             }
         }
     }
@@ -364,7 +382,20 @@ public class MovieInfoImpl implements MovieInfo {
             MovieImageImpl movieImage = (MovieImageImpl) image;
             if (images.contains(movieImage)) {
                 images.remove(movieImage);
+                movieImage.setMovieInfo(null);
             }
+        }
+    }
+
+    @Override
+    public Movie getMovie() {
+        return movie;
+    }
+
+    @Override
+    public void setMovie(Movie movie) {
+        if (movie.getClass() == MovieImpl.class) {
+            this.movie = (MovieImpl) movie;
         }
     }
 }

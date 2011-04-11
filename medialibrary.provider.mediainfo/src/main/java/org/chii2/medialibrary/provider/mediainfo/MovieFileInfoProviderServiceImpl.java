@@ -2,25 +2,29 @@ package org.chii2.medialibrary.provider.mediainfo;
 
 import org.chii2.medialibrary.api.persistence.factory.MovieFactory;
 import org.chii2.medialibrary.api.provider.MovieFileInfoProviderService;
-import org.chii2.medialibrary.provider.mediainfo.analyzer.VideoAnalyzer;
+import org.chii2.medialibrary.provider.mediainfo.consumer.RequestConsumer;
 import org.chii2.util.ConfigUtils;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import regex2.Pattern;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Movie File Information Provider Service based on MediaInfo
  */
-public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderService {
+public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderService, EventHandler {
+    // Request queue
+    protected BlockingQueue<List<File>> queue;
     // Injected ConfigAdmin Service
     private ConfigurationAdmin configAdmin;
     // Injected EventAdmin service
@@ -143,6 +147,12 @@ public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderSe
                 logger.error("MediaInfo Provider configuration <{}> is not valid.", MOVIE_DISK_NUMBER_PATTERN);
             }
         }
+
+        // Init queue
+        this.queue = new LinkedBlockingQueue<List<File>>();
+
+        // Start Request Consumer
+        new Thread(new RequestConsumer(queue, eventAdmin, movieFactory, moviePatterns, movieSeparatorPattern, movieSourcePattern, movieVideoCodecPattern, movieAudioCodecPattern, diskNumPattern)).start();
     }
 
     /**
@@ -154,23 +164,39 @@ public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderSe
     }
 
     @Override
+    public void handleEvent(Event event) {
+        if (MovieFileInfoProviderService.MOVIE_FILE_INFO_REQUEST_TOPIC.equals(event.getTopic())) {
+            @SuppressWarnings("unchecked")
+            List<File> files = (List<File>) event.getProperty(MovieFileInfoProviderService.MOVIE_FILE_PROPERTY);
+            logger.debug("Receive a movie file information request event with {} records.", files.size());
+            // Add request to queue
+            try {
+                this.queue.put(files);
+            } catch (InterruptedException e) {
+                logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
+            }
+        }
+    }
+
+    @Override
     public String getProviderName() {
         return "MediaInfo";
     }
 
     @Override
-    public void getMovieFileInformation(File movieFile, List<String> excludeProviders) {
+    public void getMovieFileInformation(File movieFile) {
         List<File> fileList = new ArrayList<File>();
         fileList.add(movieFile);
-        getMovieFileInformation(fileList, excludeProviders);
+        getMovieFileInformation(fileList);
     }
 
     @Override
-    public void getMovieFileInformation(List<File> movieFiles, List<String> excludeProviders) {
-        logger.debug("MediaInfo Provider start a new MediaInfo Movie File Parser thread.");
-        Thread movieParseThread = new Thread(new VideoAnalyzer(movieFiles, eventAdmin, movieFactory, excludeProviders, moviePatterns, movieSeparatorPattern, movieSourcePattern, movieVideoCodecPattern, movieAudioCodecPattern, diskNumPattern));
-        movieParseThread.setDaemon(false);
-        movieParseThread.start();
+    public void getMovieFileInformation(List<File> movieFiles) {
+        try {
+            this.queue.put(movieFiles);
+        } catch (InterruptedException e) {
+            logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
+        }
     }
 
     /**

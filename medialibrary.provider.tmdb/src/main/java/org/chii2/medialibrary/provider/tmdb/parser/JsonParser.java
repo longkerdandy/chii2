@@ -48,6 +48,10 @@ public class JsonParser implements Parser {
         try {
             // Root node
             JsonNode rootNode = this.mapper.readTree(content);
+            // Not Found
+            if (rootNode.size() == 1 && "Nothing found.".equalsIgnoreCase(rootNode.path(0).getValueAsText())) {
+                return result;
+            }
             // Loop and create movie info list
             for (int i = 0; i < rootNode.size() && i < maxCount; i++) {
                 // New MovieInfo
@@ -70,8 +74,12 @@ public class JsonParser implements Parser {
                 movieInfo.setCertification(movieNode.path("certification").getValueAsText());
                 movieInfo.setOverview(movieNode.path("overview").getValueAsText());
                 movieInfo.setVersion(movieNode.path("version").getValueAsInt());
-                movieInfo.setReleasedDate(new SimpleDateFormat("yyyy-MM-dd").parse(movieNode.path("released").getValueAsText()));
-                movieInfo.setLastModified(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(movieNode.path("last_modified_at").getValueAsText()));
+                try {
+                    movieInfo.setReleasedDate(new SimpleDateFormat("yyyy-MM-dd").parse(movieNode.path("released").getValueAsText()));
+                    movieInfo.setLastModified(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(movieNode.path("last_modified_at").getValueAsText()));
+                } catch (Exception e) {
+                    logger.warn("JsonParser catch a Exception during parsing date time: {}.", e.getMessage());
+                }
                 // Movie Poster Node
                 JsonNode posterNode = movieNode.path("posters");
                 List<String> posterIDs = new ArrayList<String>();
@@ -129,9 +137,6 @@ public class JsonParser implements Parser {
             }
         } catch (IOException e) {
             logger.error("JsonParser catch a IOException during parsing: {}.", e.getMessage());
-            throw new ParseException(e.getMessage());
-        } catch (java.text.ParseException e) {
-            logger.error("JsonParser catch a ParseException during parsing: {}.", e.getMessage());
             throw new ParseException(e.getMessage());
         }
         return result;

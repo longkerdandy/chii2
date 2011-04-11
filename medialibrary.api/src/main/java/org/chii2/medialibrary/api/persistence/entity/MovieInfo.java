@@ -317,6 +317,13 @@ public interface MovieInfo {
     public int getBackdropsCount();
 
     /**
+     * Set Movie Images
+     *
+     * @param images Movie Images
+     */
+    public void setImages(List<MovieImage> images);
+
+    /**
      * Add a Movie Image
      *
      * @param image Movie Image
@@ -329,4 +336,18 @@ public interface MovieInfo {
      * @param image Movie Image
      */
     public void removeImage(MovieImage image);
+
+    /**
+     * Get Movie this information belong to
+     *
+     * @return Movie
+     */
+    public Movie getMovie();
+
+    /**
+     * Set Movie this information belong to
+     *
+     * @param movie Movie
+     */
+    public void setMovie(Movie movie);
 }

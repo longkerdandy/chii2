@@ -60,15 +60,15 @@ public class PersistenceServiceImpl implements PersistenceService {
                 if (field != null && sortType != null) {
                     if (field.startsWith("file.")) {
                         if (sortType.equalsIgnoreCase("asc")) {
-                            orders.add(builder.asc(movies.join("files").get(field.substring(5))));
+                            orders.add(builder.asc(movies.join("files", JoinType.LEFT).get(field.substring(5))));
                         } else if (sortType.equalsIgnoreCase("desc")) {
-                            orders.add(builder.desc(movies.join("files").get(field.substring(5))));
+                            orders.add(builder.desc(movies.join("files", JoinType.LEFT).get(field.substring(5))));
                         }
                     } else if (field.startsWith("info.")) {
                         if (sortType.equalsIgnoreCase("asc")) {
-                            orders.add(builder.asc(movies.join("information").get(field.substring(5))));
+                            orders.add(builder.asc(movies.join("information", JoinType.LEFT).get(field.substring(5))));
                         } else if (sortType.equalsIgnoreCase("desc")) {
-                            orders.add(builder.desc(movies.join("information").get(field.substring(5))));
+                            orders.add(builder.desc(movies.join("information", JoinType.LEFT).get(field.substring(5))));
                         }
                     }
                 }
@@ -90,21 +90,7 @@ public class PersistenceServiceImpl implements PersistenceService {
 
     @Override
     public Movie getMovieById(String id) {
-        // From Query
-        CriteriaQuery<MovieImpl> fromQuery = builder.createQuery(MovieImpl.class);
-        Root<MovieImpl> movies = fromQuery.from(MovieImpl.class);
-        // Select Query
-        CriteriaQuery<MovieImpl> selectQuery = fromQuery.select(movies);
-        // Where Query
-        selectQuery.where(builder.equal(movies.get("id"), id));
-        // Final Query
-        TypedQuery<MovieImpl> typedQuery = entityManager.createQuery(selectQuery);
-        try {
-            return typedQuery.getSingleResult();
-        } catch (NoResultException e) {
-            logger.debug("Try to get movie file <{}> but not exist.", id);
-            return null;
-        }
+        return entityManager.find(MovieImpl.class, id);
     }
 
     @Override
@@ -156,47 +142,6 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
-    public Movie getMoviesContainFile(String fileId) {
-        // From Query
-        CriteriaQuery<MovieImpl> fromQuery = builder.createQuery(MovieImpl.class);
-        Root<MovieImpl> movies = fromQuery.from(MovieImpl.class);
-        Path<String> fileIdFiled = movies.join("files").get("id");
-        // Select Query
-        CriteriaQuery<MovieImpl> selectQuery = fromQuery.select(movies);
-        // Where Query
-        selectQuery.where(builder.equal(fileIdFiled, fileId));
-        // Final Query
-        TypedQuery<MovieImpl> typedQuery = entityManager.createQuery(selectQuery);
-        try {
-            return typedQuery.getSingleResult();
-        } catch (NoResultException e) {
-            logger.debug("Try to get movie contains file <{}> but not exist.", fileId);
-            return null;
-        }
-    }
-
-    @Override
-    public Movie getMoviesContainFile(String absolutePath, String fileMovieName) {
-        // From Query
-        CriteriaQuery<MovieImpl> fromQuery = builder.createQuery(MovieImpl.class);
-        Root<MovieImpl> movies = fromQuery.from(MovieImpl.class);
-        Path<String> filePathFiled = movies.join("files").get("filePath");
-        Path<String> movieNameFiled = movies.join("files").get("movieName");
-        // Select Query
-        CriteriaQuery<MovieImpl> selectQuery = fromQuery.select(movies);
-        // Where Query
-        selectQuery.where(builder.and(builder.equal(filePathFiled, absolutePath), builder.equal(movieNameFiled, fileMovieName)));
-        // Final Query
-        TypedQuery<MovieImpl> typedQuery = entityManager.createQuery(selectQuery);
-        try {
-            return typedQuery.getSingleResult();
-        } catch (NoResultException e) {
-            logger.debug("Try to get movie contains file with absolute name <{}> and movie name <{}> but not exist.", absolutePath, fileMovieName);
-            return null;
-        }
-    }
-
-    @Override
     public List<? extends MovieFile> getMovieFiles(int firstResult, int maxResults, Map<String, String> sorts) {
         // From Query
         CriteriaQuery<MovieFileImpl> fromQuery = builder.createQuery(MovieFileImpl.class);
@@ -223,89 +168,51 @@ public class PersistenceServiceImpl implements PersistenceService {
         TypedQuery<MovieFileImpl> typedQuery = entityManager.createQuery(selectQuery);
         // First Result
         if (firstResult >= 0) {
-            typedQuery = typedQuery.setFirstResult(firstResult);
+            typedQuery.setFirstResult(firstResult);
         }
         // Max Results
         if (maxResults >= 0) {
-            typedQuery = typedQuery.setMaxResults(maxResults);
+            typedQuery.setMaxResults(maxResults);
         }
         return typedQuery.getResultList();
     }
 
     @Override
     public MovieFile getMovieFileById(String id) {
-        // From Query
-        CriteriaQuery<MovieFileImpl> fromQuery = builder.createQuery(MovieFileImpl.class);
-        Root<MovieFileImpl> movieFiles = fromQuery.from(MovieFileImpl.class);
-        // Select Query
-        CriteriaQuery<MovieFileImpl> selectQuery = fromQuery.select(movieFiles);
-        // Where Query
-        selectQuery.where(builder.equal(movieFiles.get("id"), id));
-        // Final Query
-        TypedQuery<MovieFileImpl> typedQuery = entityManager.createQuery(selectQuery);
-        try {
-            return typedQuery.getSingleResult();
-        } catch (NoResultException e) {
-            logger.debug("Try to get movie file <{}> but not exist.", id);
-            return null;
-        }
-    }
-
-    @Override
-    public MovieFile getMovieFileByAbsoluteName(String absoluteName) {
-        // From Query
-        CriteriaQuery<MovieFileImpl> fromQuery = builder.createQuery(MovieFileImpl.class);
-        Root<MovieFileImpl> movieFiles = fromQuery.from(MovieFileImpl.class);
-        // Select Query
-        CriteriaQuery<MovieFileImpl> selectQuery = fromQuery.select(movieFiles);
-        // Where Query
-        selectQuery.where(builder.equal(movieFiles.get("absoluteName"), absoluteName));
-        // Final Query
-        TypedQuery<MovieFileImpl> typedQuery = entityManager.createQuery(selectQuery);
-        try {
-            return typedQuery.getSingleResult();
-        } catch (NoResultException e) {
-            logger.debug("Try to get movie file <{}> but not exist.", absoluteName);
-            return null;
-        }
+        return entityManager.find(MovieFileImpl.class, id);
     }
 
     @Override
     public MovieInfo getMovieInfoById(String id) {
-        // From Query
-        CriteriaQuery<MovieInfoImpl> fromQuery = builder.createQuery(MovieInfoImpl.class);
-        Root<MovieInfoImpl> movieInfo = fromQuery.from(MovieInfoImpl.class);
-        // Select Query
-        CriteriaQuery<MovieInfoImpl> selectQuery = fromQuery.select(movieInfo);
-        // Where Query
-        selectQuery.where(builder.equal(movieInfo.get("id"), id));
-        // Final Query
-        TypedQuery<MovieInfoImpl> typedQuery = entityManager.createQuery(selectQuery);
-        try {
-            return typedQuery.getSingleResult();
-        } catch (NoResultException e) {
-            logger.debug("Try to get movie info <{}> but not exist.", id);
-            return null;
-        }
+        return entityManager.find(MovieInfoImpl.class, id);
     }
 
     @Override
     public MovieImage getMovieImageById(String id) {
-        // From Query
-        CriteriaQuery<MovieImageImpl> fromQuery = builder.createQuery(MovieImageImpl.class);
-        Root<MovieImageImpl> movieImages = fromQuery.from(MovieImageImpl.class);
-        // Select Query
-        CriteriaQuery<MovieImageImpl> selectQuery = fromQuery.select(movieImages);
-        // Where Query
-        selectQuery.where(builder.equal(movieImages.get("id"), id));
-        // Final Query
-        TypedQuery<MovieImageImpl> typedQuery = entityManager.createQuery(selectQuery);
-        try {
-            return typedQuery.getSingleResult();
-        } catch (NoResultException e) {
-            logger.debug("Try to get movie image <{}> but not exist.", id);
-            return null;
+        return entityManager.find(MovieImageImpl.class, id);
+    }
+
+    @Override
+    public byte[] getMovieThumbnailById(String movieId) {
+        List<? extends MovieInfo> movieInfoList = entityManager.createQuery("SELECT i FROM MOVIE_INFO i JOIN i.movie m WHERE m.id = ?1", MovieInfoImpl.class).setParameter(1, movieId).getResultList();
+        if (movieInfoList != null && !movieInfoList.isEmpty()) {
+            for (MovieImage movieImage : movieInfoList.get(0).getPosters()) {
+                if ("thumb".equalsIgnoreCase(movieImage.getSize())) {
+                    return movieImage.getImage();
+                }
+            }
         }
+        return null;
+    }
+
+    @Override
+    public long getMoviesCount() {
+        return entityManager.createQuery("SELECT COUNT(m) FROM MOVIE m", Long.class).getSingleResult();
+    }
+
+    @Override
+    public long getMovieFilesCount() {
+        return entityManager.createQuery("SELECT COUNT(m) FROM MOVIE_FILE m", Long.class).getSingleResult();
     }
 
     @Override
@@ -522,138 +429,74 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
-    public void persist(List<Movie> movies) {
-        for (Movie movie : movies) {
-            if (movie.getClass() == MovieImpl.class) {
-                entityManager.persist(movie);
+    public void deleteMovieInfo() {
+        entityManager.createQuery("DELETE FROM MOVIE_INFO m").executeUpdate();
+    }
+
+    @Override
+    public void synchronize(List<MovieFile> movieFiles) {
+        // Mapping relations
+        for (MovieFile movieFile : movieFiles) {
+            List<MovieFileImpl> dbMovieFiles = entityManager.createQuery("SELECT m FROM MOVIE_FILE m WHERE m.absoluteName = ?1", MovieFileImpl.class).setParameter(1, movieFile.getAbsoluteName()).getResultList();
+            if (dbMovieFiles != null && dbMovieFiles.size() == 1) {
+                dbMovieFiles.get(0).getMovie().addFile(movieFile);
             }
         }
-    }
 
-    @Override
-    public void persist(Movie movie) {
-        if (movie.getClass() == MovieImpl.class) {
-            entityManager.persist(movie);
+        // Delete old ones
+        entityManager.createQuery("DELETE FROM MOVIE_FILE m").executeUpdate();
+
+        // Insert new ones
+        for (MovieFile movieFile : movieFiles) {
+            if (movieFile.getMovie() != null) {
+                entityManager.merge(movieFile.getMovie());
+            } else {
+                List<MovieImpl> dbMovies = entityManager.createQuery("SELECT m FROM MOVIE m JOIN m.files f WHERE f.filePath = ?1 AND f.movieName = ?2", MovieImpl.class).setParameter(1, movieFile.getFilePath()).setParameter(2, movieFile.getMovieName()).getResultList();
+                if (dbMovies != null && dbMovies.size() > 0) {
+                    Movie movie = dbMovies.get(0);
+                    movie.addFile(movieFile);
+                    entityManager.merge(movie);
+                } else {
+                    Movie movie = new MovieImpl();
+                    movie.addFile(movieFile);
+                    entityManager.persist(movie);
+                }
+            }
         }
+
+        // Delete empty movies
+        entityManager.createQuery("DELETE FROM MOVIE m WHERE SIZE(m.files) = 0").executeUpdate();
     }
 
     @Override
-    public void persist(MovieFile movieFile) {
-        if (movieFile.getClass() == MovieFileImpl.class) {
-            entityManager.persist(movieFile);
-        }
-    }
-
-    @Override
-    public void persist(MovieInfo movieInfo) {
-        if (movieInfo.getClass() == MovieInfoImpl.class) {
-            entityManager.persist(movieInfo);
-        }
-    }
-
-    @Override
-    public void persist(MovieImage movieImage) {
-        if (movieImage.getClass() == MovieImageImpl.class) {
-            entityManager.persist(movieImage);
-        }
-    }
-
-    @Override
-    public void persist(Image image) {
-        if (image.getClass() == ImageImpl.class) {
-            entityManager.persist(image);
-        }
-    }
-
-    @Override
-    public void persist(ImageFile imageFile) {
-        if (imageFile.getClass() == ImageFileImpl.class) {
-            entityManager.persist(imageFile);
-        }
-    }
-
-    @Override
-    public void merge(Movie movie) {
-        if (movie.getClass() == MovieImpl.class) {
+    public void synchronize(String movieId, List<MovieInfo> info) {
+        Movie movie = entityManager.find(MovieImpl.class, movieId);
+        if (movie != null) {
+            for (MovieInfo movieInfo : info) {
+                movie.addInfo(movieInfo);
+            }
             entityManager.merge(movie);
         }
     }
 
     @Override
-    public void merge(MovieFile movieFile) {
-        if (movieFile.getClass() == MovieFileImpl.class) {
-            entityManager.merge(movieFile);
-        }
+    public void persist(Object entity) {
+        entityManager.persist(entity);
     }
 
     @Override
-    public void merge(MovieInfo movieInfo) {
-        if (movieInfo.getClass() == MovieInfoImpl.class) {
-            entityManager.merge(movieInfo);
-        }
+    public <T> T merge(T entity) {
+        return entityManager.merge(entity);
     }
 
     @Override
-    public void merge(MovieImage movieImage) {
-        if (movieImage.getClass() == MovieImageImpl.class) {
-            entityManager.merge(movieImage);
-        }
+    public void remove(Object entity) {
+        entityManager.remove(entity);
     }
 
     @Override
-    public void merge(Image image) {
-        if (image.getClass() == ImageImpl.class) {
-            entityManager.merge(image);
-        }
-    }
-
-    @Override
-    public void merge(ImageFile imageFile) {
-        if (imageFile.getClass() == ImageFileImpl.class) {
-            entityManager.merge(imageFile);
-        }
-    }
-
-    @Override
-    public void remove(Movie movie) {
-        if (movie.getClass() == MovieImpl.class) {
-            entityManager.remove(movie);
-        }
-    }
-
-    @Override
-    public void remove(MovieFile movieFile) {
-        if (movieFile.getClass() == MovieFileImpl.class) {
-            entityManager.remove(movieFile);
-        }
-    }
-
-    @Override
-    public void remove(MovieInfo movieInfo) {
-        if (movieInfo.getClass() == MovieInfoImpl.class) {
-            entityManager.remove(movieInfo);
-        }
-    }
-
-    @Override
-    public void remove(MovieImage movieImage) {
-        if (movieImage.getClass() == MovieImageImpl.class) {
-            entityManager.remove(movieImage);
-        }
-    }
-
-    @Override
-    public void remove(Image image) {
-        if (image.getClass() == ImageImpl.class) {
-            entityManager.remove(image);
-        }
-    }
-
-    @Override
-    public void remove(ImageFile imageFile) {
-        if (imageFile.getClass() == ImageFileImpl.class) {
-            entityManager.remove(imageFile);
-        }
+    public void refresh(Object entity) {
+        entityManager.refresh(entity);
     }
 
     /**

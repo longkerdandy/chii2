@@ -78,7 +78,7 @@ public class MovieBaseStorageFolderContainer extends Container implements Visual
         // Read from library
         List<? extends VisualItem> movies = contentManager.getMovies(getId(), filter, startIndex, maxCount, orderBy);
         // Total count
-        long count = 1;
+        long count = contentManager.getMoviesCount();
         // Add children
         if (movies != null && count > 0) {
             for (VisualItem movie : movies) {

@@ -80,7 +80,7 @@ public class ImageHandler implements EventHandler {
     @Override
     public void handleEvent(Event event) {
         // Image Scan Event
-        if (FileService.IMAGE_SCAN_TOPIC.equals(event.getTopic())) {
+        if (FileService.IMAGE_SCAN_PROVIDED_TOPIC.equals(event.getTopic())) {
             // Get List of file names from event, this should be fine
             @SuppressWarnings("unchecked")
             List<File> files = (List<File>) event.getProperty("files");

@@ -28,35 +28,35 @@ public class ContentManagerTest {
 
     @Test
     public void getItemParentTest() {
-        assert "PSFC-Singapore".equals(contentManger.getItemParentId("PI-PSFC-Singapore-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261"));
-        assert "PSFC-Universal Studios".equals(contentManger.getItemParentId("PI-PSFC-Universal Studios-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261"));
+        assert "PSFC-Singapore".equals(contentManger.getItemParentId("PI-PSFC-Singapore-1-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261"));
+        assert "PSFC-Universal Studios".equals(contentManger.getItemParentId("PI-PSFC-Universal Studios-1-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261"));
     }
 
     @Test
     public void getItemLibraryIdTest() {
-        assert "19f08e4e-b25e-4a2f-9e2b-55d2d40a4261".equals(contentManger.getItemLibraryId("PI-PSFC-Singapore-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261"));
-        assert "19f08e4e-b25e-4a2f-9e2b-55d2d40a4261".equals(contentManger.getItemLibraryId("PI-PSFC-Universal Studios-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261"));
+        assert "19f08e4e-b25e-4a2f-9e2b-55d2d40a4261".equals(contentManger.getItemLibraryId("PI-PSFC-Singapore-1-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261"));
+        assert "19f08e4e-b25e-4a2f-9e2b-55d2d40a4261".equals(contentManger.getItemLibraryId("PI-PSFC-Universal Studios-1-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261"));
     }
 
     @Test
     public void forgeItemIdTest() {
-        assert "PI-PSFC-Singapore-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261".equals(contentManger.forgeItemId("19f08e4e-b25e-4a2f-9e2b-55d2d40a4261", "PSFC-Singapore", "PI-"));
-        assert "PI-PSFC-Universal Studios-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261".equals(contentManger.forgeItemId("19f08e4e-b25e-4a2f-9e2b-55d2d40a4261", "PSFC-Universal Studios", "PI-"));
+        assert "PI-PSFC-Singapore-1-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261".equals(contentManger.forgeItemId("19f08e4e-b25e-4a2f-9e2b-55d2d40a4261", 1, "PSFC-Singapore", "PI-"));
+        assert "PI-PSFC-Universal Studios-1-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261".equals(contentManger.forgeItemId("19f08e4e-b25e-4a2f-9e2b-55d2d40a4261", 1, "PSFC-Universal Studios", "PI-"));
     }
 
     @Test
     public void isPicturesStorageFolderTest() {
         assert contentManger.isPicturesStorageFolderContainer("PSFC-Singapore");
         assert contentManger.isPicturesStorageFolderContainer("PSFC-Universal Studios");
-        assert !contentManger.isPicturesStorageFolderContainer("PI-PSFC-Singapore-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
-        assert !contentManger.isPicturesStorageFolderContainer("PI-PSFC-Universal Studios-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
+        assert !contentManger.isPicturesStorageFolderContainer("PI-PSFC-Singapore-1-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
+        assert !contentManger.isPicturesStorageFolderContainer("PI-PSFC-Universal Studios-1-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
     }
 
     @Test
     public void isPhotoItemTest() {
         assert !contentManger.isPhotoItem("PSFC-Singapore");
         assert !contentManger.isPhotoItem("PSFC-Universal Studios");
-        assert contentManger.isPhotoItem("PI-PSFC-Singapore-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
-        assert contentManger.isPhotoItem("PI-PSFC-Universal Studios-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
+        assert contentManger.isPhotoItem("PI-PSFC-Singapore-1-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
+        assert contentManger.isPhotoItem("PI-PSFC-Universal Studios-1-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
     }
 }

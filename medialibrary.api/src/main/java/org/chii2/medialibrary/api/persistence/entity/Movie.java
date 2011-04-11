@@ -1,5 +1,6 @@
 package org.chii2.medialibrary.api.persistence.entity;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -57,6 +58,14 @@ public interface Movie {
     public void removeFile(MovieFile file);
 
     /**
+     * Get File by disk number
+     *
+     * @param diskNum Disk Number
+     * @return Movie File
+     */
+    public MovieFile getFile(int diskNum);
+
+    /**
      * Get list of movie information
      *
      * @return Movie information
@@ -90,4 +99,144 @@ public interface Movie {
      * @param info Movie information
      */
     public void removeInfo(MovieInfo info);
+
+    /**
+     * Get default movie title (movie name)
+     *
+     * @return Movie Title
+     */
+    public String getTitle();
+
+    /**
+     * Get movie released date
+     *
+     * @return Movie Released Date
+     */
+    public Date getReleasedDate();
+
+    /**
+     * Get movie overview
+     *
+     * @return Overview
+     */
+    public String getOverview();
+
+    /**
+     * Get movie rating
+     *
+     * @return Rating
+     */
+    public double getRating();
+
+    /**
+     * Get movie certification
+     *
+     * @return Certification
+     */
+    public String getCertification();
+
+    /**
+     * Get movie language
+     *
+     * @return Language
+     */
+    public String getLanguage();
+
+    /**
+     * Get movie format
+     *
+     * @return Format
+     */
+    public String getFormat();
+
+    /**
+     * Get movie duration in milliseconds
+     *
+     * @return Duration
+     */
+    public long getDuration();
+
+    /**
+     * Get movie size in bytes
+     *
+     * @return Size
+     */
+    public long getSize();
+
+    /**
+     * Get movie bit rate in bytes
+     *
+     * @return Bit Rate
+     */
+    public long getBitRate();
+
+    /**
+     * Get video width
+     *
+     * @return Video Width
+     */
+    public int getVideoWidth();
+
+    /**
+     * Get video height
+     *
+     * @return Video Height
+     */
+    public int getVideoHeight();
+
+    /**
+     * Get video codec
+     *
+     * @return Video Codec
+     */
+    public String getVideoCodec();
+
+    /**
+     * Get video bit rate
+     *
+     * @return Video BitRate
+     */
+    public long getVideoBitRate();
+
+    /**
+     * Get video fps
+     *
+     * @return Video FPS
+     */
+    public float getVideoFps();
+
+    /**
+     * Get audio codec
+     *
+     * @return Audio Codec
+     */
+    public String getAudioCodec();
+
+    /**
+     * Get movie audio channels number
+     *
+     * @return Channels Number
+     */
+    public int getAudioChannels();
+
+    /**
+     * Get audio bit rate
+     *
+     * @return Audio BitRate
+     */
+    public long getAudioBitRate();
+
+    /**
+     * Get movie audio sample frequency in HZ (sample bit rate)
+     *
+     * @return Sample Frequency
+     */
+    public long getAudioSampleBitRate();
+
+    /**
+     * Get movie audio bits per sample (bit depth)
+     *
+     * @return Bits per Sample
+     */
+    public int getAudioBitDepth();
 }

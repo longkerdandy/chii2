@@ -5,9 +5,13 @@ import org.chii2.medialibrary.api.file.FileService;
 import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.persistence.PersistenceService;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -18,10 +22,10 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
 
     // Persistence Service
     private PersistenceService persistenceService;
-    // File Service
-    private FileService fileService;
+    // Injected EventAdmin Service
+    private EventAdmin eventAdmin;
     // Logger
-    private Logger logger= LoggerFactory.getLogger("org.chii2.medialibrary.core");
+    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.core");
 
     /**
      * Life Cycle Init
@@ -41,17 +45,28 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
 
     @Override
     public void scanAll() {
-        // TODO
+        scanMovies();
+        scanImages();
     }
 
     @Override
     public void scanMovies() {
-        fileService.scanMovies();
+        // Prepare properties
+        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        // Send a event
+        Event event = new Event(FileService.MOVIE_SCAN_REQUEST_TOPIC, properties);
+        logger.debug("Send a movie scan request event.");
+        eventAdmin.postEvent(event);
     }
 
     @Override
     public void scanImages() {
-        fileService.scanImages();
+        // Prepare properties
+        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        // Send a event
+        Event event = new Event(FileService.IMAGE_SCAN_REQUEST_TOPIC, properties);
+        logger.debug("Send a image scan request event.");
+        eventAdmin.postEvent(event);
     }
 
     @Override
@@ -87,6 +102,21 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     @Override
     public List<? extends Movie> getMoviesByName(String movieName, int firstResult, int maxResults, Map<String, String> sorts) {
         return persistenceService.getMoviesByName(movieName, firstResult, maxResults, sorts);
+    }
+
+    @Override
+    public byte[] getMovieThumbnailById(String movieId) {
+        return persistenceService.getMovieThumbnailById(movieId);
+    }
+
+    @Override
+    public long getMoviesCount() {
+        return persistenceService.getMoviesCount();
+    }
+
+    @Override
+    public long getMovieFilesCount() {
+        return persistenceService.getMovieFilesCount();
     }
 
     @Override
@@ -146,7 +176,7 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
 
     @Override
     public List<? extends Image> getImagesByAlbum(String album) {
-        return persistenceService.getImagesByAlbum(album,-1 ,-1, null);
+        return persistenceService.getImagesByAlbum(album, -1, -1, null);
     }
 
     @Override
@@ -175,12 +205,12 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     }
 
     /**
-     * Inject FileService
+     * Inject EventAdmin service
      *
-     * @param fileService FileService
+     * @param eventAdmin EventAdmin service
      */
     @SuppressWarnings("unused")
-    public void setFileService(FileService fileService) {
-        this.fileService = fileService;
+    public void setEventAdmin(EventAdmin eventAdmin) {
+        this.eventAdmin = eventAdmin;
     }
 }

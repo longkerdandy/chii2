@@ -81,18 +81,6 @@ public interface ContentManager {
     public List<? extends VisualItem> getPhotosByAlbum(String album, String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy);
 
     /**
-     * Get movies
-     *
-     * @param filter     Content Filer
-     * @param parentId   Parent Container ID
-     * @param startIndex Start Index
-     * @param maxCount   Max Results Count
-     * @param orderBy    Sort Criterion
-     * @return List of Movie Item
-     */
-    public List<? extends VisualItem> getMovies(String filter, String parentId, long startIndex, long maxCount, SortCriterion[] orderBy);
-
-    /**
      * Get total photos count by photo album
      *
      * @param album Photo Album
@@ -108,6 +96,25 @@ public interface ContentManager {
      * @return Photo Item
      */
     public VisualItem getPhotoById(String id, String filter);
+
+    /**
+     * Get movies
+     *
+     * @param filter     Content Filer
+     * @param parentId   Parent Container ID
+     * @param startIndex Start Index
+     * @param maxCount   Max Results Count
+     * @param orderBy    Sort Criterion
+     * @return List of Movie Item
+     */
+    public List<? extends VisualItem> getMovies(String filter, String parentId, long startIndex, long maxCount, SortCriterion[] orderBy);
+
+    /**
+     * Get movies count
+     *
+     * @return Count
+     */
+    public long getMoviesCount();
 
     /**
      * Get Container's Title from Container's ID. (By removing the container prefix)
@@ -136,12 +143,13 @@ public interface ContentManager {
     /**
      * Forge Item ID from Library ID
      *
-     * @param id       Library ID
-     * @param parentId Parent ID
-     * @param prefix   Item Prefix
+     * @param id           Library ID
+     * @param seriesNumber Series Number
+     * @param parentId     Parent ID
+     * @param prefix       Item Prefix
      * @return Item ID
      */
-    public String forgeItemId(String id, String parentId, String prefix);
+    public String forgeItemId(String id, int seriesNumber, String parentId, String prefix);
 
     /**
      * Forge Container ID from its Title

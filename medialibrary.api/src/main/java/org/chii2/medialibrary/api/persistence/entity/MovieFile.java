@@ -302,6 +302,34 @@ public interface MovieFile {
     public void setVideoBitRate(long videoBitRate);
 
     /**
+     * Get Video Bit Depth
+     *
+     * @return Video Bit Depth
+     */
+    public int getVideoBitDepth();
+
+    /**
+     * Set Video Bit Depth
+     *
+     * @param videoBitDepth Video Bit Depth
+     */
+    public void setVideoBitDepth(int videoBitDepth);
+
+    /**
+     * Get Video Frame Rate
+     *
+     * @return Video Frame Rate
+     */
+    public float getVideoFrameRate();
+
+    /**
+     * Set Video Frame Rate
+     *
+     * @param videoFrameRate Video Frame Rate
+     */
+    public void setVideoFrameRate(float videoFrameRate);
+
+    /**
      * Get Video Width
      *
      * @return Video Width
@@ -372,6 +400,20 @@ public interface MovieFile {
     public void setAudioBitRate(long audioBitRate);
 
     /**
+     * Get Audio Bit Depth
+     *
+     * @return Audio Bit Depth
+     */
+    public int getAudioBitDepth();
+
+    /**
+     * Set Audio Bit Depth
+     *
+     * @param audioBitDepth Audio Bit Depth
+     */
+    public void setAudioBitDepth(int audioBitDepth);
+
+    /**
      * Get Audio Channel Count
      *
      * @return Audio Channel Count
@@ -412,4 +454,18 @@ public interface MovieFile {
      * @param audioLanguage Audio Language
      */
     public void setAudioLanguage(String audioLanguage);
+
+    /**
+     * Get Movie this file belong to
+     *
+     * @return Movie
+     */
+    public Movie getMovie();
+
+    /**
+     * Set Movie this file belong to
+     *
+     * @param movie Movie
+     */
+    public void setMovie(Movie movie);
 }

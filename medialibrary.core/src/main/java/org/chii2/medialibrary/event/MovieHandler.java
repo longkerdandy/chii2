@@ -5,7 +5,6 @@ import org.chii2.medialibrary.api.file.FileService;
 import org.chii2.medialibrary.api.persistence.PersistenceService;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.persistence.entity.MovieFile;
-import org.chii2.medialibrary.api.persistence.entity.MovieImage;
 import org.chii2.medialibrary.api.persistence.entity.MovieInfo;
 import org.chii2.medialibrary.api.persistence.factory.MovieFactory;
 import org.chii2.medialibrary.api.provider.MovieFileInfoProviderService;
@@ -36,14 +35,6 @@ public class MovieHandler implements EventHandler {
     private PersistenceService persistenceService;
     // Injected MovieFactory
     private MovieFactory movieFactory;
-    // Injected list of Movie Online Information Provider Service
-    private List<MovieInfoProviderService> onlineProviderServices;
-    // Injected list of Movie File Information Provider Service
-    private List<MovieFileInfoProviderService> fileProviderServices;
-    // Preferred Movie File Information Providers
-    private List<String> movieFileInfoProviders = Arrays.asList("MediaInfo");
-    // Preferred Movie Online Information Providers
-    private List<String> movieOnlineInfoProviders = Arrays.asList("TMDb");
     // Force to refresh/update movie's information
     private boolean forceInfoUpdate = true;
     // Poster fetch count
@@ -52,10 +43,6 @@ public class MovieHandler implements EventHandler {
     private int backdropCount = 3;
     //Configuration FIle
     private final static String CONFIG_FILE = "org.chii2.medialibrary.core";
-    // Preferred Movie File Information Provider Config Key
-    private final static String MOVIE_FILE_INFO_PROVIDER = "movie.file.info.provider";
-    // Preferred Movie Online Information Provider Config Key
-    private final static String MOVIE_ONLINE_INFO_PROVIDER = "movie.online.info.provider";
     // Force to refresh/update movie's information Config Key
     private final static String MOVIE_FORCE_INFORMATION_UPDATE = "movie.force.update";
     // Poster Fetch Count Config Key
@@ -83,24 +70,6 @@ public class MovieHandler implements EventHandler {
         if (props == null || props.isEmpty()) {
             logger.error("MovieHandler load configuration <{}> with error.", CONFIG_FILE);
         } else {
-            // Load movie file information providers configuration
-            List<String> movieFileInfoProviders = ConfigUtils.loadConfigurations(props, MOVIE_FILE_INFO_PROVIDER);
-            if (movieFileInfoProviders != null && !movieFileInfoProviders.isEmpty()) {
-                this.movieFileInfoProviders = movieFileInfoProviders;
-                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_FILE_INFO_PROVIDER);
-            } else {
-                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_FILE_INFO_PROVIDER);
-            }
-
-            // Load movie online information providers configuration
-            List<String> movieOnlineInfoProviders = ConfigUtils.loadConfigurations(props, MOVIE_ONLINE_INFO_PROVIDER);
-            if (movieOnlineInfoProviders != null && !movieOnlineInfoProviders.isEmpty()) {
-                this.movieOnlineInfoProviders = movieOnlineInfoProviders;
-                logger.debug("MovieHandler configuration <{}> loaded.", MOVIE_ONLINE_INFO_PROVIDER);
-            } else {
-                logger.error("MovieHandler configuration <{}> is not valid.", MOVIE_ONLINE_INFO_PROVIDER);
-            }
-
             // Load force update information
             String forceInfoUpdate = ConfigUtils.loadConfiguration(props, MOVIE_FORCE_INFORMATION_UPDATE);
             if (StringUtils.isNotBlank(forceInfoUpdate)) {
@@ -141,12 +110,12 @@ public class MovieHandler implements EventHandler {
     @Override
     public void handleEvent(Event event) {
         // Movie Scan Event
-        if (FileService.MOVIE_SCAN_TOPIC.equals(event.getTopic())) {
+        if (FileService.MOVIE_SCAN_PROVIDED_TOPIC.equals(event.getTopic())) {
             // Get list of File from event, this should be fine
             @SuppressWarnings("unchecked")
             List<File> files = (List<File>) event.getProperty(FileService.FILE_PROPERTY);
             logger.debug("Receive a movie scan event with {} records.", files.size());
-            notifyProviderFetchFileInfo(files, new ArrayList<String>());
+            postMovieFileInfoRequestEvent(files);
         }
         // Movie FIle Information Provided Event
         else if (MovieFileInfoProviderService.MOVIE_FILE_INFO_PROVIDED_TOPIC.equals(event.getTopic())) {
@@ -154,17 +123,25 @@ public class MovieHandler implements EventHandler {
             @SuppressWarnings("unchecked")
             List<MovieFile> movieFiles = (List<MovieFile>) event.getProperty(MovieFileInfoProviderService.MOVIE_FILE_INFO_PROPERTY);
             logger.debug("Receive a movie file information provided event with {} records.", movieFiles.size());
-            synchronizeFileInfo(movieFiles, this.forceInfoUpdate);
+            // Synchronize
+            persistenceService.synchronize(movieFiles);
+            // Delete old movie information
+            if (forceInfoUpdate) {
+                persistenceService.deleteMovieInfo();
+            }
+            // Notify providers fetch movie info (online information)
+            List<? extends Movie> movies = persistenceService.getMovies(-1, -1, null);
+            for (Movie movie : movies) {
+                if (movie.getFilesCount() > 0 && (forceInfoUpdate || movie.getInfoCount() == 0)) {
+                    MovieFile movieFile = movie.getFiles().get(0);
+                    postMovieInfoRequestEvent(movie.getId(), movieFile.getMovieName(), movieFile.getYear(), 1, posterCount, backdropCount);
+                }
+            }
         }
         // Movie FIle Information Failed Event
         else if (MovieFileInfoProviderService.MOVIE_FILE_INFO_FAILED_TOPIC.equals(event.getTopic())) {
-            // Get list of Movie from event, this should be fine
-            @SuppressWarnings("unchecked")
-            List<File> files = (List<File>) event.getProperty(MovieFileInfoProviderService.MOVIE_FILE_PROPERTY);
-            @SuppressWarnings("unchecked")
-            List<String> excludeProviders = (List<String>) event.getProperty(MovieFileInfoProviderService.EXCLUDE_PROVIDERS_PROPERTY);
-            logger.debug("Receive a movie file information failed event, will try for another provider.");
-            notifyProviderFetchFileInfo(files, excludeProviders);
+            // Currently, do nothing here
+            logger.debug("Receive a movie file information failed event.");
         }
         // Movie Information Provided Event
         else if (MovieInfoProviderService.MOVIE_INFO_PROVIDED_TOPIC.equals(event.getTopic())) {
@@ -172,281 +149,54 @@ public class MovieHandler implements EventHandler {
             @SuppressWarnings("unchecked")
             List<MovieInfo> info = (List<MovieInfo>) event.getProperty(MovieInfoProviderService.MOVIE_INFO_PROPERTY);
             logger.debug("Receive a movie information provided event with {} information.", info.size());
-            synchronizeInfo(movieId, info);
+            // Synchronize
+            persistenceService.synchronize(movieId, info);
         }
         // Movie Information provided Failed Event
         else if (MovieInfoProviderService.MOVIE_INFO_FAILED_TOPIC.equals(event.getTopic())) {
             // Currently, do nothing here
-        }
-        // Movie Image Provided Event
-        else if (MovieInfoProviderService.MOVIE_IMAGE_PROVIDED_TOPIC.equals(event.getTopic())) {
-            String imageId = (String) event.getProperty(MovieInfoProviderService.IMAGE_ID_PROPERTY);
-            byte[] imageContent = (byte[]) event.getProperty(MovieInfoProviderService.IMAGE_CONTENT_PROPERTY);
-            logger.debug("Receive a movie image {} provided event.", imageId);
-            // Try to update image in database
-            synchronizeImage(imageId, imageContent);
+            logger.debug("Receive a movie information failed event.");
         }
     }
 
     /**
-     * Parse provided image and save into database
+     * Send a movie file information request event
      *
-     * @param imageId      Image ID
-     * @param imageContent Image Content
+     * @param files Files to be parsed
      */
-    private void synchronizeImage(String imageId, byte[] imageContent) {
-        // Get the image from database
-        MovieImage image = persistenceService.getMovieImageById(imageId);
-        if (image != null) {
-            // Add Image save back to database
-            image.setImage(imageContent);
-            // Save back to database
-            persistenceService.merge(image);
-            logger.debug("Movie image {} merged into database.", imageId);
-        } else {
-            logger.debug("Movie image {} not found in database.", imageId);
-        }
+    private void postMovieFileInfoRequestEvent(List<File> files) {
+        // Prepare properties
+        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        properties.put(MovieFileInfoProviderService.MOVIE_FILE_PROPERTY, files);
+        // Send a event
+        Event event = new Event(MovieFileInfoProviderService.MOVIE_FILE_INFO_REQUEST_TOPIC, properties);
+        logger.debug("Send a movie file information request event with {} files.", files.size());
+        eventAdmin.postEvent(event);
     }
 
     /**
-     * Parse provided movie information and save into database
+     * Send a movie information request event
      *
-     * @param movieId Movie ID
-     * @param info    Movie Information
+     * @param movieId       Movie Id
+     * @param movieName     Movie Name (Guessed Name)
+     * @param movieYear     Movie Year (Guessed Year)
+     * @param resultCount   Max result count
+     * @param posterCount   Result poster count
+     * @param backdropCount Result backdrop count
      */
-    private void synchronizeInfo(String movieId, List<MovieInfo> info) {
-        // Get movie from database
-        Movie movie = persistenceService.getMovieById(movieId);
-
-        // Null, Return
-        if (movie == null) {
-            return;
-        }
-
-        // Remove current info
-        if (movie.getInfoCount() > 0) {
-            for (MovieInfo movieInfo : movie.getInfo()) {
-                persistenceService.remove(movieInfo);
-            }
-        }
-
-        // Set new info
-        movie.setInfo(info);
-
-        // Save into database        
-        persistenceService.merge(movie);
-
-        // Fetch Posters and Backdrops
-        for (MovieInfo movieInfo : info) {
-            for (MovieImage image : movieInfo.getImages()) {
-                notifyProviderFetchImage(image.getId(), image.getUrl(), movieInfo.getProviderName());
-            }
-        }
-    }
-
-    /**
-     * Synchronize Movie Files to database
-     *
-     * @param movieFiles      Movie Files
-     * @param forceInfoUpdate True to force movie information update (even information already existed)
-     */
-    private void synchronizeFileInfo(List<MovieFile> movieFiles, boolean forceInfoUpdate) {
-        // Current Movie Files from database, and will be compared after looping
-        List<? extends MovieFile> currentFiles = persistenceService.getMovieFiles(-1, -1, null);
-        // Present Movie Files
-        List<MovieFile> presentFiles = new ArrayList<MovieFile>();
-        // Loop files
-        for (MovieFile movieFile : movieFiles) {
-            // Try to get the movie file in database which point to the same file in disk
-            MovieFile dbMovieFile = persistenceService.getMovieFileByAbsoluteName(movieFile.getAbsoluteName());
-            // Database doesn't contain current movie file
-            if (dbMovieFile == null) {
-                Movie movie = persistenceService.getMoviesContainFile(movieFile.getFilePath(), movieFile.getMovieName());
-                // Database doesn't contain a movie this movie file belong to, create a new movie
-                if (movie == null) {
-                    movie = movieFactory.createMovie();
-                    movie.addFile(movieFile);
-                    persistenceService.merge(movie);
-                    //
-                }
-                // Database already has a movie this movie file should be included, add file to movie
-                else {
-                    movie.addFile(movieFile);
-                    persistenceService.merge(movie);
-                }
-            }
-            // Database contains the movie file, we will update it
-            else {
-                movieFile.setId(dbMovieFile.getId());
-                persistenceService.merge(movieFile);
-                // Add to present movie file list
-                presentFiles.add(dbMovieFile);
-            }
-        }
-
-        // Remove unnecessary movie files from database
-        loop:
-        for (MovieFile currentFile : currentFiles) {
-            for (MovieFile presentFile : presentFiles) {
-                // Current Movie File is still present, continue to next one
-                if (currentFile.getId().equals(presentFile.getId())) {
-                    presentFiles.remove(presentFile);
-                    continue loop;
-                }
-            }
-
-            // Here means current Movie File is not present any more, remove it
-            // Movie contains the movie file
-            Movie movie = persistenceService.getMoviesContainFile(currentFile.getId());
-            // Shouldn't be null, already been removed, is that possible?
-            if (movie != null) {
-                // Movie contains this file only, and since the file is going to be removed, we just removed the movie
-                if (movie.getFilesCount() == 1) {
-                    persistenceService.remove(movie);
-                }
-                // Movie contains other files
-                else {
-                    movie.removeFile(currentFile);
-                    persistenceService.remove(currentFile);
-                    // TODO: not sure this logic is correct, do I need this?
-                    persistenceService.merge(movie);
-                }
-            }
-        }
-
-        // Notify providers fetch movie info (online information)
-        List<? extends Movie> movies = persistenceService.getMovies(-1, -1, null);
-        for (Movie movie : movies) {
-            // Movie already contains information
-            if (movie.getInfoCount() > 0) {
-                // Force to update movie information
-                if (forceInfoUpdate) {
-                    notifyProviderFetchOnlineInfo(movie);
-                }
-            }
-            // Movie without information
-            else {
-                notifyProviderFetchOnlineInfo(movie);
-            }
-        }
-    }
-
-    /**
-     * Notify Movie File Information Provider to analyze movie files and extract metadata information
-     *
-     * @param files            Movie Files
-     * @param excludeProviders Excluded Providers (which may already prove failed)
-     */
-    private void notifyProviderFetchFileInfo(List<File> files, List<String> excludeProviders) {
-        if (!fileProviderServices.isEmpty()) {
-            // Find the provider based on configuration order and use it to fetch movie information
-            for (String preferredProvider : movieFileInfoProviders) {
-                // If the provider on the exclude list (which usually already failed), continue to next
-                if (excludeProviders != null && excludeProviders.contains(preferredProvider)) {
-                    continue;
-                }
-                // Loop the current provider see whether preferred provider is available
-                for (MovieFileInfoProviderService provider : fileProviderServices) {
-                    if (preferredProvider.equalsIgnoreCase(provider.getProviderName())) {
-                        logger.debug("Try to get movie file information with <{}> provider.", provider.getProviderName());
-                        // Try to get movie file information from the provider (this tends to work background)
-                        provider.getMovieFileInformation(files, excludeProviders);
-                        // Once matched, stop looping
-                        return;
-                    }
-                }
-            }
-        }
-
-        // If nothing matched
-        logger.error("No valid Movie File Information Provider presents, please check configuration and module status.");
-    }
-
-    /**
-     * Notify the provider to fetch movie online information
-     *
-     * @param movie Movie
-     */
-    @SuppressWarnings({"LoopStatementThatDoesntLoop"})
-    private void notifyProviderFetchOnlineInfo(Movie movie) {
-        // Provider matched
-        boolean hasMatched = false;
-
-        if (!onlineProviderServices.isEmpty()) {
-            String movieName = null;
-            int movieYear = -1;
-            // All the movie files should have the same movie name and year, we just use the first available one
-            for (MovieFile movieFile : movie.getFiles()) {
-                if (StringUtils.isNotBlank(movieFile.getMovieName())) {
-                    movieName = movieFile.getMovieName();
-                    movieYear = movieFile.getYear();
-                }
-                break;
-            }
-
-            // Find providers based on configuration and use each provider to fetch movie information
-            for (String preferredProvider : movieOnlineInfoProviders) {
-                // Loop the current provider see whether preferred provider is available
-                for (MovieInfoProviderService provider : onlineProviderServices) {
-                    if (preferredProvider.equalsIgnoreCase(provider.getProviderName())) {
-                        // Mark as matched
-                        hasMatched = true;
-
-                        if (StringUtils.isNotBlank(movieName)) {
-                            logger.debug("Try to get movie <{}> information with <{}> provider.", movieName, provider.getProviderName());
-                            // Try to get movie information from the internet provider (this tends to work background)
-                            if (movieYear > 0) {
-                                provider.getMovieInformationByName(movie.getId(), movieName, movieYear, 1, this.posterCount, this.backdropCount);
-                            } else {
-                                provider.getMovieInformationByName(movie.getId(), movieName, 1, this.posterCount, this.backdropCount);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!hasMatched) {
-            logger.error("No valid Movie Online Information Provider presents, please check configuration and module status.");
-        }
-    }
-
-    /**
-     * Notify the provider to fetch movie image
-     *
-     * @param imageId          Image ID
-     * @param url              URL
-     * @param originalProvider Original Provider
-     */
-    private void notifyProviderFetchImage(String imageId, String url, String originalProvider) {
-        if (!onlineProviderServices.isEmpty()) {
-            // Loop the current provider see whether original provider is available
-            for (MovieInfoProviderService provider : onlineProviderServices) {
-                if (originalProvider.equalsIgnoreCase(provider.getProviderName())) {
-                    logger.debug("Try to get movie image <{}> with <{}> provider.", imageId, provider.getProviderName());
-                    // Try to get movie image from the internet provider (this tends to work background)
-                    provider.getMovieImageByUrl(imageId, url);
-                    // Once matched, stop
-                    return;
-                }
-            }
-
-            // If original provider not presented, find the provider based on configuration order and use it to fetch image
-            for (String preferredProvider : movieOnlineInfoProviders) {
-                // Loop the current provider see whether preferred provider is available
-                for (MovieInfoProviderService provider : onlineProviderServices) {
-                    if (preferredProvider.equalsIgnoreCase(provider.getProviderName())) {
-                        logger.debug("Try to get movie image <{}> with <{}> provider.", imageId, provider.getProviderName());
-                        // Try to get movie image from the internet provider (this tends to work background)
-                        provider.getMovieImageByUrl(imageId, url);
-                        // Once matched, stop looping
-                        return;
-                    }
-                }
-            }
-        }
-
-        logger.error("No valid Movie Online Information Provider presents, please check configuration and module status.");
+    private void postMovieInfoRequestEvent(String movieId, String movieName, int movieYear, int resultCount, int posterCount, int backdropCount) {
+        // Prepare properties
+        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        properties.put(MovieInfoProviderService.MOVIE_ID_PROPERTY, movieId);
+        properties.put(MovieInfoProviderService.MOVIE_NAME_PROPERTY, movieName);
+        properties.put(MovieInfoProviderService.MOVIE_YEAR_PROPERTY, movieYear);
+        properties.put(MovieInfoProviderService.RESULT_COUNT_PROPERTY, resultCount);
+        properties.put(MovieInfoProviderService.POSTER_COUNT_PROPERTY, posterCount);
+        properties.put(MovieInfoProviderService.BACKDROP_COUNT_PROPERTY, backdropCount);
+        // Send a event
+        Event event = new Event(MovieInfoProviderService.MOVIE_INFO_REQUEST_TOPIC, properties);
+        logger.debug("Send a movie <{}> information request event.", movieId);
+        eventAdmin.postEvent(event);
     }
 
     /**
@@ -487,26 +237,6 @@ public class MovieHandler implements EventHandler {
     @SuppressWarnings("unused")
     public void setMovieFactory(MovieFactory movieFactory) {
         this.movieFactory = movieFactory;
-    }
-
-    /**
-     * Inject Movie Information Provider Services
-     *
-     * @param onlineProviderServices Movie Information Provider Services
-     */
-    @SuppressWarnings("unused")
-    public void setOnlineProviderServices(List<MovieInfoProviderService> onlineProviderServices) {
-        this.onlineProviderServices = onlineProviderServices;
-    }
-
-    /**
-     * Inject Movie File Information Provider Services
-     *
-     * @param fileProviderServices Movie File Information Provider Services
-     */
-    @SuppressWarnings("unused")
-    public void setFileProviderServices(List<MovieFileInfoProviderService> fileProviderServices) {
-        this.fileProviderServices = fileProviderServices;
     }
 }
 

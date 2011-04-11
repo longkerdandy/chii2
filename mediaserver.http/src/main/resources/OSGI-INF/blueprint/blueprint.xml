@@ -16,7 +16,7 @@
     </reference>
 
     <!-- Chii2 Media Server HTTP Bean -->
-    <bean id="mediaServerHttpService" class="org.chii2.mediaserver.http.NHttpServerServiceImpl"
+    <bean id="mediaServerHttpService" class="org.chii2.mediaserver.http.HttpServerServiceImpl"
           init-method="init"
           destroy-method="destroy">
         <property name="configAdmin" ref="configAdminService"/>

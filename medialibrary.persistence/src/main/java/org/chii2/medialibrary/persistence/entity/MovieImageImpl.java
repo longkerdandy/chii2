@@ -1,6 +1,7 @@
 package org.chii2.medialibrary.persistence.entity;
 
 import org.chii2.medialibrary.api.persistence.entity.MovieImage;
+import org.chii2.medialibrary.api.persistence.entity.MovieInfo;
 
 import javax.persistence.*;
 import java.util.UUID;
@@ -44,9 +45,14 @@ public class MovieImageImpl implements MovieImage {
 
     // Image binary Content
     @Lob
-    @Basic
+    @Basic(fetch = FetchType.LAZY)
     @Column(name = "IMAGE")
     private byte[] image;
+
+    // Movie Information
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MOVIE_INFO_ID")
+    private MovieInfoImpl movieInfo;
 
     /**
      * Constructor
@@ -143,5 +149,17 @@ public class MovieImageImpl implements MovieImage {
     @Override
     public void setImage(byte[] image) {
         this.image = image;
+    }
+
+    @Override
+    public MovieInfo getMovieInfo() {
+        return movieInfo;
+    }
+
+    @Override
+    public void setMovieInfo(MovieInfo movieInfo) {
+        if (movieInfo.getClass() == MovieInfoImpl.class) {
+            this.movieInfo = (MovieInfoImpl) movieInfo;
+        }
     }
 }

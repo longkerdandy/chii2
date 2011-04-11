@@ -4,30 +4,29 @@ import com.ning.http.client.*;
 import org.apache.commons.lang.StringUtils;
 import org.chii2.medialibrary.api.persistence.factory.MovieFactory;
 import org.chii2.medialibrary.api.provider.MovieInfoProviderService;
-import org.chii2.medialibrary.provider.tmdb.handler.ImageResponseHandler;
-import org.chii2.medialibrary.provider.tmdb.handler.MovieResponseHandler;
-import org.chii2.medialibrary.provider.tmdb.parser.JsonParser;
-import org.chii2.medialibrary.provider.tmdb.parser.Parser;
+import org.chii2.medialibrary.provider.tmdb.consumer.RequestConsumer;
 import org.chii2.util.ConfigUtils;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * TMDb Movie Information Provider Service (www.themoviedb.org)
  */
-public class MovieInfoProviderServiceImpl implements MovieInfoProviderService {
-    // Movie Search API URL
-    private final static String MOVIE_SEARCH_API = "http://api.themoviedb.org/2.1/Movie.search/en/json/";
-    // API Key
-    private final static String API_KEY = "e032ad8a5fa69bb92c91ebb7b7e20c15";
+public class MovieInfoProviderServiceImpl implements MovieInfoProviderService, EventHandler {
+    // Request queue
+    protected BlockingQueue<Map<String, Object>> queue;
     // Configuration FIle
     private final static String CONFIG_FILE = "org.chii2.medialibrary.provider.tmdb";
     // Configuration for the http client compression
@@ -54,10 +53,6 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService {
     private int idleConnectionInPoolTimeout = 100;
     // Http client request timeout in ms
     private int requestTimeout = 30000;
-    // Reusable Http Client
-    private AsyncHttpClient client;
-    // Reusable Parser
-    private Parser parser;
     // Injected ConfigAdmin Service
     private ConfigurationAdmin configAdmin;
     // Injected EventAdmin service
@@ -66,6 +61,7 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService {
     private MovieFactory movieFactory;
     // Logger
     private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.provider.tmdb");
+
 
     /**
      * Life Cycle Init
@@ -135,9 +131,6 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService {
             }
         }
 
-        // init Parser
-        this.parser = new JsonParser(this.movieFactory);
-
         // Init Http Client
         AsyncHttpClientConfig config = new AsyncHttpClientConfig.Builder()
                 .setCompressionEnabled(this.compressionEnabled)
@@ -147,7 +140,12 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService {
                 .setIdleConnectionInPoolTimeoutInMs(this.idleConnectionInPoolTimeout)
                 .setRequestTimeoutInMs(this.requestTimeout)
                 .build();
-        this.client = new AsyncHttpClient(config);
+
+        // Init queue
+        this.queue = new LinkedBlockingQueue<Map<String, Object>>();
+
+        // Start Request Consumer
+        new Thread(new RequestConsumer(queue, eventAdmin, movieFactory, config)).start();
     }
 
     /**
@@ -156,8 +154,25 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService {
     @SuppressWarnings("unused")
     public void destroy() {
         logger.debug("Chii2 Media Library TMDb Provider destroy.");
-        if (client != null) {
-            client.close();
+    }
+
+    @Override
+    public void handleEvent(Event event) {
+        if (MovieInfoProviderService.MOVIE_INFO_REQUEST_TOPIC.equals(event.getTopic())) {
+            Map<String, Object> properties = new Hashtable<String, Object>();
+            properties.put(MovieInfoProviderService.MOVIE_ID_PROPERTY, event.getProperty(MovieInfoProviderService.MOVIE_ID_PROPERTY));
+            properties.put(MovieInfoProviderService.MOVIE_NAME_PROPERTY, event.getProperty(MovieInfoProviderService.MOVIE_NAME_PROPERTY));
+            properties.put(MovieInfoProviderService.MOVIE_YEAR_PROPERTY, event.getProperty(MovieInfoProviderService.MOVIE_YEAR_PROPERTY));
+            properties.put(MovieInfoProviderService.RESULT_COUNT_PROPERTY, event.getProperty(MovieInfoProviderService.RESULT_COUNT_PROPERTY));
+            properties.put(MovieInfoProviderService.POSTER_COUNT_PROPERTY, event.getProperty(MovieInfoProviderService.POSTER_COUNT_PROPERTY));
+            properties.put(MovieInfoProviderService.BACKDROP_COUNT_PROPERTY, event.getProperty(MovieInfoProviderService.BACKDROP_COUNT_PROPERTY));
+            logger.debug("Receive a {} movie information request event.", event.getProperty(MovieInfoProviderService.MOVIE_ID_PROPERTY));
+            // Add request to queue
+            try {
+                this.queue.put(properties);
+            } catch (InterruptedException e) {
+                logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
+            }
         }
     }
 
@@ -177,38 +192,19 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService {
             logger.warn("Request movie information with empty movie id or movie name.");
             return;
         }
-        // Forge http request
-        try {
-            // Escape movie name
-            String encodedMovieName = URLEncoder.encode(movieName, "utf-8");
-            // Prepare url
-            String url;
-            if (movieYear > 0) {
-                url = MOVIE_SEARCH_API + API_KEY + "/" + encodedMovieName;
-            } else {
-                url = MOVIE_SEARCH_API + API_KEY + "/" + encodedMovieName + "+" + movieYear;
-            }
-            // Send request
-            this.client.prepareGet(url).execute(new MovieResponseHandler(movieId, this.eventAdmin, this.parser, count, posterCount, backdropCount));
-        } catch (UnsupportedEncodingException e) {
-            logger.error("Encoding movie name with error: {}.", e.getMessage());
-        } catch (IOException e) {
-            logger.error("Http client transfer with error: {}.", e.getMessage());
-        }
-    }
 
-    @Override
-    public void getMovieImageByUrl(String imageId, String url) {
-        if (StringUtils.isBlank(imageId) || StringUtils.isBlank(url)) {
-            logger.warn("Request movie image with empty image id or image url.");
-            return;
-        }
-        // Forge http request
+        Map<String, Object> properties = new Hashtable<String, Object>();
+        properties.put(MovieInfoProviderService.MOVIE_ID_PROPERTY, movieId);
+        properties.put(MovieInfoProviderService.MOVIE_NAME_PROPERTY, movieName);
+        properties.put(MovieInfoProviderService.MOVIE_YEAR_PROPERTY, movieYear);
+        properties.put(MovieInfoProviderService.RESULT_COUNT_PROPERTY, count);
+        properties.put(MovieInfoProviderService.POSTER_COUNT_PROPERTY, posterCount);
+        properties.put(MovieInfoProviderService.BACKDROP_COUNT_PROPERTY, backdropCount);
+        // Add request to queue
         try {
-            // Send request
-            this.client.prepareGet(url).execute(new ImageResponseHandler(imageId, this.eventAdmin));
-        } catch (IOException e) {
-            logger.error("Http client transfer with error: {}.", e.getMessage());
+            this.queue.put(properties);
+        } catch (InterruptedException e) {
+            logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
         }
     }
 

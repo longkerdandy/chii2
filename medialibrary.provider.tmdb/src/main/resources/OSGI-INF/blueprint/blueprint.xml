@@ -24,7 +24,19 @@
     </bean>
 
     <!-- Chii2 Media Library TMDb Provider Service -->
-    <service ref="tmdbProvider" interface="org.chii2.medialibrary.api.provider.MovieInfoProviderService">
+    <service ref="tmdbProvider">
+        <interfaces>
+            <value>org.chii2.medialibrary.api.provider.MovieInfoProviderService</value>
+            <value>org.osgi.service.event.EventHandler</value>
+        </interfaces>
+        <service-properties>
+            <!-- Register Event Topics -->
+            <entry key="event.topics">
+                <list>
+                    <value>org/chii2/medialibrary/provider/movie/INFO_REQUEST</value>
+                </list>
+            </entry>
+        </service-properties>
     </service>
 
 </blueprint>

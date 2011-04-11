@@ -1,8 +1,7 @@
-package org.chii2.medialibrary.provider.mediainfo.analyzer;
+package org.chii2.medialibrary.provider.mediainfo.consumer;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.persistence.entity.MovieFile;
 import org.chii2.medialibrary.api.persistence.factory.MovieFactory;
 import org.chii2.medialibrary.api.provider.MovieFileInfoProviderService;
@@ -22,19 +21,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Video File Metadata Analyzer based on MediaInfo
  */
-public class VideoAnalyzer implements Runnable {
-    // Movie Files
-    private List<File> files;
+public class RequestConsumer implements Runnable {
+    // Request queue
+    protected BlockingQueue<List<File>> queue;
     // EventAdmin
     private EventAdmin eventAdmin;
     // Image Factory
     private MovieFactory movieFactory;
-    // Exclude Providers
-    private List<String> excludeProviders;
     // Movie File Name Patterns
     private List<Pattern> moviePatterns = new ArrayList<Pattern>() {{
         add(Pattern.compile("^(?<name>[\\w\\.\\-\\']+)\\.\\(?(?<year>\\d{4})\\)?(?<info>(\\.\\w+)+)\\-\\[?(?<group>\\w+)\\]?\\.((?<disk>\\w+)\\.)?(?<ext>[\\w\\-]+)$", Pattern.CASE_INSENSITIVE));
@@ -55,10 +53,9 @@ public class VideoAnalyzer implements Runnable {
     /**
      * Constructor
      *
-     * @param files                  Movie Files
+     * @param queue                  Request Queue
      * @param eventAdmin             Event Admin
      * @param movieFactory           Movie Factory
-     * @param excludeProviders       Exclude Providers
      * @param moviePatterns          Movie File Name Patterns
      * @param movieSeparatorPattern  Movie Name Separator
      * @param movieSourcePattern     Movie File Source Type
@@ -66,11 +63,10 @@ public class VideoAnalyzer implements Runnable {
      * @param movieAudioCodecPattern Audio Codec
      * @param diskNumPattern         DIsk Number
      */
-    public VideoAnalyzer(List<File> files, EventAdmin eventAdmin, MovieFactory movieFactory, List<String> excludeProviders, List<Pattern> moviePatterns, Pattern movieSeparatorPattern, Pattern movieSourcePattern, Pattern movieVideoCodecPattern, Pattern movieAudioCodecPattern, Pattern diskNumPattern) {
-        this.files = files;
+    public RequestConsumer(BlockingQueue<List<File>> queue, EventAdmin eventAdmin, MovieFactory movieFactory, List<Pattern> moviePatterns, Pattern movieSeparatorPattern, Pattern movieSourcePattern, Pattern movieVideoCodecPattern, Pattern movieAudioCodecPattern, Pattern diskNumPattern) {
+        this.queue = queue;
         this.eventAdmin = eventAdmin;
         this.movieFactory = movieFactory;
-        this.excludeProviders = excludeProviders;
         this.moviePatterns = moviePatterns;
         this.movieSeparatorPattern = movieSeparatorPattern;
         this.movieSourcePattern = movieSourcePattern;
@@ -79,18 +75,28 @@ public class VideoAnalyzer implements Runnable {
         this.diskNumPattern = diskNumPattern;
     }
 
+    @SuppressWarnings({"ConstantConditions", "InfiniteLoopStatement"})
     @Override
     public void run() {
         try {
-            // Using MediaInfo to analyze video files
-            List<MovieFile> movieFiles = analyzeWithMediaInfo(this.files, this.movieFactory);
-            // Parse File Name information
-            movieFiles = parseFileName(movieFiles, moviePatterns, movieSeparatorPattern, movieSourcePattern, movieVideoCodecPattern, movieAudioCodecPattern, diskNumPattern);
-            // Raise event
-            raiseMovieFileInfoProvidedEvent(files, movieFiles, excludeProviders);
-        } catch (Exception e) {
-            // Raise failed event
-            raiseMovieFileInfoFailedEvent(files, excludeProviders);
+            while (true) {
+                // Read request
+                List<File> requestFiles = this.queue.take();
+                try {
+                    // Using MediaInfo to analyze video files
+                    List<MovieFile> movieFiles = analyzeWithMediaInfo(requestFiles, movieFactory);
+                    // Parse File Name information
+                    movieFiles = parseFileName(movieFiles, moviePatterns, movieSeparatorPattern, movieSourcePattern, movieVideoCodecPattern, movieAudioCodecPattern, diskNumPattern);
+                    // Raise event
+                    postMovieFileInfoProvidedEvent(requestFiles, movieFiles);
+                } catch (Exception e) {
+                    logger.warn("Provider consumer with error: {}.", e.getMessage());
+                    // Raise failed event
+                    postMovieFileInfoFailedEvent(requestFiles);
+                }
+            }
+        } catch (InterruptedException e) {
+            logger.error("Provider consumer has been interrupted with error: {}.", e.getMessage());
         }
     }
 
@@ -217,7 +223,7 @@ public class VideoAnalyzer implements Runnable {
                                         if (event.isCharacters() && movieFiles.get(movieFileIndex).getVideoFormat() == null) {
                                             movieFiles.get(movieFileIndex).setVideoFormat(event.asCharacters().getData());
                                         }
-                                    } else if ("Codec".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                    } else if ("Codec_CC".equalsIgnoreCase(event.asStartElement().getName().toString())) {
                                         event = reader.peek();
                                         if (event.isCharacters() && movieFiles.get(movieFileIndex).getVideoCodec() == null) {
                                             movieFiles.get(movieFileIndex).setVideoCodec(event.asCharacters().getData());
@@ -226,6 +232,16 @@ public class VideoAnalyzer implements Runnable {
                                         event = reader.peek();
                                         if (event.isCharacters() && movieFiles.get(movieFileIndex).getVideoBitRate() == 0) {
                                             movieFiles.get(movieFileIndex).setVideoBitRate(NumberUtils.toLong(event.asCharacters().getData()));
+                                        }
+                                    } else if ("Bit_depth".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                        event = reader.peek();
+                                        if (event.isCharacters() && movieFiles.get(movieFileIndex).getVideoBitDepth() == 0) {
+                                            movieFiles.get(movieFileIndex).setVideoBitDepth(NumberUtils.toInt(event.asCharacters().getData()));
+                                        }
+                                    } else if ("Frame_rate".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                        event = reader.peek();
+                                        if (event.isCharacters() && movieFiles.get(movieFileIndex).getVideoFrameRate() == 0) {
+                                            movieFiles.get(movieFileIndex).setVideoFrameRate(NumberUtils.toFloat(event.asCharacters().getData()));
                                         }
                                     } else if ("Width".equalsIgnoreCase(event.asStartElement().getName().toString())) {
                                         event = reader.peek();
@@ -251,7 +267,7 @@ public class VideoAnalyzer implements Runnable {
                                         if (event.isCharacters() && movieFiles.get(movieFileIndex).getAudioFormat() == null) {
                                             movieFiles.get(movieFileIndex).setAudioFormat(event.asCharacters().getData());
                                         }
-                                    } else if ("Codec".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                    } else if ("Codec_CC".equalsIgnoreCase(event.asStartElement().getName().toString())) {
                                         event = reader.peek();
                                         if (event.isCharacters() && movieFiles.get(movieFileIndex).getAudioCodec() == null) {
                                             movieFiles.get(movieFileIndex).setAudioCodec(event.asCharacters().getData());
@@ -260,6 +276,11 @@ public class VideoAnalyzer implements Runnable {
                                         event = reader.peek();
                                         if (event.isCharacters() && movieFiles.get(movieFileIndex).getAudioBitRate() == 0) {
                                             movieFiles.get(movieFileIndex).setAudioBitRate(NumberUtils.toLong(event.asCharacters().getData()));
+                                        }
+                                    } else if ("Bit_depth".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                        event = reader.peek();
+                                        if (event.isCharacters() && movieFiles.get(movieFileIndex).getAudioBitDepth() == 0) {
+                                            movieFiles.get(movieFileIndex).setAudioBitDepth(NumberUtils.toInt(event.asCharacters().getData()));
                                         }
                                     } else if ("Sampling_rate".equalsIgnoreCase(event.asStartElement().getName().toString())) {
                                         event = reader.peek();
@@ -352,6 +373,8 @@ public class VideoAnalyzer implements Runnable {
                     String disk = matcher.group("disk");
                     if (disk != null && !disk.isEmpty()) {
                         movieFile.setDiskNum(parseDiskNum(disk, diskNumPattern));
+                    } else {
+                        movieFile.setDiskNum(1);
                     }
 
                     // Match release group
@@ -463,16 +486,14 @@ public class VideoAnalyzer implements Runnable {
     /**
      * Raise a movie file information provided event
      *
-     * @param files            List of Movie Files (from request)
-     * @param movieFiles           Movie File Information
-     * @param excludeProviders List of exclude Providers (from request)
+     * @param files      List of Movie Files (from request)
+     * @param movieFiles Movie File Information
      */
-    private void raiseMovieFileInfoProvidedEvent(List<File> files, List<MovieFile> movieFiles, List<String> excludeProviders) {
+    private void postMovieFileInfoProvidedEvent(List<File> files, List<MovieFile> movieFiles) {
         // Prepare properties
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put(MovieFileInfoProviderService.MOVIE_FILE_PROPERTY, files);
         properties.put(MovieFileInfoProviderService.MOVIE_FILE_INFO_PROPERTY, movieFiles);
-        properties.put(MovieFileInfoProviderService.EXCLUDE_PROVIDERS_PROPERTY, excludeProviders);
         // Send a event
         Event event = new Event(MovieFileInfoProviderService.MOVIE_FILE_INFO_PROVIDED_TOPIC, properties);
         logger.debug("Send a movie files information provided event.");
@@ -482,17 +503,12 @@ public class VideoAnalyzer implements Runnable {
     /**
      * Raise a movie file information failed event
      *
-     * @param files            List of Movie Files (from request)
-     * @param excludeProviders List of exclude Providers (from request)
+     * @param files List of Movie Files (from request)t)
      */
-    private void raiseMovieFileInfoFailedEvent(List<File> files, List<String> excludeProviders) {
-        // Since failed, append this provider to exclude provider list
-        excludeProviders.add("MediaInfo");
+    private void postMovieFileInfoFailedEvent(List<File> files) {
         // Prepare properties
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put(MovieFileInfoProviderService.MOVIE_FILE_PROPERTY, files);
-        properties.put(MovieFileInfoProviderService.MOVIE_FILE_INFO_PROPERTY, new ArrayList<Movie>());
-        properties.put(MovieFileInfoProviderService.EXCLUDE_PROVIDERS_PROPERTY, excludeProviders);
         // Send a event
         Event event = new Event(MovieFileInfoProviderService.MOVIE_FILE_INFO_FAILED_TOPIC, properties);
         logger.debug("Send a movie files information failed event.");
