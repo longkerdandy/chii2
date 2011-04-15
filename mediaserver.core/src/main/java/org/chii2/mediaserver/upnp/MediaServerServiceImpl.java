@@ -97,7 +97,7 @@ public class MediaServerServiceImpl implements MediaServerService {
                 new UDADeviceType("MediaServer", 1);
         // XBox360 Device Details
         DeviceDetails xboxDetails = new DeviceDetails(
-                "Chii2 (Home-Server):1",
+                "Chii2 (Home-Server)",
                 new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
                 new ModelDetails("Windows Media Player Sharing", "Windows Media Player Sharing", "12"),
                 "000da201238c",
@@ -112,7 +112,7 @@ public class MediaServerServiceImpl implements MediaServerService {
         );
 
         DeviceDetails psDetails = new DeviceDetails(
-                "Chii2 (Home-Server):1",
+                "Chii2 (Home-Server)",
                 new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
                 new ModelDetails("Chii2 Home Server", "Chii2 Home Server", "1"),
                 "000da201238c",

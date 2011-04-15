@@ -1,4 +1,4 @@
-package org.chii2.mediaserver.http;
+package org.chii2.mediaserver.http.bio;
 
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpException;
@@ -39,8 +39,7 @@ public class WorkerThread extends Thread {
         } catch (ConnectionClosedException ex) {
             logger.error("Client closed connection: {}", ex.getMessage());
         } catch (IOException ex) {
-            ex.printStackTrace();
-            logger.error("I/O error: {}", ex.getMessage());
+            logger.warn("I/O error: {}", ex.getMessage());
         } catch (HttpException ex) {
             logger.error("Unrecoverable HTTP protocol violation: {}", ex.getMessage());
         } finally {

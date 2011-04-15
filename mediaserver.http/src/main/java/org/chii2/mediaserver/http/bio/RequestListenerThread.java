@@ -1,4 +1,4 @@
-package org.chii2.mediaserver.http;
+package org.chii2.mediaserver.http.bio;
 
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
@@ -46,6 +46,7 @@ public class RequestListenerThread extends Thread {
                 new ResponseDate(),
                 new ResponseServer(),
                 new ResponseContent(),
+                new ResponseContentRange(),
                 new ResponseConnControl()
         });
 

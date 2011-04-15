@@ -1,4 +1,4 @@
-package org.chii2.mediaserver.http;
+package org.chii2.mediaserver.http.bio;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
@@ -6,7 +6,6 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.*;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.FileEntity;
-import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.util.EntityUtils;
@@ -21,9 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Locale;
 import java.util.Map;
 
@@ -97,19 +94,8 @@ public class HttpHandler implements HttpRequestHandler {
                     File file = new File(movieFile.getAbsoluteName());
                     String mime = DLNAProfile.getMimeByProfile(dlnaProfile);
                     if (rangeBegin > 0) {
-                        InputStream is = new FileInputStream(file);
-                        if (rangeBegin > 0) {
-                            is.skip(rangeBegin);
-                        }
-                        if (rangeEnd >= rangeBegin && rangeEnd <= movieFile.getSize()) {
-                            entity = new InputStreamEntity(is, rangeEnd - rangeBegin + 1);
-                            response.addHeader("Content-Range", String.format("bytes %s-%s/%s", rangeBegin, rangeEnd, rangeEnd - rangeBegin + 1));
-                        } else {
-                            entity = new InputStreamEntity(is, -1);
-                            response.addHeader("Content-Range", String.format("bytes %s-%s/%s", rangeBegin, movieFile.getSize() - 1, movieFile.getSize() - rangeBegin));
-                        }
-                        response.addHeader("Content-Type", mime);
-                        response.setStatusCode(206);
+                        entity = new RangeFileEntity(file, mime, rangeBegin, rangeEnd);
+                        response.setStatusCode(HttpStatus.SC_PARTIAL_CONTENT);
                     } else {
                         entity = new FileEntity(file, mime);
                         response.setStatusCode(HttpStatus.SC_OK);
@@ -124,7 +110,7 @@ public class HttpHandler implements HttpRequestHandler {
             }
 
             if (entity == null) {
-                response.setStatusCode(400);
+                response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
                 logger.debug("Chii2 Media Server Http Server requested object not found.");
             } else {
                 response.setEntity(entity);
@@ -135,13 +121,12 @@ public class HttpHandler implements HttpRequestHandler {
 
     private static long getRangeBegin(Header range) {
         if (range != null) {
-            String rangeValue = range.getValue();
-            int index = rangeValue.indexOf("=");
-            if (index > 0 && rangeValue.length() > index + 1) {
-                String rangeBeginToEnd = rangeValue.substring(index + 1);
-                int beginIndex = rangeBeginToEnd.indexOf("-");
-                if (beginIndex > 0) {
-                    return NumberUtils.toLong(StringUtils.trim(rangeBeginToEnd.substring(0, beginIndex)), -1);
+            HeaderElement[] elements = range.getElements();
+            if (elements != null && elements.length > 0) {
+                String rangeValue = elements[0].getValue();
+                int index = rangeValue.indexOf("-");
+                if (index > 0) {
+                    return NumberUtils.toLong(StringUtils.trim(rangeValue.substring(0, index)), -1);
                 }
             }
         }
@@ -150,13 +135,12 @@ public class HttpHandler implements HttpRequestHandler {
 
     private static long getRangeEnd(Header range) {
         if (range != null) {
-            String rangeValue = range.getValue();
-            int index = rangeValue.indexOf("=");
-            if (index > 0 && rangeValue.length() > index + 1) {
-                String rangeBeginToEnd = rangeValue.substring(index + 1);
-                int endIndex = rangeBeginToEnd.indexOf("-");
-                if (endIndex > 0 && rangeBeginToEnd.length() > endIndex + 1) {
-                    return NumberUtils.toLong(StringUtils.trim(rangeBeginToEnd.substring(endIndex + 1)), -1);
+            HeaderElement[] elements = range.getElements();
+            if (elements != null && elements.length > 0) {
+                String rangeValue = elements[0].getValue();
+                int index = rangeValue.indexOf("-");
+                if (index > 0 && rangeValue.length() > index + 1) {
+                    return NumberUtils.toLong(StringUtils.trim(rangeValue.substring(index + 1)), -1);
                 }
             }
         }
