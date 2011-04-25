@@ -14,6 +14,7 @@ import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.persistence.entity.MovieFile;
 import org.chii2.mediaserver.api.dlna.DLNAProfile;
+import org.chii2.mediaserver.api.dlna.DLNATransport;
 import org.chii2.mediaserver.api.http.HttpUrl;
 import org.chii2.transcoder.api.core.TranscoderService;
 import org.slf4j.Logger;
@@ -57,10 +58,17 @@ public class HttpHandler implements HttpRequestHandler {
         }
 
         String target = request.getRequestLine().getUri();
-        Header range = request.getFirstHeader("RANGE");
+        Header range = request.getFirstHeader(DLNATransport.RANGE);
+        Header contentFeatures = request.getFirstHeader(DLNATransport.CONTENT_FEATURES_REQUEST);
+        Header timeSeek = request.getFirstHeader(DLNATransport.TIME_SEEK_RANGE);
+        Header playSpeed = request.getFirstHeader(DLNATransport.PLAY_SPEED);
         long rangeBegin = getRangeBegin(range);
         long rangeEnd = getRangeEnd(range);
+
         logger.debug(String.format("Receive HTTP %s request for target %s with range %d-%d", method, target, rangeBegin, rangeEnd));
+        if (contentFeatures != null) logger.debug("Request with dlna content features header: {}", contentFeatures.getValue());
+        if (timeSeek != null) logger.debug("Request with dlna time seek header: {}", timeSeek.getValue());
+        if (playSpeed != null) logger.debug("Request with dlna play speed header: {}", playSpeed.getValue());
 
         //Parse URL
         Map<String, String> map = HttpUrl.parseURL(target);
