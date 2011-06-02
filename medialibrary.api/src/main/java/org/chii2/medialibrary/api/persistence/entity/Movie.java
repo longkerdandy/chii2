@@ -171,6 +171,13 @@ public interface Movie {
     public long getBitRate();
 
     /**
+     * Get MIME
+     *
+     * @return MIME
+     */
+    public String getMIME();
+
+    /**
      * Get video width
      *
      * @return Video Width
@@ -183,6 +190,27 @@ public interface Movie {
      * @return Video Height
      */
     public int getVideoHeight();
+
+    /**
+     * Get video format
+     *
+     * @return Video Format
+     */
+    public String getVideoFormat();
+
+    /**
+     * Get video format profile
+     *
+     * @return Video Format Profile
+     */
+    public String getVideoFormatProfile();
+
+    /**
+     * Get video format version
+     *
+     * @return Video Format Version
+     */
+    public int getVideoFormatVersion();
 
     /**
      * Get video codec
@@ -204,6 +232,27 @@ public interface Movie {
      * @return Video FPS
      */
     public float getVideoFps();
+
+    /**
+     * Get audio format
+     *
+     * @return Audio Format
+     */
+    public String getAudioFormat();
+
+    /**
+     * Get audio format profile
+     *
+     * @return Audio Format Profile
+     */
+    public String getAudioFormatProfile();
+
+    /**
+     * Get audio format version
+     *
+     * @return Audio Format Version
+     */
+    public int getAudioFormatVersion();
 
     /**
      * Get audio codec

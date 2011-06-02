@@ -2,13 +2,11 @@ package org.chii2.mediaserver.content.common.container;
 
 import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
-import org.chii2.mediaserver.api.content.item.VisualItem;
+import org.chii2.mediaserver.api.content.item.VisualVideoItem;
 import org.chii2.mediaserver.content.common.CommonContentManager;
 import org.teleal.cling.support.model.DIDLObject;
 import org.teleal.cling.support.model.SortCriterion;
 import org.teleal.cling.support.model.WriteStatus;
-import org.teleal.cling.support.model.container.Container;
-import org.teleal.cling.support.model.item.Item;
 
 import java.util.List;
 
@@ -17,12 +15,7 @@ import java.util.List;
  * This is a fixed dynamic container for video storage folders. UPnP/DLNA doesn't tell difference between Movie/TV Show/Etc but we do.
  * Contains all containers and movies represent folders in storage
  */
-public class MovieBaseStorageFolderContainer extends Container implements VisualContainer {
-
-    // Filter
-    private String filter;
-    // Total Child Count
-    private long totalChildCount;
+public class MovieBaseStorageFolderContainer extends VisualContainer {
 
      /**
      * Constructor
@@ -64,25 +57,15 @@ public class MovieBaseStorageFolderContainer extends Container implements Visual
     }
 
     @Override
-    public long getTotalChildCount() {
-        return this.totalChildCount;
-    }
-
-    @Override
-    public void setTotalChildCount(long totalChildCount) {
-        this.totalChildCount = totalChildCount;
-    }
-
-    @Override
     public void loadContents(long startIndex, long maxCount, SortCriterion[] orderBy, ContentManager contentManager) {
         // Read from library
-        List<? extends VisualItem> movies = contentManager.getMovies(getId(), filter, startIndex, maxCount, orderBy);
+        List<? extends VisualVideoItem> movies = contentManager.getMovies(getId(), filter, startIndex, maxCount, orderBy);
         // Total count
         long count = contentManager.getMoviesCount();
         // Add children
         if (movies != null && count > 0) {
-            for (VisualItem movie : movies) {
-                addItem((Item) movie);
+            for (VisualVideoItem movie : movies) {
+                addItem(movie);
             }
             setChildCount(movies.size());
             setTotalChildCount(count);

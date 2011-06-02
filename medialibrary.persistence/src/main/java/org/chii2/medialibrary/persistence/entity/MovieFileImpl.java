@@ -4,6 +4,7 @@ import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.persistence.entity.MovieFile;
 
 import javax.persistence.*;
+import java.io.File;
 import java.util.Date;
 import java.util.UUID;
 
@@ -85,6 +86,14 @@ public class MovieFileImpl implements MovieFile {
     @Column(name = "VIDEO_FORMAT")
     private String videoFormat;
 
+    // Video Format Profile
+    @Column(name = "VIDEO_FORMAT_PROFILE")
+    private String videoFormatProfile;
+
+    // Video Format Version
+    @Column(name = "VIDEO_FORMAT_VERSION")
+    private int videoFormatVersion;
+
     // Video Codec
     @Column(name = "VIDEO_CODEC")
     private String videoCodec;
@@ -116,6 +125,14 @@ public class MovieFileImpl implements MovieFile {
     // Audio Format
     @Column(name = "AUDIO_FORMAT")
     private String audioFormat;
+
+    // Audio Format Profile
+    @Column(name = "AUDIO_FORMAT_PROFILE")
+    private String audioFormatProfile;
+
+    // Audio Format Version
+    @Column(name = "AUDIO_FORMAT_VERSION")
+    private int audioFormatVersion;
 
     // Audio Codec
     @Column(name = "AUDIO_CODEC")
@@ -161,6 +178,11 @@ public class MovieFileImpl implements MovieFile {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Override
+    public File getFile() {
+        return new File(absoluteName);
     }
 
     @Override
@@ -334,6 +356,26 @@ public class MovieFileImpl implements MovieFile {
     }
 
     @Override
+    public String getVideoFormatProfile() {
+        return videoFormatProfile;
+    }
+
+    @Override
+    public void setVideoFormatProfile(String videoFormatProfile) {
+        this.videoFormatProfile = videoFormatProfile;
+    }
+
+    @Override
+    public int getVideoFormatVersion() {
+        return videoFormatVersion;
+    }
+
+    @Override
+    public void setVideoFormatVersion(int videoFormatVersion) {
+        this.videoFormatVersion = videoFormatVersion;
+    }
+
+    @Override
     public String getVideoCodec() {
         return videoCodec;
     }
@@ -411,6 +453,26 @@ public class MovieFileImpl implements MovieFile {
     @Override
     public void setAudioFormat(String audioFormat) {
         this.audioFormat = audioFormat;
+    }
+
+    @Override
+    public String getAudioFormatProfile() {
+        return audioFormatProfile;
+    }
+
+    @Override
+    public void setAudioFormatProfile(String audioFormatProfile) {
+        this.audioFormatProfile = audioFormatProfile;
+    }
+
+    @Override
+    public int getAudioFormatVersion() {
+        return audioFormatVersion;
+    }
+
+    @Override
+    public void setAudioFormatVersion(int audioFormatVersion) {
+        this.audioFormatVersion = audioFormatVersion;
     }
 
     @Override

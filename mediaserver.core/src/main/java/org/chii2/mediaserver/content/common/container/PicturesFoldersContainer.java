@@ -6,7 +6,6 @@ import org.chii2.mediaserver.content.common.CommonContentManager;
 import org.teleal.cling.support.model.DIDLObject;
 import org.teleal.cling.support.model.SortCriterion;
 import org.teleal.cling.support.model.WriteStatus;
-import org.teleal.cling.support.model.container.Container;
 
 import java.util.List;
 
@@ -14,12 +13,7 @@ import java.util.List;
  * Image Container
  * Contains all containers and pictures represent folders in storage
  */
-public class PicturesFoldersContainer extends Container implements VisualContainer {
-
-    // Filter
-    private String filter;
-    // Total Child Count
-    private long totalChildCount;
+public class PicturesFoldersContainer extends VisualContainer {
 
     /**
      * Constructor
@@ -61,16 +55,6 @@ public class PicturesFoldersContainer extends Container implements VisualContain
     }
 
     @Override
-    public long getTotalChildCount() {
-        return this.totalChildCount;
-    }
-
-    @Override
-    public void setTotalChildCount(long totalChildCount) {
-        this.totalChildCount = totalChildCount;
-    }
-
-    @Override
     public void loadContents(long startIndex, long maxCount, SortCriterion[] orderBy, ContentManager contentManager) {
         // Load from library
         List<? extends VisualContainer> containers = contentManager.getPicturesStorageFolders(filter, startIndex, maxCount, orderBy);
@@ -78,7 +62,7 @@ public class PicturesFoldersContainer extends Container implements VisualContain
         // Add children
         if (containers != null && count > 0) {
             for (VisualContainer container : containers) {
-                addContainer((Container) container);
+                addContainer(container);
             }
             setChildCount(containers.size());
             setTotalChildCount(count);

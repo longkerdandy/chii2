@@ -21,7 +21,7 @@ public class ResponseContentRange implements HttpResponseInterceptor {
         ProtocolVersion ver = response.getStatusLine().getProtocolVersion();
         int status = response.getStatusLine().getStatusCode();
         HttpEntity entity = response.getEntity();
-        if (ver.compareToVersion(HttpVersion.HTTP_1_1) == 0 && entity instanceof RangeFileEntity && status == HttpStatus.SC_PARTIAL_CONTENT) {
+        if (ver.compareToVersion(HttpVersion.HTTP_1_1) >= 0 && entity instanceof RangeFileEntity && status == HttpStatus.SC_PARTIAL_CONTENT) {
             RangeFileEntity rangeFileEntity = (RangeFileEntity) entity;
             String range = rangeFileEntity.getContentRange();
             if (range != null) {

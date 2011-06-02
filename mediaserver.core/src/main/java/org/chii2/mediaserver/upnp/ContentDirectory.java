@@ -4,6 +4,7 @@ import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
 import org.chii2.mediaserver.api.http.HttpServerService;
+import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
 import org.chii2.mediaserver.content.common.CommonContentManager;
 import org.chii2.mediaserver.content.xbox.XBoxContentManager;
 import org.chii2.transcoder.api.core.TranscoderService;
@@ -20,6 +21,7 @@ import org.teleal.cling.support.model.container.Container;
 import org.teleal.cling.support.model.item.Item;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * ContentDirectory Service for UPnP AV/DLNA Media Server
@@ -31,6 +33,8 @@ public class ContentDirectory extends AbstractContentDirectoryService {
     private HttpServerService httpServer;
     // Transcoder
     private TranscoderService transcoder;
+    // Online Videos
+    private List<OnlineVideoProviderService> onlineVideos;
     // Content Manger List
     private LinkedList<ContentManager> contentManagers;
     // Logger
@@ -42,15 +46,17 @@ public class ContentDirectory extends AbstractContentDirectoryService {
      * @param mediaLibrary Media Library
      * @param httpServer   Http Server
      * @param transcoder   Transcoder
+     * @param onlineVideos Online Video Providers
      */
-    public ContentDirectory(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder) {
+    public ContentDirectory(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder, List<OnlineVideoProviderService> onlineVideos) {
         super();
         this.mediaLibrary = mediaLibrary;
         this.httpServer = httpServer;
         this.transcoder = transcoder;
+        this.onlineVideos = onlineVideos;
         this.contentManagers = new LinkedList<ContentManager>();
-        contentManagers.add(new XBoxContentManager(mediaLibrary, httpServer, transcoder));
-        contentManagers.add(new CommonContentManager(mediaLibrary, httpServer, transcoder));
+        contentManagers.add(new XBoxContentManager(this.mediaLibrary, this.httpServer, this.transcoder, this.onlineVideos));
+        contentManagers.add(new CommonContentManager(this.mediaLibrary, this.httpServer, this.transcoder, this.onlineVideos));
     }
 
     @Override
@@ -99,7 +105,7 @@ public class ContentDirectory extends AbstractContentDirectoryService {
         else if (browseFlag.equals(BrowseFlag.DIRECT_CHILDREN)) {
             if (didlObject instanceof Container) {
                 logger.info("Browsing children of container:<{}>", didlObject.getId());
-                Container container = (Container) didlObject;
+                VisualContainer container = (VisualContainer) didlObject;
                 if (container.getChildCount() <= requestCount) {
                     for (Container subContainer : container.getContainers()) {
                         didlContent.addContainer(subContainer);
@@ -108,7 +114,7 @@ public class ContentDirectory extends AbstractContentDirectoryService {
                         didlContent.addItem(item);
                     }
                     numReturned = container.getChildCount();
-                    totalMatches = ((VisualContainer) container).getTotalChildCount();
+                    totalMatches = container.getTotalChildCount();
                 } else {
                     // TODO Maybe should cut the extra results
                     throw new ContentDirectoryException(ContentDirectoryErrorCode.CANNOT_PROCESS, "Returned results count exceeds max request count limit.");
@@ -159,6 +165,6 @@ public class ContentDirectory extends AbstractContentDirectoryService {
                 return contentManager;
             }
         }
-        return new CommonContentManager(mediaLibrary, httpServer, transcoder);
+        return new CommonContentManager(this.mediaLibrary, this.httpServer, this.transcoder, this.onlineVideos);
     }
 }

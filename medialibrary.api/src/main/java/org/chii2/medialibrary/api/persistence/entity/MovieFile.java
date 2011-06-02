@@ -1,5 +1,6 @@
 package org.chii2.medialibrary.api.persistence.entity;
 
+import java.io.File;
 import java.util.Date;
 
 /**
@@ -20,6 +21,13 @@ public interface MovieFile {
      * @param id
      */
     public void setId(String id);
+
+    /**
+     * Get File
+     *
+     * @return File
+     */
+    public File getFile();
 
     /**
      * Get Movie File Name
@@ -288,6 +296,34 @@ public interface MovieFile {
     public void setVideoFormat(String videoFormat);
 
     /**
+     * Get Video Format Profile
+     *
+     * @return Video Format Profile
+     */
+    public String getVideoFormatProfile();
+
+    /**
+     * Set Video Format Profile
+     *
+     * @param videoFormatProfile Video Format Profile
+     */
+    public void setVideoFormatProfile(String videoFormatProfile);
+
+    /**
+     * Get Video Format Version
+     *
+     * @return Video Format Version
+     */
+    public int getVideoFormatVersion();
+
+    /**
+     * Set Video Format Version
+     *
+     * @param videoFormatVersion Video Format Version
+     */
+    public void setVideoFormatVersion(int videoFormatVersion);
+
+    /**
      * Get Video Bit Rate
      *
      * @return Video Bit Rate
@@ -384,6 +420,34 @@ public interface MovieFile {
      * @param audioFormat Audio Format
      */
     public void setAudioFormat(String audioFormat);
+
+    /**
+     * Get Audio Format Profile
+     *
+     * @return Audio Format Profile
+     */
+    public String getAudioFormatProfile();
+
+    /**
+     * Set Audio Format Profile
+     *
+     * @param audioFormatProfile Audio Format Profile
+     */
+    public void setAudioFormatProfile(String audioFormatProfile);
+
+    /**
+     * Get Audio Format Version
+     *
+     * @return Audio Format Version
+     */
+    public int getAudioFormatVersion();
+
+    /**
+     * Set Audio Format Version
+     *
+     * @param audioFormatVersion Audio Format Version
+     */
+    public void setAudioFormatVersion(int audioFormatVersion);
 
     /**
      * Get Audio Bit Rate

@@ -3,6 +3,7 @@ package org.chii2.util;
 import org.apache.commons.lang.StringUtils;
 import regex2.Pattern;
 import regex2.PatternSyntaxException;
+import zhcode.Zhcode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +14,6 @@ import java.util.List;
  * Configuration Utility
  */
 public class ConfigUtils {
-
     // Configuration Split Pattern
     private static final Pattern ConfigSplitPattern = Pattern.compile(":", Pattern.CASE_INSENSITIVE);
 

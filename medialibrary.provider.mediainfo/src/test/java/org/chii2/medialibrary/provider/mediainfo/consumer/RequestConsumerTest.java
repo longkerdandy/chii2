@@ -14,6 +14,16 @@ import java.util.List;
 public class RequestConsumerTest {
 
     @Test
+    public void parseFormatVersion() {
+        // Mock
+        RequestConsumer analyzer = new RequestConsumer(null, null, null, null, null, null, null, null, null);
+        // Test
+        assert analyzer.parseFormatVersion("1") == 1;
+        assert analyzer.parseFormatVersion("Version 2") == 2;
+        assert analyzer.parseFormatVersion("v3") == 3;
+    }
+
+    @Test
     public void parseFileNameTest() {
         // Mock
         RequestConsumer analyzer = new RequestConsumer(null, null, null, null, null, null, null, null, null);

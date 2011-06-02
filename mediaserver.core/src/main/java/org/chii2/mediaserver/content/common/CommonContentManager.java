@@ -5,9 +5,9 @@ import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
-import org.chii2.mediaserver.api.content.item.VisualItem;
-import org.chii2.mediaserver.api.dlna.DLNAProfile;
+import org.chii2.mediaserver.api.content.item.VisualVideoItem;
 import org.chii2.mediaserver.api.http.HttpServerService;
+import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
 import org.chii2.mediaserver.content.common.Item.PhotoItem;
 import org.chii2.mediaserver.content.common.container.*;
 import org.chii2.transcoder.api.core.TranscoderService;
@@ -19,7 +19,6 @@ import org.teleal.cling.support.model.DIDLObject;
 import org.teleal.cling.support.model.ProtocolInfo;
 import org.teleal.cling.support.model.Res;
 import org.teleal.cling.support.model.SortCriterion;
-import org.teleal.cling.support.model.container.Container;
 import org.teleal.common.util.MimeType;
 
 import java.net.URI;
@@ -30,29 +29,31 @@ import java.util.*;
  */
 public class CommonContentManager implements ContentManager {
     // Root Container ID
-    public static String ROOT_ID = "0";
+    public final static String ROOT_ID = "0";
     // Video Container
-    public static String VIDEO_ID = "2";
+    public final static String VIDEO_ID = "2";
     // Pictures Container
-    public static String PICTURES_ID = "3";
+    public final static String PICTURES_ID = "3";
     // Video Folders Container
-    public static String VIDEO_FOLDERS_ID = "15";
+    public final static String VIDEO_FOLDERS_ID = "15";
     // Pictures Folders Container
-    public static String PICTURES_FOLDERS_ID = "16";
+    public final static String PICTURES_FOLDERS_ID = "16";
     // Movie Storage Folders Container as a Base Container
-    public static String MOVIE_BASE_STORAGE_FOLDER_ID = "1501";
+    public final static String MOVIE_BASE_STORAGE_FOLDER_ID = "1501";
     // Pictures Storage Folder Container ID Prefix
-    public static String PICTURES_STORAGE_FOLDER_PREFIX = "PSFC-";
+    public final static String PICTURES_STORAGE_FOLDER_PREFIX = "PSFC-";
     // Photo Item ID Prefix
-    public static String PHOTO_ITEM_PREFIX = "PI-";
+    public final static String PHOTO_ITEM_PREFIX = "PI-";
     // Movie Item ID Prefix
-    public static String MOVIE_ITEM_PREFIX = "MI-";
+    public final static String MOVIE_ITEM_PREFIX = "MI-";
     // Media Library
     protected MediaLibraryService mediaLibrary;
     // HTTP Server
     protected HttpServerService httpServer;
     // Transcoder
     protected TranscoderService transcoder;
+    // Online Videos
+    protected List<OnlineVideoProviderService> onlineVideos;
     // Logger
     protected Logger logger = LoggerFactory.getLogger("org.chii2.mediaserver.content");
     // UUID Length
@@ -64,11 +65,13 @@ public class CommonContentManager implements ContentManager {
      * @param mediaLibrary Media Library
      * @param httpServer   Http Server
      * @param transcoder   Transcoder
+     * @param onlineVideos Online Video Providers
      */
-    public CommonContentManager(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder) {
+    public CommonContentManager(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder, List<OnlineVideoProviderService> onlineVideos) {
         this.mediaLibrary = mediaLibrary;
         this.httpServer = httpServer;
         this.transcoder = transcoder;
+        this.onlineVideos = onlineVideos;
     }
 
     @Override
@@ -93,7 +96,7 @@ public class CommonContentManager implements ContentManager {
         if (isRootContainer(objectId)) {
             VisualContainer container = new RootContainer(filter);
             container.loadContents(startIndex, requestCount, orderBy, this);
-            return (Container) container;
+            return container;
         }
 
         /** ------------------------- Pictures -------------------------**/
@@ -101,19 +104,19 @@ public class CommonContentManager implements ContentManager {
         else if (isPicturesContainer(objectId)) {
             VisualContainer container = new PicturesContainer(filter);
             container.loadContents(startIndex, requestCount, orderBy, this);
-            return (Container) container;
+            return container;
         }
         // Pictures Folders Container
         else if (isPicturesFoldersContainer(objectId)) {
             VisualContainer container = new PicturesFoldersContainer(filter);
             container.loadContents(startIndex, requestCount, orderBy, this);
-            return (Container) container;
+            return container;
         }
         // Pictures Storage Folder Container (Dynamic)
         else if (isPicturesStorageFolderContainer(objectId)) {
             VisualContainer container = new PicturesStorageFolderContainer(filter, objectId, getContainerTitle(objectId));
             container.loadContents(startIndex, requestCount, orderBy, this);
-            return (Container) container;
+            return container;
         }
         // Photo Item
         else if (isPhotoItem(objectId)) {
@@ -125,19 +128,19 @@ public class CommonContentManager implements ContentManager {
         else if (isVideoContainer(objectId)) {
             VisualContainer container = new VideoContainer(filter);
             container.loadContents(startIndex, requestCount, orderBy, this);
-            return (Container) container;
+            return container;
         }
         // Video Folders Container
         else if (isVideoFoldersContainer(objectId)) {
             VisualContainer container = new VideoFoldersContainer(filter);
             container.loadContents(startIndex, requestCount, orderBy, this);
-            return (Container) container;
+            return container;
         }
         // Movie Base Storage Folder Container
         else if (isMovieBaseStorageFolderContainer(objectId)) {
             VisualContainer container = new MovieBaseStorageFolderContainer(filter);
             container.loadContents(startIndex, requestCount, orderBy, this);
-            return (Container) container;
+            return container;
         }
 
         // Invalid
@@ -224,8 +227,8 @@ public class CommonContentManager implements ContentManager {
         // Create photo item and add to results
         for (Image image : images) {
             if (image != null) {
-                String id = forgeItemId(image.getId(), 1, parentId, PHOTO_ITEM_PREFIX);
-                URI url = httpServer.forgeUrl(getClientProfile(), "image", false, 1, DLNAProfile.Profile.PROFILE_INVALID, image.getId());
+                String id = forgeItemId(image.getId(), parentId, PHOTO_ITEM_PREFIX);
+                URI url = httpServer.forgeUrl(getClientProfile(), "image", false, image.getId());
                 String profile = getClientProfile();
                 MimeType mime = new MimeType("image", transcoder.getImageTranscodedType(profile, image.getType()));
                 // Resources
@@ -268,7 +271,7 @@ public class CommonContentManager implements ContentManager {
         Image image = mediaLibrary.getImageById(libraryId);
         if (image != null) {
             String parentId = getItemParentId(id);
-            URI url = httpServer.forgeUrl(getClientProfile(), "image", false, 1, DLNAProfile.Profile.PROFILE_INVALID, image.getId());
+            URI url = httpServer.forgeUrl(getClientProfile(), "image", false, image.getId());
             String profile = getClientProfile();
             MimeType mime = new MimeType("image", transcoder.getImageTranscodedType(profile, image.getType()));
             // Resources
@@ -299,14 +302,14 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
-    public List<? extends VisualItem> getMovies(String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
+    public List<? extends VisualVideoItem> getMovies(String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
         // TODO: finished this later
         return null;
     }
 
     @Override
     public long getMoviesCount() {
-        return mediaLibrary.getMovieFilesCount();
+        return mediaLibrary.getMoviesCount();
     }
 
     @Override
@@ -323,10 +326,7 @@ public class CommonContentManager implements ContentManager {
         if (id != null && id.indexOf('-') > 0) {
             String subId = id.substring(id.indexOf('-') + 1);
             if (subId.length() > uuidLength + 1) {
-                String subsubId = subId.substring(0, subId.length() - uuidLength - 1);
-                if (subsubId.length() > 0 && subsubId.lastIndexOf("-") > 0) {
-                    return subsubId.substring(0, subsubId.lastIndexOf("-"));
-                }
+                return subId.substring(0, subId.length() - uuidLength - 1);
             }
         }
 
@@ -343,9 +343,9 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
-    public String forgeItemId(String libraryId, int seriesNumber, String parentId, String prefix) {
+    public String forgeItemId(String libraryId, String parentId, String prefix) {
         if (libraryId != null && libraryId.length() == uuidLength) {
-            return prefix + parentId + "-" + seriesNumber + "-" + libraryId;
+            return prefix + parentId + "-" + libraryId;
         } else {
             return null;
         }
@@ -377,7 +377,7 @@ public class CommonContentManager implements ContentManager {
 
     @Override
     public boolean isPicturesStorageFolderContainer(String id) {
-        return id != null && id.length() > 4 && id.substring(0, 5).equalsIgnoreCase(PICTURES_STORAGE_FOLDER_PREFIX);
+        return id != null && id.length() > 5 && id.substring(0, 5).equalsIgnoreCase(PICTURES_STORAGE_FOLDER_PREFIX);
     }
 
     @Override
@@ -400,4 +400,24 @@ public class CommonContentManager implements ContentManager {
         return MOVIE_BASE_STORAGE_FOLDER_ID.equalsIgnoreCase(id);
     }
 
+    @Override
+    public boolean isOnlineVideoContainer(String id) {
+        return id != null && id.length() > 4 && id.substring(0, 4).equalsIgnoreCase(OnlineVideoProviderService.ONLINE_VIDEO_CONTAINER_PREFIX);
+    }
+
+    /**
+     * Get Online Video Container from Provider
+     *
+     * @param filter Filter
+     * @param id Object ID
+     * @return Online Video Container
+     */
+    protected VisualContainer getOnlineVideoContainer(String filter, String id) {
+        for (OnlineVideoProviderService onlineVideo : onlineVideos) {
+            if (onlineVideo.isMatch(id)) {
+                return onlineVideo.getContainerByID(filter, id);
+            }
+        }
+        return null;
+    }
 }

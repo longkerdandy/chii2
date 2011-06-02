@@ -1,7 +1,9 @@
 package org.chii2.mediaserver.upnp;
 
+import org.apache.commons.lang.StringUtils;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.mediaserver.api.http.HttpServerService;
+import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
 import org.chii2.mediaserver.api.upnp.MediaServerService;
 import org.chii2.transcoder.api.core.TranscoderService;
 import org.slf4j.Logger;
@@ -21,8 +23,11 @@ import org.teleal.cling.transport.impl.apache.StreamClientConfigurationImpl;
 import org.teleal.cling.transport.impl.apache.StreamClientImpl;
 import org.teleal.cling.transport.spi.StreamClient;
 
+import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,7 +36,9 @@ import java.util.Map;
 public class MediaServerServiceImpl implements MediaServerService {
 
     // UDN
-    final private UDN udn = UDN.uniqueSystemIdentifier("Chii2 MediaServer v1");
+    private final UDN udn = UDN.uniqueSystemIdentifier("Chii2 MediaServer v1");
+    // Server Prefix
+    private String serverPrefix = "Home Server";
     // UPnP Server
     private UpnpService upnpService = null;
     // Library
@@ -40,6 +47,8 @@ public class MediaServerServiceImpl implements MediaServerService {
     private HttpServerService httpService;
     // Transcoder
     private TranscoderService transcoder;
+    // Online Videos
+    private List<OnlineVideoProviderService> onlineVideos;
     // Logger
     private Logger logger = LoggerFactory.getLogger("org.chii2.mediaserver.upnp");
 
@@ -49,6 +58,15 @@ public class MediaServerServiceImpl implements MediaServerService {
     @SuppressWarnings("unused")
     public void init() {
         logger.debug("Chii2 Media Server MediaServerService (Core) init.");
+
+        // Set Server Prefix to Host Name
+        try {
+            String hostName = InetAddress.getLocalHost().getHostName();
+            if (StringUtils.isNotBlank(hostName)) {
+                serverPrefix = hostName;
+            }
+        } catch (UnknownHostException ignore) {
+        }
 
         try {
             // Init UPnP stack
@@ -97,7 +115,7 @@ public class MediaServerServiceImpl implements MediaServerService {
                 new UDADeviceType("MediaServer", 1);
         // XBox360 Device Details
         DeviceDetails xboxDetails = new DeviceDetails(
-                "Chii2 (Home-Server)",
+                "Chii2 : " + serverPrefix,
                 new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
                 new ModelDetails("Windows Media Player Sharing", "Windows Media Player Sharing", "12"),
                 "000da201238c",
@@ -112,7 +130,7 @@ public class MediaServerServiceImpl implements MediaServerService {
         );
 
         DeviceDetails psDetails = new DeviceDetails(
-                "Chii2 (Home-Server)",
+                "Chii2 : " + serverPrefix,
                 new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
                 new ModelDetails("Chii2 Home Server", "Chii2 Home Server", "1"),
                 "000da201238c",
@@ -140,7 +158,7 @@ public class MediaServerServiceImpl implements MediaServerService {
                 new DefaultServiceManager<ContentDirectory>(contentDirectory, null) {
                     @Override
                     protected ContentDirectory createServiceInstance() throws Exception {
-                        return new ContentDirectory(mediaLibrary, httpService, transcoder);
+                        return new ContentDirectory(mediaLibrary, httpService, transcoder, onlineVideos);
                     }
                 }
         );
@@ -295,10 +313,21 @@ public class MediaServerServiceImpl implements MediaServerService {
 
     /**
      * Inject Transcoder Service
+     *
      * @param transcoder Transcoder Service
      */
     @SuppressWarnings("unused")
     public void setTranscoder(TranscoderService transcoder) {
         this.transcoder = transcoder;
+    }
+
+    /**
+     * Inject Online Video Providers
+     *
+     * @param onlineVideos Online Video Providers
+     */
+    @SuppressWarnings("unused")
+    public void setOnlineVideos(List<OnlineVideoProviderService> onlineVideos) {
+        this.onlineVideos = onlineVideos;
     }
 }

@@ -250,6 +250,15 @@ public class MovieImpl implements Movie {
     }
 
     @Override
+    public String getMIME() {
+        if (getFilesCount() > 0) {
+            return getFiles().get(0).getMime();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public int getVideoWidth() {
         if (getFilesCount() > 0) {
             return getFiles().get(0).getVideoWidth();
@@ -262,6 +271,33 @@ public class MovieImpl implements Movie {
     public int getVideoHeight() {
         if (getFilesCount() > 0) {
             return getFiles().get(0).getVideoHeight();
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public String getVideoFormat() {
+        if (getFilesCount() > 0) {
+            return getFiles().get(0).getVideoFormat();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public String getVideoFormatProfile() {
+        if (getFilesCount() > 0) {
+            return getFiles().get(0).getVideoFormatProfile();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public int getVideoFormatVersion() {
+        if (getFilesCount() > 0) {
+            return getFiles().get(0).getVideoFormatVersion();
         } else {
             return 0;
         }
@@ -289,6 +325,33 @@ public class MovieImpl implements Movie {
     public float getVideoFps() {
         if (getFilesCount() > 0) {
             return getFiles().get(0).getVideoFrameRate();
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public String getAudioFormat() {
+        if (getFilesCount() > 0) {
+            return getFiles().get(0).getAudioFormat();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public String getAudioFormatProfile() {
+        if (getFilesCount() > 0) {
+            return getFiles().get(0).getAudioFormatProfile();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public int getAudioFormatVersion() {
+        if (getFilesCount() > 0) {
+            return getFiles().get(0).getAudioFormatVersion();
         } else {
             return 0;
         }

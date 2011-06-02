@@ -1,8 +1,6 @@
 package org.chii2.mediaserver.http.bio;
 
 import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.*;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.FileEntity;
@@ -13,15 +11,17 @@ import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.persistence.entity.MovieFile;
-import org.chii2.mediaserver.api.dlna.DLNAProfile;
 import org.chii2.mediaserver.api.dlna.DLNATransport;
 import org.chii2.mediaserver.api.http.HttpUrl;
+import org.chii2.transcoder.api.core.TranscoderProcess;
 import org.chii2.transcoder.api.core.TranscoderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -62,25 +62,23 @@ public class HttpHandler implements HttpRequestHandler {
         Header contentFeatures = request.getFirstHeader(DLNATransport.CONTENT_FEATURES_REQUEST);
         Header timeSeek = request.getFirstHeader(DLNATransport.TIME_SEEK_RANGE);
         Header playSpeed = request.getFirstHeader(DLNATransport.PLAY_SPEED);
-        long rangeBegin = getRangeBegin(range);
-        long rangeEnd = getRangeEnd(range);
 
-        logger.debug(String.format("Receive HTTP %s request for target %s with range %d-%d", method, target, rangeBegin, rangeEnd));
-        if (contentFeatures != null) logger.debug("Request with dlna content features header: {}", contentFeatures.getValue());
+        logger.debug(String.format("Receive HTTP %s request for target %s", method, target));
+        if (range != null) logger.debug("Request with dlna http range header: {}", range.getValue());
+        if (contentFeatures != null)
+            logger.debug("Request with dlna content features header: {}", contentFeatures.getValue());
         if (timeSeek != null) logger.debug("Request with dlna time seek header: {}", timeSeek.getValue());
         if (playSpeed != null) logger.debug("Request with dlna play speed header: {}", playSpeed.getValue());
 
         //Parse URL
         Map<String, String> map = HttpUrl.parseURL(target);
         if (map == null) {
-            response.setStatusCode(400);
+            response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
             logger.debug("Chii2 Media Server Http Server requested url parse error.");
         } else {
             String clientProfile = map.get("client");
             String type = map.get("type");
             boolean transcoded = BooleanUtils.toBoolean(map.get("transcoded"), "1", "0");
-            int seriesNumber = NumberUtils.toInt(map.get("series"), 1);
-            DLNAProfile.Profile dlnaProfile = DLNAProfile.getProfileById(map.get("dlna"));
             String id = map.get("id");
 
             // Query the library and get the entity
@@ -98,15 +96,25 @@ public class HttpHandler implements HttpRequestHandler {
             } else if ("movie".equalsIgnoreCase(type)) {
                 Movie movie = mediaLibrary.getMovieById(id);
                 if (movie != null) {
-                    MovieFile movieFile = movie.getFile(seriesNumber);
-                    File file = new File(movieFile.getAbsoluteName());
-                    String mime = DLNAProfile.getMimeByProfile(dlnaProfile);
-                    if (rangeBegin > 0) {
-                        entity = new RangeFileEntity(file, mime, rangeBegin, rangeEnd);
-                        response.setStatusCode(HttpStatus.SC_PARTIAL_CONTENT);
+                    if (!transcoded) {
+                        String mime = transcoder.getVideoMIME(movie.getFormat(), movie.getVideoFormat(), movie.getVideoFormatProfile(), movie.getVideoFormatVersion(), movie.getVideoCodec());
+                        List<File> files = new ArrayList<File>();
+                        for (MovieFile movieFile : movie.getFiles()) {
+                            files.add(movieFile.getFile());
+                        }
+                        entity = new RangeFileEntity(files, mime, range);
+                        if (range != null) {
+                            response.setStatusCode(HttpStatus.SC_PARTIAL_CONTENT);
+                        } else {
+                            response.setStatusCode(HttpStatus.SC_OK);
+                        }
                     } else {
-                        entity = new FileEntity(file, mime);
-                        response.setStatusCode(HttpStatus.SC_OK);
+                        String mime = transcoder.getTranscodedMIME(clientProfile, movie);
+                        List<TranscoderProcess> processes = transcoder.getTranscodedProcesses(clientProfile, movie);
+                        if (range == null) {
+                            entity = new TranscodedEntity(processes, mime);
+                            response.setStatusCode(HttpStatus.SC_OK);
+                        }
                     }
                 }
             } else if ("moviethumb".equalsIgnoreCase(type)) {
@@ -125,33 +133,5 @@ public class HttpHandler implements HttpRequestHandler {
                 logger.debug("Chii2 Media Server Http Server serving {} {}.", type, id);
             }
         }
-    }
-
-    private static long getRangeBegin(Header range) {
-        if (range != null) {
-            HeaderElement[] elements = range.getElements();
-            if (elements != null && elements.length > 0) {
-                String rangeValue = elements[0].getValue();
-                int index = rangeValue.indexOf("-");
-                if (index > 0) {
-                    return NumberUtils.toLong(StringUtils.trim(rangeValue.substring(0, index)), -1);
-                }
-            }
-        }
-        return -1;
-    }
-
-    private static long getRangeEnd(Header range) {
-        if (range != null) {
-            HeaderElement[] elements = range.getElements();
-            if (elements != null && elements.length > 0) {
-                String rangeValue = elements[0].getValue();
-                int index = rangeValue.indexOf("-");
-                if (index > 0 && rangeValue.length() > index + 1) {
-                    return NumberUtils.toLong(StringUtils.trim(rangeValue.substring(index + 1)), -1);
-                }
-            }
-        }
-        return -1;
     }
 }

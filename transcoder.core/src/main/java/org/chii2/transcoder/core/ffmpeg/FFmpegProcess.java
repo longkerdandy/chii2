@@ -1,117 +1,166 @@
 package org.chii2.transcoder.core.ffmpeg;
 
+import org.apache.commons.lang.StringUtils;
+import org.chii2.transcoder.api.core.TranscoderProcess;
+import org.chii2.transcoder.core.io.TranscodedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.concurrent.*;
+import java.util.List;
 
 /**
  * FFmpeg Process Wrapper
  */
-public class FFmpegProcess {
+public class FFmpegProcess implements TranscoderProcess {
+    // Size
+    public volatile long size;
+    // Duration
+    public volatile float duration;
+    // Bitrate
+    public volatile long bitrate;
+    // Stopped
+    public volatile boolean stopped = false;
+    // Finished
+    public volatile boolean finished = false;
+    // Successful
+    public volatile boolean started = false;
+
     // FFmpeg parameter
     private FFmpegConverterParameter parameter;
     // Real Thread Process
     private Process process;
-    // Start FFmpeg daemon successful or not
-    private boolean successful = false;
+    // Stream
+    private TranscodedInputStream stream;
+
     // Logger
     protected Logger logger = LoggerFactory.getLogger("org.chii2.transcoder.ffmpeg");
 
     /**
      * Constructor
-     * @param inputFile Input File
-     * @param videoCodec Video Codec
-     * @param videoBitrate Video Bit rate
-     * @param audioCodec Audio Codec
-     * @param audioBitrate Audio Bit rate
+     *
+     * @param parameter FFmpeg Parameter
      */
-    public FFmpegProcess(File inputFile, String videoCodec, long videoBitrate, String audioCodec, long audioBitrate) {
-        this.parameter = new FFmpegConverterParameter(inputFile, videoCodec, videoBitrate, audioCodec, audioBitrate);
+    public FFmpegProcess(FFmpegConverterParameter parameter) {
+        this.parameter = parameter;
     }
 
-    /**
-     * Constructor
-     * @param inputFile Input File
-     * @param outputFile Output File
-     * @param videoCodec Video Codec
-     * @param videoBitrate Video Bit rate
-     * @param audioCodec Audio Codec
-     * @param audioBitrate Audio Bit rate
-     */
-    public FFmpegProcess(File inputFile, File outputFile, String videoCodec, long videoBitrate, String audioCodec, long audioBitrate) {
-        this.parameter = new FFmpegConverterParameter(inputFile, outputFile, videoCodec, videoBitrate, audioCodec, audioBitrate);
-    }
-
-    /**
-     * Start FFmpeg Process
-     */
-    public boolean start() {
-        // Converter
-        Callable<Process> converter = new FFmpegConverter(this.parameter);
-        // Executor
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        // Future
-        Future<Process> future = executor.submit(converter);
-        // Reader
-        BufferedReader reader = null;
+    @Override
+    public void start() {
         try {
-            // Get process
-            this.process = future.get();
+            // Parameters
+            List<String> commands = parameter.getParameters();
+            // Start FFmpeg
+            logger.info("Starting FFmpeg process with parameters: {}", commands);
+            // ffmpeg process
+            process = new ProcessBuilder(commands).redirectErrorStream(true).start();
             // Read text output
-            reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
                 if ("Press [q] to stop encoding".equalsIgnoreCase(line)) {
-                    this.successful = true;
                     break;
                 }
             }
-        } catch (InterruptedException e) {
-            logger.error("FFmpeg Process with Interrupted Exception: {}", e.getMessage());
-            this.successful = false;
-        } catch (ExecutionException e) {
-            logger.error("FFmpeg Process with Execution Exception: {}", e.getMessage());
-            this.successful = false;
+            // Make sure output file's size > 0
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("frame=")) {
+                    if (processOutput(line)) {
+                        break;
+                    }
+                }
+            }
+            // Output Reader Thread
+            FFmpegOutputTextReader outputTextReader = new FFmpegOutputTextReader(reader, this);
+            Thread thread = new Thread(outputTextReader);
+            thread.setDaemon(false);
+            thread.start();
         } catch (IOException e) {
             logger.error("FFmpeg Process with IO Exception: {}", e.getMessage());
-            this.successful = false;
+            this.stopped = true;
         } finally {
-            if (reader != null) try {
-                reader.close();
-            } catch (IOException ignore) {
-            }
+            this.started = true;
         }
-        return successful;
     }
 
-    /**
-     * Stop FFmpeg Process
-     */
+    @Override
     public void stop() {
+        // To stop reader
+        stopped = true;
+        // Stop ffmpeg
         if (this.process != null) {
             char quit = 'q';
             try {
                 logger.info("Try to stop FFmpeg Process.");
                 process.getOutputStream().write(quit);
-                process.destroy();
-                logger.info("FFmpeg Process with exit value: {}.", process.exitValue());
             } catch (IOException e) {
                 logger.error("FFmpeg Process with IO Exception: {}", e.getMessage());
+            } finally {
+                process.destroy();
+            }
+        }
+        // Delete file
+        File outputFile = getOutputFile();
+        if (outputFile.exists()) {
+            try {
+                boolean deleted = outputFile.delete();
+                if (deleted) {
+                    logger.info("Temp file {} deleted.", outputFile.getAbsolutePath());
+                } else {
+                    logger.info("Temp file {} can not be deleted.", outputFile.getAbsolutePath());
+                }
+            } catch (SecurityException e) {
+                logger.error("FFmpeg Process try to delete temp file {} with Security Exception: {}", outputFile.getAbsolutePath(), e.getMessage());
             }
         }
     }
 
+    /**
+     * Parse ffmpeg output to make sure output file size not zero
+     * @param line Output Line
+     * @return True if file size > 0
+     */
+    private boolean processOutput(String line) {
+        int sizeIndex = line.indexOf("size=");
+        int timeIndex = line.indexOf("time=");
+        try {
+            String size = line.substring(sizeIndex + 5, timeIndex);
+            size = StringUtils.trim(size);
+            return !(size.equalsIgnoreCase("0kB") || size.equalsIgnoreCase("0"));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
     public File getOutputFile() {
         return this.parameter.getOutputFile();
     }
 
-    public FFmpegConverterParameter getParameter() {
-        return parameter;
+    @Override
+    public InputStream getOutputFileStream() {
+        if (stream == null) {
+            try {
+                stream = new TranscodedInputStream(getOutputFile(), this);
+            } catch (FileNotFoundException e) {
+                logger.error("Create Transcoded InputStream with error: {}", e.getMessage());
+            }
+        }
+        return stream;
     }
 
-    public boolean isSuccessful() {
-        return successful;
+    @Override
+    public boolean isStarted() {
+        return started;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return finished;
+    }
+
+    @Override
+    public boolean isStopped() {
+        return stopped;
     }
 }

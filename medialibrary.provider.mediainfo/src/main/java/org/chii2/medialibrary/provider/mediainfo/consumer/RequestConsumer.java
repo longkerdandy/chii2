@@ -31,8 +31,10 @@ public class RequestConsumer implements Runnable {
     protected BlockingQueue<List<File>> queue;
     // EventAdmin
     private EventAdmin eventAdmin;
-    // Image Factory
+    // Movie Factory
     private MovieFactory movieFactory;
+    // Format Version Pattern
+    private Pattern formatVersionPattern = Pattern.compile("\\.*(?<version>\\d+)");
     // Movie File Name Patterns
     private List<Pattern> moviePatterns = new ArrayList<Pattern>() {{
         add(Pattern.compile("^(?<name>[\\w\\.\\-\\']+)\\.\\(?(?<year>\\d{4})\\)?(?<info>(\\.\\w+)+)\\-\\[?(?<group>\\w+)\\]?\\.((?<disk>\\w+)\\.)?(?<ext>[\\w\\-]+)$", Pattern.CASE_INSENSITIVE));
@@ -202,7 +204,13 @@ public class RequestConsumer implements Runnable {
                                     } else if ("Title".equalsIgnoreCase(event.asStartElement().getName().toString())) {
                                         event = reader.peek();
                                         if (event.isCharacters() && movieFiles.get(movieFileIndex).getMovieName() == null) {
-                                            movieFiles.get(movieFileIndex).setMovieName(event.asCharacters().getData());
+                                            // Comment this because I found this is not reliable
+                                            // movieFiles.get(movieFileIndex).setMovieName(event.asCharacters().getData());
+                                        }
+                                    } else if ("InternetMediaType".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                        event = reader.peek();
+                                        if (event.isCharacters() && movieFiles.get(movieFileIndex).getMime() == null) {
+                                            movieFiles.get(movieFileIndex).setMime(event.asCharacters().getData());
                                         }
                                     } else if ("Overall_bit_rate".equalsIgnoreCase(event.asStartElement().getName().toString())) {
                                         event = reader.peek();
@@ -223,9 +231,24 @@ public class RequestConsumer implements Runnable {
                                         if (event.isCharacters() && movieFiles.get(movieFileIndex).getVideoFormat() == null) {
                                             movieFiles.get(movieFileIndex).setVideoFormat(event.asCharacters().getData());
                                         }
-                                    } else if ("Codec_CC".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                    } else if ("Format_profile".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                        event = reader.peek();
+                                        if (event.isCharacters() && movieFiles.get(movieFileIndex).getVideoFormatProfile() == null) {
+                                            movieFiles.get(movieFileIndex).setVideoFormatProfile(event.asCharacters().getData());
+                                        }
+                                    } else if ("Format_version".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                        event = reader.peek();
+                                        if (event.isCharacters() && movieFiles.get(movieFileIndex).getVideoFormatVersion() == 0) {
+                                            movieFiles.get(movieFileIndex).setVideoFormatVersion(parseFormatVersion(event.asCharacters().getData()));
+                                        }
+                                    } else if ("Codec".equalsIgnoreCase(event.asStartElement().getName().toString())) {
                                         event = reader.peek();
                                         if (event.isCharacters() && movieFiles.get(movieFileIndex).getVideoCodec() == null) {
+                                            movieFiles.get(movieFileIndex).setVideoCodec(event.asCharacters().getData());
+                                        }
+                                    } else if ("Codec_CC".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                        event = reader.peek();
+                                        if (event.isCharacters()) {
                                             movieFiles.get(movieFileIndex).setVideoCodec(event.asCharacters().getData());
                                         }
                                     } else if ("Bit_rate".equalsIgnoreCase(event.asStartElement().getName().toString())) {
@@ -267,9 +290,24 @@ public class RequestConsumer implements Runnable {
                                         if (event.isCharacters() && movieFiles.get(movieFileIndex).getAudioFormat() == null) {
                                             movieFiles.get(movieFileIndex).setAudioFormat(event.asCharacters().getData());
                                         }
-                                    } else if ("Codec_CC".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                    } else if ("Format_profile".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                        event = reader.peek();
+                                        if (event.isCharacters() && movieFiles.get(movieFileIndex).getAudioFormatProfile() == null) {
+                                            movieFiles.get(movieFileIndex).setAudioFormatProfile(event.asCharacters().getData());
+                                        }
+                                    } else if ("Format_version".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                        event = reader.peek();
+                                        if (event.isCharacters() && movieFiles.get(movieFileIndex).getAudioFormatVersion() == 0) {
+                                            movieFiles.get(movieFileIndex).setAudioFormatVersion(parseFormatVersion(event.asCharacters().getData()));
+                                        }
+                                    } else if ("Codec".equalsIgnoreCase(event.asStartElement().getName().toString())) {
                                         event = reader.peek();
                                         if (event.isCharacters() && movieFiles.get(movieFileIndex).getAudioCodec() == null) {
+                                            movieFiles.get(movieFileIndex).setAudioCodec(event.asCharacters().getData());
+                                        }
+                                    } else if ("Codec_CC".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                        event = reader.peek();
+                                        if (event.isCharacters()) {
                                             movieFiles.get(movieFileIndex).setAudioCodec(event.asCharacters().getData());
                                         }
                                     } else if ("Bit_rate".equalsIgnoreCase(event.asStartElement().getName().toString())) {
@@ -329,6 +367,22 @@ public class RequestConsumer implements Runnable {
 
         // Return Result
         return movieFiles;
+    }
+
+    /**
+     * Parse Format Version
+     *
+     * @param formatVersion Format Version
+     * @return Version Number
+     */
+    protected int parseFormatVersion(String formatVersion) {
+        Matcher matcher = formatVersionPattern.matcher(formatVersion);
+        if (matcher.find() && matcher.groupCount() > 0) {
+            String version = matcher.group("version");
+            return Integer.parseInt(version);
+        } else {
+            return 0;
+        }
     }
 
     /**

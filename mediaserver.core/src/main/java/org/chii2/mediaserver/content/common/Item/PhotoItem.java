@@ -1,10 +1,7 @@
 package org.chii2.mediaserver.content.common.Item;
 
-import org.chii2.mediaserver.api.content.item.VisualItem;
-import org.teleal.cling.support.model.ProtocolInfo;
+import org.chii2.mediaserver.api.content.item.VisualPictureItem;
 import org.teleal.cling.support.model.Res;
-import org.teleal.cling.support.model.item.Photo;
-import org.teleal.common.util.MimeType;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -14,7 +11,7 @@ import java.util.List;
  * Photo Item
  * Especially represent a photo belong to a album
  */
-public class PhotoItem extends Photo implements VisualItem {
+public class PhotoItem extends VisualPictureItem {
 
     // Filter
     private String filter;

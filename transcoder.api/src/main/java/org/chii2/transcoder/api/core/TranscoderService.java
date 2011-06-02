@@ -1,6 +1,7 @@
 package org.chii2.transcoder.api.core;
 
-import org.chii2.mediaserver.api.dlna.DLNAProfile;
+import org.chii2.medialibrary.api.persistence.entity.Movie;
+import org.teleal.cling.support.model.dlna.DLNAProfiles;
 
 import java.io.File;
 import java.util.List;
@@ -14,58 +15,13 @@ public interface TranscoderService {
     public final static String PROFILE_COMMON = "common";
     // XBox Profile
     public final static String PROFILE_XBOX = "xbox";
-    // Video MPEG Type
-    public final static String VIDEO_TYPE_MPEG = "mpeg";
-    // Video MPEG4 Type
-    public final static String VIDEO_TYPE_MP4 = "mp4";
-    // Video Ogg Type
-    public final static String VIDEO_TYPE_OGG = "ogg";
-    // Video WebM Type
-    public final static String VIDEO_TYPE_WEBM = "webm";
-    // Video QuickTime Type
-    public final static String VIDEO_TYPE_QUICKTIME = "quicktime";
-    // Video ASF Type
-    public final static String VIDEO_TYPE_ASF = "asf";
-    // Video Microsoft Video (AVI?) Type
-    public final static String VIDEO_TYPE_MSVIDEO = "msvideo";
-    // Video Windows Media Video Type
-    public final static String VIDEO_TYPE_WMV = "wmv";
-    // Video MPEG Mime
-    public final static String VIDEO_MIME_MPEG = "video/mpeg";
-    // Video MPEG4 Mime
-    public final static String VIDEO_MIME_MP4 = "video/mp4";
-    // Video Ogg Mime
-    public final static String VIDEO_MIME_OGG = "video/ogg";
-    // Video WebM Mime
-    public final static String VIDEO_MIME_WEBM = "video/webm";
-    // Video QuickTime Mime
-    public final static String VIDEO_MIME_QUICKTIME = "video/quicktime";
-    // Video ASF Mime
-    public final static String VIDEO_MIME_ASF = "video/x-ms-asf";
-    // Video Microsoft Video (AVI?) Mime
-    public final static String VIDEO_MIME_MSVIDEO = "video/x-msvideo";
-    // Video Windows Media Video Mime
-    public final static String VIDEO_MIME_WMV = "video/x-ms-wmv";
+
     // Image GIF Type
     public final static String IMAGE_TYPE_GIF = "gif";
     // Image JPEG Type
     public final static String IMAGE_TYPE_JPEG = "jpeg";
     // Image PNG Type
     public final static String IMAGE_TYPE_PNG = "png";
-    // Image SVG Type
-    public final static String IMAGE_TYPE_SVG = "svg+xml";
-    // Image TIFF Type TODO should I use tiff-fx
-    public final static String IMAGE_TYPE_TIFF = "tiff";
-    // Image GIF Mime
-    public final static String IMAGE_MIME_GIF = "image/gif";
-    // Image JPEG Mime
-    public final static String IMAGE_MIME_JPEG = "image/jpeg";
-    // Image PNG Mime
-    public final static String IMAGE_MIME_PNG = "image/png";
-    // Image SVG Mime
-    public final static String IMAGE_MIME_SVG = "image/svg+xml";
-    // Image TIFF Mime TODO should I use image/tiff-fx
-    public final static String IMAGE_MIME_TIFF = "image/tiff";
 
     /**
      * Get Client Profile based on user agent information
@@ -84,30 +40,110 @@ public interface TranscoderService {
     public String getClientProfile(List<String> userAgent);
 
     /**
-     * Whether DLNA profile is valid for the client
+     * Whether the media is valid for the client
      *
-     * @param client  Client
-     * @param profile DLNA Profile
+     * @param client Client
+     * @param movie  Movie
      * @return True if valid
      */
-    public boolean isValidProfile(String client, DLNAProfile.Profile profile);
+    public boolean isValidMedia(String client, Movie movie);
 
     /**
-     * Get Transcoded DLNA Profile
+     * Get Video MIME
      *
-     * @param client             Client
+     * @param container          Container
+     * @param videoFormat        Video Format
+     * @param videoFormatProfile Video Format Profile
+     * @param videoFormatVersion Video Format Version
      * @param videoCodec         Video Codec
-     * @param videoBitRate       Video BitRate
+     * @return Video MIME
+     */
+    public String getVideoMIME(String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec);
+
+    /**
+     * Get Audio DLNA Profile
+     *
+     * @param container          Container
+     * @param audioFormat        Audio Format
+     * @param audioFormatProfile Audio Format Profile
+     * @param audioFormatVersion Audio Format Version
+     * @param audioCodec         Audio Codec
+     * @param audioBitRate       Audio BitRate
+     * @param audioSampleBitRate Audio SampleBitRate
+     * @param audioChannels      Audio Channels
+     * @return Audio Profile
+     */
+    public DLNAProfiles getAudioProfile(String container, String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels);
+
+    /**
+     * Get Video DLNA Profile
+     *
+     * @param container          Container
+     * @param videoFormat        Video Format
+     * @param videoFormatProfile Video Format Profile
+     * @param videoFormatVersion Video Format Version
+     * @param videoCodec         Video Codec
+     * @param videoBitRate       BitRate
      * @param videoWidth         Video Width
      * @param videoHeight        Video Height
      * @param fps                Video FPS
+     * @param audioFormat        Audio Format
+     * @param audioFormatProfile Audio Format Profile
+     * @param audioFormatVersion Audio Format Version
      * @param audioCodec         Audio Codec
      * @param audioBitRate       Audio BitRate
-     * @param audioSampleBitRate Sample BitRate
-     * @param audioChannels      Channels Count
-     * @return DLNA Profile
+     * @param audioSampleBitRate Audio SampleBitRate
+     * @param audioChannels      Audio Channels
+     * @return Video DLNA Profile
      */
-    public DLNAProfile.Profile getTranscodedProfile(String client, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels);
+    public DLNAProfiles getVideoProfile(String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps,
+                                        String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels);
+
+    /**
+     * Get Image DLNA Profile
+     *
+     * @param imageType   Image Type
+     * @param imageWidth  Image Width
+     * @param imageHeight Image Height
+     * @return Image Profile
+     */
+    public DLNAProfiles getImageProfile(String imageType, int imageWidth, int imageHeight);
+
+    /**
+     * Get Video Transcoded DLNA Profile
+     *
+     * @param client Client
+     * @param movie  Movie
+     * @return Video Transcoded DLNA Profile
+     */
+    public DLNAProfiles getVideoTranscodedProfile(String client, Movie movie);
+
+    /**
+     * Get Transcoded MIME
+     *
+     * @param client Client
+     * @param movie  Movie
+     * @return MIME
+     */
+    public String getTranscodedMIME(String client, Movie movie);
+
+    /**
+     * Get Transcoded Video Codec
+     *
+     * @param client Client
+     * @param movie  Movie
+     * @return Video Codec
+     */
+    public String getVideoTranscodedCodec(String client, Movie movie);
+
+    /**
+     * Get List of Transcoder Process
+     *
+     * @param client Client
+     * @param movie  Movie
+     * @return Transcoder Process
+     */
+    public List<TranscoderProcess> getTranscodedProcesses(String client, Movie movie);
 
     /**
      * Get Transcoded Type for image on specific client

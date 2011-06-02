@@ -6,17 +6,11 @@ import org.chii2.mediaserver.content.common.CommonContentManager;
 import org.teleal.cling.support.model.DIDLObject;
 import org.teleal.cling.support.model.SortCriterion;
 import org.teleal.cling.support.model.WriteStatus;
-import org.teleal.cling.support.model.container.Container;
 
 /**
  * Root Container
  */
-public class RootContainer extends Container implements VisualContainer {
-
-    // Filter
-    private String filter;
-    // Total Child Count
-    private long totalChildCount;
+public class RootContainer extends VisualContainer {
 
     /**
      * Constructor
@@ -55,16 +49,6 @@ public class RootContainer extends Container implements VisualContainer {
         setSearchable(false);
         // Writable
         setWriteStatus(WriteStatus.NOT_WRITABLE);
-    }
-
-    @Override
-    public long getTotalChildCount() {
-        return this.totalChildCount;
-    }
-
-    @Override
-    public void setTotalChildCount(long totalChildCount) {
-        this.totalChildCount = totalChildCount;
     }
 
     @Override

@@ -2,7 +2,6 @@ package org.chii2.mediaserver.http;
 
 import org.apache.commons.lang.StringUtils;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
-import org.chii2.mediaserver.api.dlna.DLNAProfile;
 import org.chii2.mediaserver.api.http.HttpServerService;
 import org.chii2.mediaserver.api.http.HttpUrl;
 import org.chii2.mediaserver.http.bio.RequestListenerThread;
@@ -141,8 +140,8 @@ public class HttpServerServiceImpl implements HttpServerService {
     }
 
     @Override
-    public URI forgeUrl(String clientProfile, String mediaType, boolean transcoded, int seriesNumber, DLNAProfile.Profile dlnaProfile, String mediaId) {
-        return HttpUrl.forgeURL(getHost().getHostAddress(), getPort(), clientProfile, mediaType, transcoded, seriesNumber, dlnaProfile, mediaId);
+    public URI forgeUrl(String clientProfile, String mediaType, boolean transcoded, String mediaId) {
+        return HttpUrl.forgeURL(getHost().getHostAddress(), getPort(), clientProfile, mediaType, transcoded, mediaId);
     }
 
     /**

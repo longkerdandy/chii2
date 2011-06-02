@@ -14,6 +14,10 @@
     <reference id="transcoderService" interface="org.chii2.transcoder.api.core.TranscoderService">
     </reference>
 
+    <!-- Online Video Provider Service List -->
+    <reference-list id="onlineVideoProviders" interface="org.chii2.mediaserver.api.provider.OnlineVideoProviderService" availability="optional">
+    </reference-list>
+
     <!-- Chii2 Media Server Core Bean -->
     <bean id="mediaServerService" class="org.chii2.mediaserver.upnp.MediaServerServiceImpl"
           init-method="init"
@@ -21,6 +25,7 @@
         <property name="mediaLibrary" ref="mediaLibraryManager"/>
         <property name="httpService" ref="httpServerService"/>
         <property name="transcoder" ref="transcoderService"/>
+        <property name="onlineVideos" ref="onlineVideoProviders"/>
     </bean>
 
     <!-- Chii2 Media Server Core Service -->

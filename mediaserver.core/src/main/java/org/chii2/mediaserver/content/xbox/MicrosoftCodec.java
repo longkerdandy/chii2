@@ -55,6 +55,12 @@ public class MicrosoftCodec {
             return "{" + WMMEDIASUBTYPE_MP4S + "}";
         } else if ("M4S2".equalsIgnoreCase(codecName)) {
             return "{" + WMMEDIASUBTYPE_M4S2 + "}";
+        } else if ("MSS1".equalsIgnoreCase(codecName)) {
+            return "{" + WMMEDIASUBTYPE_MSS1 + "}";
+        } else if ("MSS2".equalsIgnoreCase(codecName)) {
+            return "{" + WMMEDIASUBTYPE_MSS2 + "}";
+        } else if ("MPEG-2V".equalsIgnoreCase(codecName)) {
+            return "{" + WMMEDIASUBTYPE_MPEG2_VIDEO + "}";
         } else {
             return null;
         }

@@ -17,10 +17,14 @@ public class FFmpegConverterParameter {
     private File outputFile;
     // Video Codec
     private String videoCodec;
+    // Video Parameters
+    private List<String> videoParameters;
     // Video Same Quantizer
     private boolean sameQuantizer = false;
     // Video Bit rate
     private long videoBitrate;
+    // CRF (x264)
+    private int videoCRF = -1;
     // Video Max rate
     private long videoMaxrate;
     // Video Min rate
@@ -33,6 +37,8 @@ public class FFmpegConverterParameter {
     private int videoGopSize;
     // Video Bit Stream Filter
     private String videoBitStreamFilter;
+    // Video Preset
+    private List<String> videoPresets;
     // Audio Codec
     private String audioCodec;
     // Audio Bit rate
@@ -41,25 +47,12 @@ public class FFmpegConverterParameter {
     private long audioSamplingFrequency;
     // Audio Channels
     private long audioChannels;
-
-    /**
-     * Constructor
-     *
-     * @param inputFile    Input File
-     * @param videoCodec   Video Codec
-     * @param videoBitrate Video Bit rate
-     * @param audioCodec   Audio Codec
-     * @param audioBitrate Audio Bit rate
-     */
-    public FFmpegConverterParameter(File inputFile, String videoCodec, long videoBitrate, String audioCodec, long audioBitrate) {
-        this.inputFile = inputFile;
-        this.videoCodec = videoCodec;
-        this.videoBitrate = videoBitrate;
-        this.audioCodec = audioCodec;
-        this.audioBitrate = audioBitrate;
-        // Random output file at temp directory TODO: not sure this is correct for all the platforms
-        this.outputFile = new File(System.getProperty("java.io.tmpdir"), "chii2/" + UUID.randomUUID().toString() + ".avi");
-    }
+    // Audio Parameters
+    private List<String> audioParameters;
+    // Audio Preset
+    private List<String> audioPresets;
+    // Threads
+    private int threads = -1;
 
     /**
      * Constructor
@@ -67,21 +60,18 @@ public class FFmpegConverterParameter {
      * @param inputFile    Input File
      * @param outputFile   Output File
      * @param videoCodec   Video Codec
-     * @param videoBitrate Video Bit rate
      * @param audioCodec   Audio Codec
-     * @param audioBitrate Audio Bit rate
      */
-    public FFmpegConverterParameter(File inputFile, File outputFile, String videoCodec, long videoBitrate, String audioCodec, long audioBitrate) {
+    public FFmpegConverterParameter(File inputFile, File outputFile, String videoCodec, String audioCodec) {
         this.inputFile = inputFile;
         this.outputFile = outputFile;
         this.videoCodec = videoCodec;
-        this.videoBitrate = videoBitrate;
         this.audioCodec = audioCodec;
-        this.audioBitrate = audioBitrate;
     }
 
     /**
      * Get FFmpeg parameters
+     *
      * @return Parameter List
      */
     public List<String> getParameters() {
@@ -95,6 +85,9 @@ public class FFmpegConverterParameter {
         if (!"copy".equalsIgnoreCase(videoCodec)) {
             if (sameQuantizer) {
                 command.add("-sameq");
+            } else if ("libx264".equalsIgnoreCase(videoCodec) && videoCRF >= 0) {
+                command.add("-crf");
+                command.add(String.valueOf(videoCRF));
             } else {
                 if (videoBitrate > 0) {
                     command.add("-b");
@@ -117,6 +110,21 @@ public class FFmpegConverterParameter {
                 command.add("-g");
                 command.add(String.valueOf(videoGopSize));
             }
+            if (videoBufferSize > 0) {
+                command.add("-bufsize");
+                command.add(String.valueOf(videoBufferSize));
+            }
+            if (videoPresets != null && !videoPresets.isEmpty()) {
+                for (String videoPreset : videoPresets) {
+                    command.add("-vpre");
+                    command.add(videoPreset);
+                }
+            }
+            if (videoParameters != null && !videoParameters.isEmpty()) {
+                for (String videoParameter : videoParameters) {
+                    command.add(videoParameter);
+                }
+            }
         }
         if (StringUtils.isNotBlank(videoBitStreamFilter)) {
             command.add("-vbsf");
@@ -137,6 +145,21 @@ public class FFmpegConverterParameter {
                 command.add("-ac");
                 command.add(String.valueOf(audioChannels));
             }
+            if (audioPresets != null && !audioPresets.isEmpty()) {
+                for (String audioPreset : audioPresets) {
+                    command.add("-apre");
+                    command.add(audioPreset);
+                }
+            }
+            if (audioParameters != null && !audioParameters.isEmpty()) {
+                for (String audioParameter : audioParameters) {
+                    command.add(audioParameter);
+                }
+            }
+        }
+        if (threads >= 0) {
+            command.add("-threads");
+            command.add(String.valueOf(threads));
         }
         command.add(outputFile.getAbsolutePath());
 
@@ -167,6 +190,14 @@ public class FFmpegConverterParameter {
         this.videoCodec = videoCodec;
     }
 
+    public List<String> getVideoParameters() {
+        return videoParameters;
+    }
+
+    public void setVideoParameters(List<String> videoParameters) {
+        this.videoParameters = videoParameters;
+    }
+
     public boolean isSameQuantizer() {
         return sameQuantizer;
     }
@@ -181,6 +212,14 @@ public class FFmpegConverterParameter {
 
     public void setVideoBitrate(long videoBitrate) {
         this.videoBitrate = videoBitrate;
+    }
+
+    public int getVideoCRF() {
+        return videoCRF;
+    }
+
+    public void setVideoCRF(int videoCRF) {
+        this.videoCRF = videoCRF;
     }
 
     public long getVideoMaxrate() {
@@ -231,6 +270,14 @@ public class FFmpegConverterParameter {
         this.videoBitStreamFilter = videoBitStreamFilter;
     }
 
+    public List<String> getVideoPresets() {
+        return videoPresets;
+    }
+
+    public void setVideoPresets(List<String> videoPresets) {
+        this.videoPresets = videoPresets;
+    }
+
     public String getAudioCodec() {
         return audioCodec;
     }
@@ -261,5 +308,29 @@ public class FFmpegConverterParameter {
 
     public void setAudioChannels(long audioChannels) {
         this.audioChannels = audioChannels;
+    }
+
+    public List<String> getAudioParameters() {
+        return audioParameters;
+    }
+
+    public void setAudioParameters(List<String> audioParameters) {
+        this.audioParameters = audioParameters;
+    }
+
+    public List<String> getAudioPresets() {
+        return audioPresets;
+    }
+
+    public void setAudioPresets(List<String> audioPresets) {
+        this.audioPresets = audioPresets;
+    }
+
+    public int getThreads() {
+        return threads;
+    }
+
+    public void setThreads(int threads) {
+        this.threads = threads;
     }
 }

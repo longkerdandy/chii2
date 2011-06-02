@@ -1,7 +1,8 @@
 package org.chii2.mediaserver.api.content;
 
 import org.chii2.mediaserver.api.content.container.VisualContainer;
-import org.chii2.mediaserver.api.content.item.VisualItem;
+import org.chii2.mediaserver.api.content.item.VisualPictureItem;
+import org.chii2.mediaserver.api.content.item.VisualVideoItem;
 import org.teleal.cling.model.message.UpnpHeaders;
 import org.teleal.cling.support.contentdirectory.DIDLParser;
 import org.teleal.cling.support.model.DIDLObject;
@@ -78,7 +79,7 @@ public interface ContentManager {
      * @param orderBy    Sort Criterion
      * @return List of Photo Item
      */
-    public List<? extends VisualItem> getPhotosByAlbum(String album, String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy);
+    public List<? extends VisualPictureItem> getPhotosByAlbum(String album, String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy);
 
     /**
      * Get total photos count by photo album
@@ -95,7 +96,7 @@ public interface ContentManager {
      * @param filter Content Filter
      * @return Photo Item
      */
-    public VisualItem getPhotoById(String id, String filter);
+    public VisualPictureItem getPhotoById(String id, String filter);
 
     /**
      * Get movies
@@ -107,7 +108,7 @@ public interface ContentManager {
      * @param orderBy    Sort Criterion
      * @return List of Movie Item
      */
-    public List<? extends VisualItem> getMovies(String filter, String parentId, long startIndex, long maxCount, SortCriterion[] orderBy);
+    public List<? extends VisualVideoItem> getMovies(String filter, String parentId, long startIndex, long maxCount, SortCriterion[] orderBy);
 
     /**
      * Get movies count
@@ -143,13 +144,12 @@ public interface ContentManager {
     /**
      * Forge Item ID from Library ID
      *
-     * @param id           Library ID
-     * @param seriesNumber Series Number
-     * @param parentId     Parent ID
-     * @param prefix       Item Prefix
+     * @param id       Library ID
+     * @param parentId Parent ID
+     * @param prefix   Item Prefix
      * @return Item ID
      */
-    public String forgeItemId(String id, int seriesNumber, String parentId, String prefix);
+    public String forgeItemId(String id, String parentId, String prefix);
 
     /**
      * Forge Container ID from its Title
@@ -223,4 +223,12 @@ public interface ContentManager {
      * @return True if ID is Movie Base Storage Folder Container
      */
     public boolean isMovieBaseStorageFolderContainer(String id);
+
+    /**
+     * ID is Online Video related Container
+     *
+     * @param id ID
+     * @return True if ID is Online Video related Container
+     */
+    public boolean isOnlineVideoContainer(String id);
 }
