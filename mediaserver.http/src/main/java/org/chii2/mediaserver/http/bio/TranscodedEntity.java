@@ -2,6 +2,8 @@ package org.chii2.mediaserver.http.bio;
 
 import org.apache.http.entity.AbstractHttpEntity;
 import org.chii2.transcoder.api.core.TranscoderProcess;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +20,8 @@ public class TranscodedEntity extends AbstractHttpEntity {
     private List<TranscoderProcess> processes;
     // Index
     private int index;
+    // Logger
+    private static Logger logger = LoggerFactory.getLogger("org.chii2.mediaserver.http");
 
     /**
      * Constructor
@@ -37,7 +41,7 @@ public class TranscodedEntity extends AbstractHttpEntity {
 
     @Override
     public long getContentLength() {
-        return -1;
+        return 17554021;
     }
 
     @Override
@@ -46,7 +50,7 @@ public class TranscodedEntity extends AbstractHttpEntity {
             return null;
         }
         if (!processes.get(index).isStarted()) {
-            processes.get(index).start();
+            processes.get(index).init();
         }
         if (processes.get(index).isStarted() && !processes.get(index).isStopped()) {
             return processes.get(index).getOutputFileStream();
@@ -65,7 +69,7 @@ public class TranscodedEntity extends AbstractHttpEntity {
         InputStream inputStream = null;
         try {
             if (!processes.get(index).isStarted()) {
-                processes.get(index).start();
+                processes.get(index).init();
             }
             if (processes.get(index).isStarted() && !processes.get(index).isStopped()) {
                 inputStream = processes.get(index).getOutputFileStream();
@@ -78,7 +82,7 @@ public class TranscodedEntity extends AbstractHttpEntity {
                             if (index < processes.size()) {
                                 inputStream.close();
                                 if (!processes.get(index).isStarted()) {
-                                    processes.get(index).start();
+                                    processes.get(index).init();
                                 }
                                 if (processes.get(index).isStarted() && !processes.get(index).isStopped()) {
                                     inputStream = processes.get(index).getOutputFileStream();
@@ -95,12 +99,14 @@ public class TranscodedEntity extends AbstractHttpEntity {
                 }
                 outStream.flush();
             }
+        } catch (Exception e) {
+            logger.warn("Transcoded Entity error: {}.", e.getMessage());
         } finally {
             if (inputStream != null) {
                 inputStream.close();
             }
             for (TranscoderProcess process : processes) {
-                process.stop();
+                process.destroy();
             }
         }
     }

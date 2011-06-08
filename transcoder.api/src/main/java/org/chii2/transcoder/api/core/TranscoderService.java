@@ -172,4 +172,72 @@ public interface TranscoderService {
      * @return Transcoded Image File
      */
     public File getImageTranscodedFile(String client, String imageType, File imageFile);
+
+    /**
+     * Get Transcoded Video DLNA Profi;e
+     *
+     * @param client             Client
+     * @param container          Container
+     * @param videoFormat        Video Format
+     * @param videoFormatProfile Video Format Profile
+     * @param videoFormatVersion Video Format Version
+     * @param videoCodec         Video Codec
+     * @param videoBitRate       BitRate
+     * @param videoWidth         Video Width
+     * @param videoHeight        Video Height
+     * @param fps                Video FPS
+     * @param audioFormat        Audio Format
+     * @param audioFormatProfile Audio Format Profile
+     * @param audioFormatVersion Audio Format Version
+     * @param audioCodec         Audio Codec
+     * @param audioBitRate       Audio BitRate
+     * @param audioSampleBitRate Audio SampleBitRate
+     * @param audioChannels      Audio Channels
+     * @return Video DLNA Profile
+     */
+    public DLNAProfiles getVideoTranscodedProfile(String client, String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps, String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels);
+
+    /**
+     * Get Transcoded MIME
+     *
+     * @param client             Client
+     * @param container          Container
+     * @param videoFormat        Video Format
+     * @param videoFormatProfile Video Format Profile
+     * @param videoFormatVersion Video Format Version
+     * @param videoCodec         Video Codec
+     * @param videoBitRate       BitRate
+     * @param videoWidth         Video Width
+     * @param videoHeight        Video Height
+     * @param fps                Video FPS
+     * @param audioFormat        Audio Format
+     * @param audioFormatProfile Audio Format Profile
+     * @param audioFormatVersion Audio Format Version
+     * @param audioCodec         Audio Codec
+     * @param audioBitRate       Audio BitRate
+     * @param audioSampleBitRate Audio SampleBitRate
+     * @param audioChannels      Audio Channels
+     * @return Video MIME
+     */
+    public String getVideoTranscodedMime(String client, String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps, String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels);
+
+    /**
+     * Get Transcoded MIME for Online Video
+     *
+     * @param providerName Online Video Provider Name
+     * @param client       Client
+     * @param url          Video URL
+     * @return Transcoded MIME
+     */
+    public String getOnlineVideoTranscodedMime(String providerName, String client, String url);
+
+    /**
+     * Get Transcoded Processes for Online Video
+     *
+     * @param providerName Online Video Provider Name
+     * @param client       Client
+     * @param url          Video URL
+     * @return Transcoded Processes
+     */
+    public List<TranscoderProcess> getOnlineVideoTranscodedProcesses(String providerName, String client, String url);
 }

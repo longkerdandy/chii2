@@ -140,8 +140,13 @@ public class HttpServerServiceImpl implements HttpServerService {
     }
 
     @Override
-    public URI forgeUrl(String clientProfile, String mediaType, boolean transcoded, String mediaId) {
-        return HttpUrl.forgeURL(getHost().getHostAddress(), getPort(), clientProfile, mediaType, transcoded, mediaId);
+    public URI forgeUrl(String mediaType, String clientProfile,  boolean transcoded, String mediaId) {
+        return HttpUrl.forgeURL(getHost().getHostAddress(), getPort(), mediaType, clientProfile, transcoded, mediaId);
+    }
+
+    @Override
+    public URI forgeUrl(String mediaType, String provider, String clientProfile,  boolean transcoded, String url) {
+        return HttpUrl.forgeURL(getHost().getHostAddress(), getPort(), mediaType, provider, clientProfile, transcoded, url);
     }
 
     /**

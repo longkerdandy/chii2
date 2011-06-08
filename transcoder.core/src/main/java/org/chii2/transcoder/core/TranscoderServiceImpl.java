@@ -2,15 +2,17 @@ package org.chii2.transcoder.core;
 
 import org.apache.commons.io.FileUtils;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
-import org.chii2.medialibrary.api.persistence.entity.MovieFile;
+import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
 import org.chii2.transcoder.api.core.TranscoderProcess;
 import org.chii2.transcoder.api.core.TranscoderService;
-import org.chii2.transcoder.core.avidemux.*;
+import org.chii2.transcoder.core.cache.TranscodedCache;
 import org.chii2.transcoder.core.dlna.catalog.*;
 import org.chii2.transcoder.core.dlna.codec.AudioCodec;
 import org.chii2.transcoder.core.dlna.codec.Container;
 import org.chii2.transcoder.core.dlna.codec.MIME;
 import org.chii2.transcoder.core.dlna.codec.VideoCodec;
+import org.chii2.transcoder.core.ffmpeg.FFmpegConverterParameter;
+import org.chii2.transcoder.core.ffmpeg.FFmpegProcess;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +30,14 @@ import java.util.UUID;
 public class TranscoderServiceImpl implements TranscoderService {
     // Injected ConfigAdmin Service
     private ConfigurationAdmin configAdmin;
+    // Online Videos
+    private List<OnlineVideoProviderService> onlineVideos;
     // Audio Catalogs
-    List<AudioCatalog> audioCatalogs = new ArrayList<AudioCatalog>();
+    private List<AudioCatalog> audioCatalogs = new ArrayList<AudioCatalog>();
     // Video Catalogs
-    List<VideoCatalog> videoCatalogs = new ArrayList<VideoCatalog>();
+    private List<VideoCatalog> videoCatalogs = new ArrayList<VideoCatalog>();
     // Image Catalogs
-    List<ImageCatalog> imageCatalogs = new ArrayList<ImageCatalog>();
+    private List<ImageCatalog> imageCatalogs = new ArrayList<ImageCatalog>();
     // Temp Directory
     private File tempDirectory = new File(System.getProperty("java.io.tmpdir"), "chii2");
     // Logger
@@ -84,6 +88,9 @@ public class TranscoderServiceImpl implements TranscoderService {
     @SuppressWarnings("unused")
     public void destroy() {
         logger.debug("Chii2 Transcoder Core Service destroy.");
+        // Shutdown Cache
+        TranscodedCache.getInstance().shutdown();
+        // Delete tmp files
         if (tempDirectory.exists()) {
             try {
                 FileUtils.forceDelete(tempDirectory);
@@ -358,75 +365,182 @@ public class TranscoderServiceImpl implements TranscoderService {
         return imageFile;
     }
 
-    private X264Config getX264Fast() {
-        X264Config config = new X264Config();
-        config.setMbTree("false");
-        config.setMotionEstimationMethod("diamond");
-        config.setSubpixelRefinement("2");
-        config.setMotionVectorSearchRange("16");
-        config.setDirectPredictionMode("auto");
-        config.setWeightedPrediction("false");
-        config.setWeightedPredictionPframes("none");
-        config.setDct8x8("false");
-        config.setPartitionP8x8("false");
-        config.setPartitionB8x8("false");
-        config.setPartitionP4x4("false");
-        config.setPartitionI8x8("false");
-        config.setPartitionI4x4("false");
-        config.setCabac("false");
-        config.setbFrameReferences("none");
-        config.setMixedReferences("false");
-        config.setChromaMotionEstimation("false");
-        config.setTrellis("disabled");
-        return config;
+    @Override
+    public DLNAProfiles getVideoTranscodedProfile(String client, String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps, String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels) {
+        if (client.equals(PROFILE_XBOX)) {
+            if (VideoCodec.match(videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, VideoCodec.MPEG4_P2) &&
+                    videoBitRate <= 5000000 && videoWidth <= 1280 && videoHeight <= 720 && fps <= 30) {
+                if (AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.AC3) && audioChannels <= 6) {
+                    // TODO: This may not correct, but DLNA doesn't have a profile with MPEG4 Part2 & AVI & AC3
+                    return DLNAProfiles.MPEG4_P2_TS_ASP_AC3_ISO;
+                } else if (AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.MP3)
+                        || AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.MP3X)) {
+                    // TODO: This may not correct, but DLNA doesn't have a profile with MPEG4 Part2 & AVI & MP3
+                    return DLNAProfiles.MPEG4_P2_TS_ASP_MPEG1_L3_ISO;
+                } else if (AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.AAC_LC) && audioChannels <= 2) {
+                    return DLNAProfiles.MPEG4_P2_MP4_ASP_AAC;
+                } else {
+                    return DLNAProfiles.MPEG4_P2_MP4_ASP_AAC;
+                }
+            } else if (VideoCodec.match(videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, VideoCodec.MPEG4_P10) &&
+                    videoBitRate <= 10000000 && videoWidth <= 1920 && videoHeight <= 1080 && fps <= 30) {
+                if (AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.AAC_LC) && audioChannels <= 2) {
+                    return DLNAProfiles.AVC_MP4_HP_HD_AAC;
+                } else {
+                    return DLNAProfiles.AVC_MP4_HP_HD_AAC;
+                }
+            } else {
+                return DLNAProfiles.AVC_MP4_HP_HD_AAC;
+            }
+        } else {
+            return DLNAProfiles.NONE;
+        }
     }
 
-    private X264Config getX264Medium() {
-        X264Config config = new X264Config();
-        config.setMbTree("true");
-        config.setFrametypeLookahead("40");
-        config.setMotionEstimationMethod("hexagonal");
-        config.setSubpixelRefinement("6");
-        config.setMotionVectorSearchRange("16");
-        config.setDirectPredictionMode("auto");
-        config.setWeightedPrediction("true");
-        config.setWeightedPredictionPframes("smart");
-        config.setDct8x8("false");
-        config.setPartitionP8x8("true");
-        config.setPartitionB8x8("true");
-        config.setPartitionP4x4("false");
-        config.setPartitionI8x8("false");
-        config.setPartitionI4x4("false");
-        config.setCabac("false");
-        config.setbFrameReferences("none");
-        config.setMixedReferences("false");
-        config.setChromaMotionEstimation("false");
-        config.setTrellis("disabled");
-        return config;
+    @Override
+    public String getVideoTranscodedMime(String client, String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps, String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels) {
+        if (client.equals(PROFILE_XBOX)) {
+            return "video/mp4";
+        } else {
+            return null;
+        }
     }
 
-    private X264Config getX264Slow() {
-        X264Config config = new X264Config();
-        config.setMbTree("true");
-        config.setFrametypeLookahead("40");
-        config.setMotionEstimationMethod("multi-hexagonal");
-        config.setSubpixelRefinement("9");
-        config.setMotionVectorSearchRange("24");
-        config.setDirectPredictionMode("auto");
-        config.setWeightedPrediction("true");
-        config.setWeightedPredictionPframes("smart");
-        config.setDct8x8("true");
-        config.setPartitionP8x8("true");
-        config.setPartitionB8x8("true");
-        config.setPartitionP4x4("true");
-        config.setPartitionI8x8("true");
-        config.setPartitionI4x4("true");
-        config.setCabac("true");
-        config.setbFrameReferences("normal");
-        config.setMixedReferences("true");
-        config.setChromaMotionEstimation("true");
-        config.setTrellis("finalMacroblock");
-        return config;
+    @Override
+    public String getOnlineVideoTranscodedMime(String providerName, String client, String url) {
+        String mime = null;
+        // Online Video Provider
+        OnlineVideoProviderService provider = getOnlineVideoProvider(providerName);
+
+        if (provider != null) {
+            // URL
+            if (!url.startsWith("/")) {
+                url = "/" + url;
+            }
+            url = provider.getVideoHostUrl() + url;
+            // Basic Information
+            String container = provider.getContainer(url);
+            String videoFormat = provider.getVideoFormat(url);
+            String videoFormatProfile = provider.getVideoFormatProfile(url);
+            int videoFormatVersion = provider.getVideoFormatVersion(url);
+            String videoCodec = provider.getVideoCodec(url);
+            long videoBitRate = provider.getVideoBitRate(url);
+            int videoWidth = provider.getVideoWidth(url);
+            int videoHeight = provider.getVideoHeight(url);
+            float fps = provider.getVideoFps(url);
+            String audioFormat = provider.getAudioFormat(url);
+            String audioFormatProfile = provider.getAudioFormatProfile(url);
+            int audioFormatVersion = provider.getAudioFormatVersion(url);
+            String audioCodec = provider.getAudioCodec(url);
+            long audioBitRate = provider.getAudioBitRate(url);
+            long audioSampleBitRate = provider.getAudioSampleBitRate(url);
+            int audioChannels = provider.getAudioChannels(url);
+            // MIME
+            mime = this.getVideoTranscodedMime(client, container, videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, videoBitRate, videoWidth, videoHeight, fps, audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, audioBitRate, audioSampleBitRate, audioChannels);
+        }
+
+        return mime;
+    }
+
+    @Override
+    public List<TranscoderProcess> getOnlineVideoTranscodedProcesses(String providerName, String client, String url) {
+        List<TranscoderProcess> processes = new ArrayList<TranscoderProcess>();
+        // Online Video Provider
+        OnlineVideoProviderService provider = getOnlineVideoProvider(providerName);
+
+        if (provider != null) {
+            // URL
+            if (!url.startsWith("/")) {
+                url = "/" + url;
+            }
+            url = provider.getVideoHostUrl() + url;
+            // Basic Information
+            String container = provider.getContainer(url);
+            String videoFormat = provider.getVideoFormat(url);
+            String videoFormatProfile = provider.getVideoFormatProfile(url);
+            int videoFormatVersion = provider.getVideoFormatVersion(url);
+            String videoCodec = provider.getVideoCodec(url);
+            long videoBitRate = provider.getVideoBitRate(url);
+            int videoWidth = provider.getVideoWidth(url);
+            int videoHeight = provider.getVideoHeight(url);
+            float fps = provider.getVideoFps(url);
+            String audioFormat = provider.getAudioFormat(url);
+            String audioFormatProfile = provider.getAudioFormatProfile(url);
+            int audioFormatVersion = provider.getAudioFormatVersion(url);
+            String audioCodec = provider.getAudioCodec(url);
+            long audioBitRate = provider.getAudioBitRate(url);
+            long audioSampleBitRate = provider.getAudioSampleBitRate(url);
+            int audioChannels = provider.getAudioChannels(url);
+            // Real URL
+            for (String realURL : provider.getRealAddress(url)) {
+                TranscoderProcess process = null;
+                // Pipe
+                List<String> pipe = provider.getPipe(realURL);
+                // Cache
+                TranscodedCache cache = TranscodedCache.getInstance();
+                if (cache.containProcess(realURL)) {
+                    process = cache.retrieveProcess(realURL);
+                } else if (cache.containFile(realURL)) {
+                    File file = cache.retrieveFile(realURL);
+                    // Fake parameter, since we already have the output file
+                    FFmpegConverterParameter ffmpegParameter = new FFmpegConverterParameter(pipe, file, "copy", "copy");
+                    process = new FFmpegProcess(realURL, ffmpegParameter);
+                    process.setStarted(true);
+                    process.setFinished(true);
+                    process.setStopped(true);
+                } else {
+                    FFmpegConverterParameter ffmpegParameter = null;
+                    // TODO: Client Not Completed
+                    if (client.equals(PROFILE_XBOX)) {
+                        if (VideoCodec.match(videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, VideoCodec.MPEG4_P2) &&
+                                videoBitRate <= 5000000 && videoWidth <= 1280 && videoHeight <= 720 && fps <= 30) {
+                            if (AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.AC3) && audioChannels <= 6) {
+                                ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".avi"), "copy", "copy");
+                            } else if (AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.MP3)
+                                    || AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.MP3X)) {
+                                ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".avi"), "copy", "copy");
+                            } else if (AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.AAC_LC) && audioChannels <= 2) {
+                                ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".mp4"), "copy", "copy");
+                            } else {
+                                ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".mp4"), "copy", "libfaac");
+                                ffmpegParameter.setAudioChannels(2);
+                            }
+                        } else if (VideoCodec.match(videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, VideoCodec.MPEG4_P10) &&
+                                videoBitRate <= 10000000 && videoWidth <= 1920 && videoHeight <= 1080 && fps <= 30) {
+                            if (AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.AAC_LC) && audioChannels <= 2) {
+                                ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".mp4"), "copy", "copy");
+                            } else {
+                                ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".mp4"), "copy", "libfaac");
+                                ffmpegParameter.setAudioChannels(2);
+                            }
+                        } else {
+                            // TODO: Parameters Not Completed
+                            ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".mp4"), "libx264", "libfaac");
+                            ffmpegParameter.setAudioChannels(2);
+                        }
+                    }
+                    process = new FFmpegProcess(realURL, ffmpegParameter);
+                }
+                processes.add(process);
+            }
+        }
+
+        return processes;
+    }
+
+    /**
+     * Get Online Video Provider by Name
+     *
+     * @param providerName Provider Name
+     * @return Online Video Provider
+     */
+    private OnlineVideoProviderService getOnlineVideoProvider(String providerName) {
+        for (OnlineVideoProviderService onlineVideo : onlineVideos) {
+            if (onlineVideo.getProviderName().equalsIgnoreCase(providerName)) {
+                return onlineVideo;
+            }
+        }
+        return null;
     }
 
     /**
@@ -437,5 +551,15 @@ public class TranscoderServiceImpl implements TranscoderService {
     @SuppressWarnings("unused")
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
+    }
+
+    /**
+     * Inject Online Video Providers
+     *
+     * @param onlineVideos Online Video Providers
+     */
+    @SuppressWarnings("unused")
+    public void setOnlineVideos(List<OnlineVideoProviderService> onlineVideos) {
+        this.onlineVideos = onlineVideos;
     }
 }

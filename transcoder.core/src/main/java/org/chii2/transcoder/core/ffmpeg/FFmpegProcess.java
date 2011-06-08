@@ -1,7 +1,9 @@
 package org.chii2.transcoder.core.ffmpeg;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.chii2.transcoder.api.core.TranscoderProcess;
+import org.chii2.transcoder.core.cache.TranscodedCache;
 import org.chii2.transcoder.core.io.TranscodedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,8 @@ public class FFmpegProcess implements TranscoderProcess {
     // Successful
     public volatile boolean started = false;
 
+    // Request ID
+    private String requestId;
     // FFmpeg parameter
     private FFmpegConverterParameter parameter;
     // Real Thread Process
@@ -39,14 +43,16 @@ public class FFmpegProcess implements TranscoderProcess {
     /**
      * Constructor
      *
+     * @param requestId  Request ID
      * @param parameter FFmpeg Parameter
      */
-    public FFmpegProcess(FFmpegConverterParameter parameter) {
+    public FFmpegProcess(String requestId, FFmpegConverterParameter parameter) {
+        this.requestId = requestId;
         this.parameter = parameter;
     }
 
     @Override
-    public void start() {
+    public void init() {
         try {
             // Parameters
             List<String> commands = parameter.getParameters();
@@ -57,11 +63,14 @@ public class FFmpegProcess implements TranscoderProcess {
             // Read text output
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
-            while ((line = reader.readLine()) != null) {
-                if ("Press [q] to stop encoding".equalsIgnoreCase(line)) {
-                    break;
-                }
-            }
+
+            // During Pipe, This will not display
+            //while ((line = reader.readLine()) != null) {
+            //    if ("Press [q] to destroy encoding".equalsIgnoreCase(line)) {
+            //        break;
+            //    }
+            //}
+
             // Make sure output file's size > 0
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("frame=")) {
@@ -77,46 +86,60 @@ public class FFmpegProcess implements TranscoderProcess {
             thread.start();
         } catch (IOException e) {
             logger.error("FFmpeg Process with IO Exception: {}", e.getMessage());
-            this.stopped = true;
+            this.destroy();
         } finally {
             this.started = true;
         }
     }
 
     @Override
-    public void stop() {
-        // To stop reader
-        stopped = true;
+    public void destroy() {
+        // Stopped
+        this.stopped = true;
         // Stop ffmpeg
         if (this.process != null) {
-            char quit = 'q';
-            try {
-                logger.info("Try to stop FFmpeg Process.");
-                process.getOutputStream().write(quit);
-            } catch (IOException e) {
-                logger.error("FFmpeg Process with IO Exception: {}", e.getMessage());
-            } finally {
-                process.destroy();
-            }
+            logger.info("Try to stop FFmpeg Process.");
+            process.destroy();
         }
-        // Delete file
-        File outputFile = getOutputFile();
-        if (outputFile.exists()) {
+        // Close Stream
+        if (this.stream != null) {
             try {
-                boolean deleted = outputFile.delete();
-                if (deleted) {
-                    logger.info("Temp file {} deleted.", outputFile.getAbsolutePath());
-                } else {
-                    logger.info("Temp file {} can not be deleted.", outputFile.getAbsolutePath());
-                }
-            } catch (SecurityException e) {
-                logger.error("FFmpeg Process try to delete temp file {} with Security Exception: {}", outputFile.getAbsolutePath(), e.getMessage());
+                this.stream.close();
+            } catch (IOException ignore) {
+            } finally {
+                this.stream = null;
             }
         }
     }
 
+    @Override
+    public void setStopped(boolean stopped) {
+        this.stopped = stopped;
+    }
+
+    @Override
+    public void setFinished(boolean finished) {
+        this.finished = finished;
+    }
+
+    @Override
+    public void setStarted(boolean started) {
+        this.started = started;
+    }
+
+    @Override
+    public void cache() {
+        TranscodedCache.getInstance().cache(this);
+    }
+
+    @Override
+    public String getRequestId() {
+        return requestId;
+    }
+
     /**
      * Parse ffmpeg output to make sure output file size not zero
+     *
      * @param line Output Line
      * @return True if file size > 0
      */
@@ -124,9 +147,12 @@ public class FFmpegProcess implements TranscoderProcess {
         int sizeIndex = line.indexOf("size=");
         int timeIndex = line.indexOf("time=");
         try {
-            String size = line.substring(sizeIndex + 5, timeIndex);
-            size = StringUtils.trim(size);
-            return !(size.equalsIgnoreCase("0kB") || size.equalsIgnoreCase("0"));
+            String size = StringUtils.trim(line.substring(sizeIndex + 5, timeIndex));
+            if (size.endsWith("kB")) {
+                size = size.substring(0, size.length() - 2);
+            }
+            this.size = NumberUtils.toLong(size);
+            return !(this.size == 0);
         } catch (Exception e) {
             return false;
         }
@@ -147,6 +173,12 @@ public class FFmpegProcess implements TranscoderProcess {
             }
         }
         return stream;
+    }
+
+    @Override
+    public long getCurrentSize() {
+        // return size;
+        return this.getOutputFile().length();
     }
 
     @Override

@@ -19,6 +19,7 @@ import org.teleal.cling.support.model.DIDLObject;
 import org.teleal.cling.support.model.ProtocolInfo;
 import org.teleal.cling.support.model.Res;
 import org.teleal.cling.support.model.SortCriterion;
+import org.teleal.cling.support.model.dlna.DLNAProfiles;
 import org.teleal.common.util.MimeType;
 
 import java.net.URI;
@@ -77,6 +78,11 @@ public class CommonContentManager implements ContentManager {
     @Override
     public String getClientProfile() {
         return TranscoderService.PROFILE_COMMON;
+    }
+
+    @Override
+    public Res getResource() {
+        return new Res();
     }
 
     @Override
@@ -228,7 +234,7 @@ public class CommonContentManager implements ContentManager {
         for (Image image : images) {
             if (image != null) {
                 String id = forgeItemId(image.getId(), parentId, PHOTO_ITEM_PREFIX);
-                URI url = httpServer.forgeUrl(getClientProfile(), "image", false, image.getId());
+                URI url = httpServer.forgeUrl("image", getClientProfile(), false, image.getId());
                 String profile = getClientProfile();
                 MimeType mime = new MimeType("image", transcoder.getImageTranscodedType(profile, image.getType()));
                 // Resources
@@ -271,7 +277,7 @@ public class CommonContentManager implements ContentManager {
         Image image = mediaLibrary.getImageById(libraryId);
         if (image != null) {
             String parentId = getItemParentId(id);
-            URI url = httpServer.forgeUrl(getClientProfile(), "image", false, image.getId());
+            URI url = httpServer.forgeUrl("image", getClientProfile(), false, image.getId());
             String profile = getClientProfile();
             MimeType mime = new MimeType("image", transcoder.getImageTranscodedType(profile, image.getType()));
             // Resources
@@ -405,11 +411,47 @@ public class CommonContentManager implements ContentManager {
         return id != null && id.length() > 4 && id.substring(0, 4).equalsIgnoreCase(OnlineVideoProviderService.ONLINE_VIDEO_CONTAINER_PREFIX);
     }
 
+    @Override
+    public URI forgetOnlineVideoUrl(String providerName, String url) {
+        OnlineVideoProviderService onlineVideo = this.getOnlineVideoProvider(providerName);
+        if (onlineVideo != null) {
+            url = url.replace(onlineVideo.getVideoHostUrl(), "");
+            return httpServer.forgeUrl("onlinevideo", providerName, this.getClientProfile(), true, url);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public DLNAProfiles getVideoTranscodedProfile(String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps, String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels) {
+        return transcoder.getVideoTranscodedProfile(getClientProfile(), container, videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, videoBitRate, videoWidth, videoHeight, fps, audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, audioBitRate, audioSampleBitRate, audioChannels);
+    }
+
+    @Override
+    public String getVideoTranscodedMime(String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps, String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels) {
+        return transcoder.getVideoTranscodedMime(getClientProfile(), container, videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, videoBitRate, videoWidth, videoHeight, fps, audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, audioBitRate, audioSampleBitRate, audioChannels);
+    }
+
+    /**
+     * Get Online Video Provider by Name
+     *
+     * @param providerName Provider Name
+     * @return Online Video Provider
+     */
+    protected OnlineVideoProviderService getOnlineVideoProvider(String providerName) {
+        for (OnlineVideoProviderService onlineVideo : onlineVideos) {
+            if (onlineVideo.getProviderName().equalsIgnoreCase(providerName)) {
+                return onlineVideo;
+            }
+        }
+        return null;
+    }
+
     /**
      * Get Online Video Container from Provider
      *
      * @param filter Filter
-     * @param id Object ID
+     * @param id     Object ID
      * @return Online Video Container
      */
     protected VisualContainer getOnlineVideoContainer(String filter, String id) {

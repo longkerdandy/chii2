@@ -5,14 +5,15 @@ import org.apache.commons.lang.StringUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * FFmpeg Converter Parameter
  */
 public class FFmpegConverterParameter {
-    // Input File
-    private File inputFile;
+    // Pipe Input
+    private List<String> pipe;
+    // Input
+    private String input;
     // Output File
     private File outputFile;
     // Video Codec
@@ -57,13 +58,29 @@ public class FFmpegConverterParameter {
     /**
      * Constructor
      *
-     * @param inputFile    Input File
-     * @param outputFile   Output File
-     * @param videoCodec   Video Codec
-     * @param audioCodec   Audio Codec
+     * @param input      Input
+     * @param outputFile Output
+     * @param videoCodec Video Codec
+     * @param audioCodec Audio Codec
      */
-    public FFmpegConverterParameter(File inputFile, File outputFile, String videoCodec, String audioCodec) {
-        this.inputFile = inputFile;
+    public FFmpegConverterParameter(String input, File outputFile, String videoCodec, String audioCodec) {
+        this.input = input;
+        this.outputFile = outputFile;
+        this.videoCodec = videoCodec;
+        this.audioCodec = audioCodec;
+    }
+
+    /**
+     * Constructor
+     *
+     * @param pipe       Pipe Input
+     * @param outputFile Output
+     * @param videoCodec Video Codec
+     * @param audioCodec Audio Codec
+     */
+    public FFmpegConverterParameter(List<String> pipe, File outputFile, String videoCodec, String audioCodec) {
+        this.pipe = pipe;
+        this.input = "-";
         this.outputFile = outputFile;
         this.videoCodec = videoCodec;
         this.audioCodec = audioCodec;
@@ -75,103 +92,123 @@ public class FFmpegConverterParameter {
      * @return Parameter List
      */
     public List<String> getParameters() {
-        List<String> command = new ArrayList<String>();
-        command.add("ffmpeg");
-        command.add("-y");
-        command.add("-i");
-        command.add(inputFile.getAbsolutePath());
-        command.add("-vcodec");
-        command.add(videoCodec);
+        List<String> ffmpegCommands = new ArrayList<String>();
+        // FFmpeg
+        ffmpegCommands.add("ffmpeg");
+        ffmpegCommands.add("-y");
+        ffmpegCommands.add("-i");
+        ffmpegCommands.add(input);
+        ffmpegCommands.add("-vcodec");
+        ffmpegCommands.add(videoCodec);
         if (!"copy".equalsIgnoreCase(videoCodec)) {
             if (sameQuantizer) {
-                command.add("-sameq");
+                ffmpegCommands.add("-sameq");
             } else if ("libx264".equalsIgnoreCase(videoCodec) && videoCRF >= 0) {
-                command.add("-crf");
-                command.add(String.valueOf(videoCRF));
+                ffmpegCommands.add("-crf");
+                ffmpegCommands.add(String.valueOf(videoCRF));
             } else {
                 if (videoBitrate > 0) {
-                    command.add("-b");
-                    command.add(String.valueOf(videoBitrate));
+                    ffmpegCommands.add("-b");
+                    ffmpegCommands.add(String.valueOf(videoBitrate));
                 }
                 if (videoMaxrate > 0) {
-                    command.add("-maxrate");
-                    command.add(String.valueOf(videoMaxrate));
+                    ffmpegCommands.add("-maxrate");
+                    ffmpegCommands.add(String.valueOf(videoMaxrate));
                 }
                 if (videoMinrate > 0) {
-                    command.add("-minrate");
-                    command.add(String.valueOf(videoMinrate));
+                    ffmpegCommands.add("-minrate");
+                    ffmpegCommands.add(String.valueOf(videoMinrate));
                 }
             }
             if (videoFrameRate > 0) {
-                command.add("-r");
-                command.add(String.valueOf(videoFrameRate));
+                ffmpegCommands.add("-r");
+                ffmpegCommands.add(String.valueOf(videoFrameRate));
             }
             if (videoGopSize > 0) {
-                command.add("-g");
-                command.add(String.valueOf(videoGopSize));
+                ffmpegCommands.add("-g");
+                ffmpegCommands.add(String.valueOf(videoGopSize));
             }
             if (videoBufferSize > 0) {
-                command.add("-bufsize");
-                command.add(String.valueOf(videoBufferSize));
+                ffmpegCommands.add("-bufsize");
+                ffmpegCommands.add(String.valueOf(videoBufferSize));
             }
             if (videoPresets != null && !videoPresets.isEmpty()) {
                 for (String videoPreset : videoPresets) {
-                    command.add("-vpre");
-                    command.add(videoPreset);
+                    ffmpegCommands.add("-vpre");
+                    ffmpegCommands.add(videoPreset);
                 }
             }
             if (videoParameters != null && !videoParameters.isEmpty()) {
                 for (String videoParameter : videoParameters) {
-                    command.add(videoParameter);
+                    ffmpegCommands.add(videoParameter);
                 }
             }
         }
         if (StringUtils.isNotBlank(videoBitStreamFilter)) {
-            command.add("-vbsf");
-            command.add(videoBitStreamFilter);
+            ffmpegCommands.add("-vbsf");
+            ffmpegCommands.add(videoBitStreamFilter);
         }
-        command.add("-acodec");
-        command.add(audioCodec);
+        ffmpegCommands.add("-acodec");
+        ffmpegCommands.add(audioCodec);
         if (!"copy".equalsIgnoreCase(audioCodec)) {
             if (audioBitrate > 0) {
-                command.add("-ab");
-                command.add(String.valueOf(audioBitrate));
+                ffmpegCommands.add("-ab");
+                ffmpegCommands.add(String.valueOf(audioBitrate));
             }
             if (audioSamplingFrequency > 0) {
-                command.add("-ar");
-                command.add(String.valueOf(audioSamplingFrequency));
+                ffmpegCommands.add("-ar");
+                ffmpegCommands.add(String.valueOf(audioSamplingFrequency));
             }
             if (audioChannels > 0) {
-                command.add("-ac");
-                command.add(String.valueOf(audioChannels));
+                ffmpegCommands.add("-ac");
+                ffmpegCommands.add(String.valueOf(audioChannels));
             }
             if (audioPresets != null && !audioPresets.isEmpty()) {
                 for (String audioPreset : audioPresets) {
-                    command.add("-apre");
-                    command.add(audioPreset);
+                    ffmpegCommands.add("-apre");
+                    ffmpegCommands.add(audioPreset);
                 }
             }
             if (audioParameters != null && !audioParameters.isEmpty()) {
                 for (String audioParameter : audioParameters) {
-                    command.add(audioParameter);
+                    ffmpegCommands.add(audioParameter);
                 }
             }
         }
         if (threads >= 0) {
-            command.add("-threads");
-            command.add(String.valueOf(threads));
+            ffmpegCommands.add("-threads");
+            ffmpegCommands.add(String.valueOf(threads));
         }
-        command.add(outputFile.getAbsolutePath());
+        ffmpegCommands.add(outputFile.getAbsolutePath());
 
-        return command;
+        if (pipe != null && pipe.size() > 0) {
+            List<String> commands = new ArrayList<String>();
+            commands.add("/bin/sh");
+            commands.add("-c");
+            StringBuilder sb = new StringBuilder();
+            for (String pipeCommand : pipe) {
+                sb.append(pipeCommand);
+                sb.append(" ");
+            }
+            sb.append("|");
+            sb.append(" ");
+            for (String ffmpegCommand : ffmpegCommands) {
+                sb.append(ffmpegCommand);
+                sb.append(" ");
+            }
+            commands.add(sb.toString());
+            return commands;
+        } else {
+            return ffmpegCommands;
+        }
     }
 
-    public File getInputFile() {
-        return inputFile;
+    public String getInput() {
+        return input;
     }
 
-    public void setInputFile(File inputFile) {
-        this.inputFile = inputFile;
+    public void setInput(String input) {
+        this.input = input;
     }
 
     public File getOutputFile() {

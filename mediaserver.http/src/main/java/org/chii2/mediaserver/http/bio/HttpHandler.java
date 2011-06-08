@@ -1,6 +1,7 @@
 package org.chii2.mediaserver.http.bio;
 
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.*;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.FileEntity;
@@ -76,10 +77,12 @@ public class HttpHandler implements HttpRequestHandler {
             response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
             logger.debug("Chii2 Media Server Http Server requested url parse error.");
         } else {
-            String clientProfile = map.get("client");
             String type = map.get("type");
+            String provider = map.get("provider");
+            String clientProfile = map.get("client");
             boolean transcoded = BooleanUtils.toBoolean(map.get("transcoded"), "1", "0");
             String id = map.get("id");
+            String url = map.get("url");
 
             // Query the library and get the entity
             HttpEntity entity = null;
@@ -123,6 +126,19 @@ public class HttpHandler implements HttpRequestHandler {
                     entity = new ByteArrayEntity(thumb);
                     response.setStatusCode(HttpStatus.SC_OK);
                 }
+            } else if ("onlinevideo".equalsIgnoreCase(type)) {
+                String mime = transcoder.getOnlineVideoTranscodedMime(provider, clientProfile, url);
+                if (StringUtils.isBlank(mime)) {
+                    logger.error("Can't determine Online Video {} for client {} 's MIME, this could result a error.", url, clientProfile);
+                }
+                List<TranscoderProcess> processes = transcoder.getOnlineVideoTranscodedProcesses(provider, clientProfile, url);
+                entity = new RangeTranscodedEntity(processes, mime, range);
+                if (range != null) {
+                    response.setStatusCode(HttpStatus.SC_PARTIAL_CONTENT);
+                } else {
+                    response.setStatusCode(HttpStatus.SC_OK);
+                }
+
             }
 
             if (entity == null) {

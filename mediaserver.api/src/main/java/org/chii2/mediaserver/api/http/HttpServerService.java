@@ -31,5 +31,17 @@ public interface HttpServerService {
      * @param mediaId       Movie ID
      * @return Movie URL
      */
-    public URI forgeUrl(String clientProfile, String mediaType, boolean transcoded, String mediaId);
+    public URI forgeUrl(String mediaType, String clientProfile, boolean transcoded, String mediaId);
+
+    /**
+     * Forge Online Media Item URL
+     *
+     * @param provider      Provider
+     * @param clientProfile Client Profile
+     * @param mediaType     Media Type
+     * @param transcoded    Transcoded or not
+     * @param url           Movie URL
+     * @return Movie URL
+     */
+    public URI forgeUrl(String mediaType, String provider, String clientProfile, boolean transcoded, String url);
 }

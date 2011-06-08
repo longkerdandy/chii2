@@ -27,6 +27,12 @@ public class ResponseContentRange implements HttpResponseInterceptor {
             if (range != null) {
                 response.addHeader("Content-Range", range);
             }
+        } else if (ver.compareToVersion(HttpVersion.HTTP_1_1) >= 0 && entity instanceof RangeTranscodedEntity && status == HttpStatus.SC_PARTIAL_CONTENT) {
+            RangeTranscodedEntity rangeTranscodedEntity = (RangeTranscodedEntity) entity;
+            String range = rangeTranscodedEntity.getContentRange();
+            if (range != null) {
+                response.addHeader("Content-Range", range);
+            }
         }
     }
 }

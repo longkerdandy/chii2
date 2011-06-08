@@ -6,8 +6,11 @@ import org.chii2.mediaserver.api.content.item.VisualVideoItem;
 import org.teleal.cling.model.message.UpnpHeaders;
 import org.teleal.cling.support.contentdirectory.DIDLParser;
 import org.teleal.cling.support.model.DIDLObject;
+import org.teleal.cling.support.model.Res;
 import org.teleal.cling.support.model.SortCriterion;
+import org.teleal.cling.support.model.dlna.DLNAProfiles;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -21,6 +24,13 @@ public interface ContentManager {
      * @return Client Profile
      */
     public String getClientProfile();
+
+    /**
+     * Get UPnP/DLNA Resource for Item
+     *
+     * @return Resource
+     */
+    public Res getResource();
 
     /**
      * Get DIDL Parser for current Content Manager
@@ -231,4 +241,62 @@ public interface ContentManager {
      * @return True if ID is Online Video related Container
      */
     public boolean isOnlineVideoContainer(String id);
+
+    /**
+     * Forge Online Video URL
+     * This likely to be a replacement for http host, and thus will use HTTP Server as proxy
+     *
+     * @param providerName Online Video Provider Name
+     * @param url          Real Online Video URL
+     * @return Proxy Online Video URL
+     */
+    public URI forgetOnlineVideoUrl(String providerName, String url);
+
+    /**
+     * Get Video DLNA Profile
+     *
+     * @param container          Container
+     * @param videoFormat        Video Format
+     * @param videoFormatProfile Video Format Profile
+     * @param videoFormatVersion Video Format Version
+     * @param videoCodec         Video Codec
+     * @param videoBitRate       BitRate
+     * @param videoWidth         Video Width
+     * @param videoHeight        Video Height
+     * @param fps                Video FPS
+     * @param audioFormat        Audio Format
+     * @param audioFormatProfile Audio Format Profile
+     * @param audioFormatVersion Audio Format Version
+     * @param audioCodec         Audio Codec
+     * @param audioBitRate       Audio BitRate
+     * @param audioSampleBitRate Audio SampleBitRate
+     * @param audioChannels      Audio Channels
+     * @return Video DLNA Profile
+     */
+    public DLNAProfiles getVideoTranscodedProfile(String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps,
+                                                  String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels);
+
+    /**
+     * Get Video MIME
+     *
+     * @param container          Container
+     * @param videoFormat        Video Format
+     * @param videoFormatProfile Video Format Profile
+     * @param videoFormatVersion Video Format Version
+     * @param videoCodec         Video Codec
+     * @param videoBitRate       BitRate
+     * @param videoWidth         Video Width
+     * @param videoHeight        Video Height
+     * @param fps                Video FPS
+     * @param audioFormat        Audio Format
+     * @param audioFormatProfile Audio Format Profile
+     * @param audioFormatVersion Audio Format Version
+     * @param audioCodec         Audio Codec
+     * @param audioBitRate       Audio BitRate
+     * @param audioSampleBitRate Audio SampleBitRate
+     * @param audioChannels      Audio Channels
+     * @return MIME
+     */
+    public String getVideoTranscodedMime(String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps,
+                                         String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels);
 }

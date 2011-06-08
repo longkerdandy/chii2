@@ -47,6 +47,11 @@ public class XBoxContentManager extends CommonContentManager {
     }
 
     @Override
+    public Res getResource() {
+        return new XBoxRes();
+    }
+
+    @Override
     public DIDLParser getParser() {
         return new XBoxDIDLParser();
     }
@@ -229,7 +234,7 @@ public class XBoxContentManager extends CommonContentManager {
                 // Original Resource (Not Transcoded)
                 XBoxRes originalResource = new XBoxRes();
                 // URL
-                URI originalUri = httpServer.forgeUrl(getClientProfile(), "movie", false, libraryId);
+                URI originalUri = httpServer.forgeUrl("movie", getClientProfile(), false, libraryId);
                 originalResource.setValue(originalUri.toString());
                 // Original dlna profile
                 DLNAProfiles originalProfile = transcoder.getVideoProfile(movie.getFormat(), movie.getVideoFormat(), movie.getVideoFormatProfile(), movie.getVideoFormatVersion(), movie.getVideoCodec(), movie.getVideoBitRate(), movie.getVideoWidth(), movie.getVideoHeight(), movie.getVideoFps(),
@@ -284,7 +289,7 @@ public class XBoxContentManager extends CommonContentManager {
                 // Transcoded Resource
                 XBoxRes transcodedResource = new XBoxRes();
                 // URL
-                URI transcodedUri = httpServer.forgeUrl(getClientProfile(), "movie", true, libraryId);
+                URI transcodedUri = httpServer.forgeUrl("movie", getClientProfile(), true, libraryId);
                 transcodedResource.setValue(transcodedUri.toString());
                 // Transcoded Profile
                 DLNAProfiles transcodedProfile = transcoder.getVideoTranscodedProfile(getClientProfile(), movie);

@@ -23,7 +23,7 @@ public class HttpUrl {
      * @param mediaId       Media ID
      * @return URL
      */
-    public static URI forgeURL(String host, int port, String clientProfile, String mediaType, boolean transcoded, String mediaId) {
+    public static URI forgeURL(String host, int port, String mediaType, String clientProfile, boolean transcoded, String mediaId) {
         URI uri = null;
         String transcodedFlag;
         if (transcoded) {
@@ -32,7 +32,38 @@ public class HttpUrl {
             transcodedFlag = "0";
         }
         try {
-            uri = new URI("http://" + host + ":" + port + "/" + clientProfile + "/" + mediaType + "/" + transcodedFlag + "/" + mediaId);
+            uri = new URI("http://" + host + ":" + port + "/" + mediaType + "/" + clientProfile + "/" + transcodedFlag + "/" + mediaId);
+        } catch (URISyntaxException ignore) {
+            // This should not happens since we create the url ourselves.
+        }
+        return uri;
+    }
+
+    /**
+     * Forge URL for online media
+     *
+     * @param host          Host Address
+     * @param port          Port
+     * @param provider      Provider Name
+     * @param clientProfile Client Profile
+     * @param mediaType     Media Type
+     * @param transcoded    Transcoded or not
+     * @param url           Media URL
+     * @return URL
+     */
+    public static URI forgeURL(String host, int port, String mediaType, String provider, String clientProfile, boolean transcoded, String url) {
+        URI uri = null;
+        String transcodedFlag;
+        if (transcoded) {
+            transcodedFlag = "1";
+        } else {
+            transcodedFlag = "0";
+        }
+        if (url.startsWith("/")) {
+            url = url.substring(1);
+        }
+        try {
+            uri = new URI("http://" + host + ":" + port + "/" + mediaType + "/" + provider + "/" + clientProfile + "/" + transcodedFlag + "/" + url);
         } catch (URISyntaxException ignore) {
             // This should not happens since we create the url ourselves.
         }
@@ -41,10 +72,12 @@ public class HttpUrl {
 
     /**
      * Parse url for media, fill result in a map like:
-     * "clinet" --- Client Profile
      * "type"  --- Media Type
+     * "provider" --- Online Provider Name
+     * "client" --- Client Profile
      * "transcoded" ---  Transcoded (1 or 0)
      * "id"    --- Media ID
+     * "url"   --- Online Media URL
      *
      * @param urlTarget URL Target
      * @return HashMap
@@ -75,15 +108,30 @@ public class HttpUrl {
         if (urlTarget.endsWith("/")) {
             urlTarget = urlTarget.substring(0, urlTarget.length() - 1);
         }
-        String[] factors = urlTarget.split("/", 4);
-        if (factors.length != 4) {
-            return null;
-        } else {
-            map.put("client", factors[0]);
-            map.put("type", factors[1] + thumb);
-            map.put("transcoded", factors[2]);
-            map.put("id", factors[3]);
-            return map;
+
+        int typeIndex = urlTarget.indexOf("/");
+        if (typeIndex > 0) {
+            String type = urlTarget.substring(0, typeIndex);
+            if ("onlinevideo".equalsIgnoreCase(type)) {
+                String[] factors = urlTarget.split("/", 5);
+                if (factors.length == 5) {
+                    map.put("type", factors[0] + thumb);
+                    map.put("provider", factors[1]);
+                    map.put("client", factors[2]);
+                    map.put("transcoded", factors[3]);
+                    map.put("url", factors[4]);
+                }
+            } else {
+                String[] factors = urlTarget.split("/", 4);
+                if (factors.length == 4) {
+                    map.put("type", factors[0] + thumb);
+                    map.put("client", factors[1]);
+                    map.put("transcoded", factors[2]);
+                    map.put("id", factors[3]);
+                }
+            }
         }
+
+        return map;
     }
 }

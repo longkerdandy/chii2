@@ -28,7 +28,7 @@ public class TranscodedInputStream extends FileInputStream {
 
     public int available() throws IOException {
         int av = super.available();
-        if ((av < 0) && (!this.process.isFinished())) {
+        if ((av < 0) && !this.process.isFinished() && !this.process.isStopped()) {
             return 1;
         }
         return av;
@@ -38,14 +38,14 @@ public class TranscodedInputStream extends FileInputStream {
         int n = -1;
         while (n == -1) {
             n = super.read(b, off, len);
-            if ((n < 0) && (!this.process.isFinished())) {
+            if (n < 0 && !this.process.isFinished() && !this.process.isStopped()) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(100);
                 } catch (InterruptedException ignore) {
                 }
                 continue;
             }
-            if ((n < 0) && (this.process.isFinished())) {
+            if (n < 0 && (this.process.isFinished() || this.process.isStopped())) {
                 return n;
             }
         }

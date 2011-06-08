@@ -15,7 +15,8 @@
     </reference>
 
     <!-- Online Video Provider Service List -->
-    <reference-list id="onlineVideoProviders" interface="org.chii2.mediaserver.api.provider.OnlineVideoProviderService" availability="optional">
+    <reference-list id="onlineVideoProviders" interface="org.chii2.mediaserver.api.provider.OnlineVideoProviderService"
+                    availability="optional">
     </reference-list>
 
     <!-- Chii2 Media Server Core Bean -->

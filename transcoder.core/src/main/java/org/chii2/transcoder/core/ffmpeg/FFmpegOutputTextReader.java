@@ -34,17 +34,23 @@ public class FFmpegOutputTextReader implements Runnable {
     public void run() {
         String line;
         try {
-            while (!process.stopped && (line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
+                // If process stopped, stop this
+                if (!this.process.stopped) {
+                    return;
+                }
+                // Output Information
                 if (line.startsWith("frame=")) {
                     processOutput(line);
                 }
             }
+            // Mark as finish
+            this.process.finished = true;
         } catch (IOException e) {
-            logger.error("FFmpeg output text reading with error: {}", e.getMessage());
+            logger.debug("FFmpeg output text reading with error: {}", e.getMessage());
         } finally {
             try {
                 reader.close();
-                process.finished = true;
             } catch (IOException ignore) {
             }
         }

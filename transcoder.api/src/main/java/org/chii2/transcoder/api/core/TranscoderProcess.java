@@ -8,29 +8,51 @@ import java.io.InputStream;
  */
 public interface TranscoderProcess {
     /**
-     * Start Transcoding Process
-     *
+     * Init Transcoding Process
      */
-    public void start();
+    public void init();
 
     /**
-     * Stop Transcoding Process
+     * Destroy Transcoding Process
      */
-    public void stop();
+    public void destroy();
+
+    /**
+     * Move Transcoding Process to Cache
+     */
+    public void cache();
+
+    /**
+     * Get Request ID
+     * This should NOT be null
+     *
+     * @return Request ID
+     */
+    public String getRequestId();
 
     /**
      * Get Output File
+     * This should NOT be null
      *
      * @return Output File
      */
     public File getOutputFile();
 
     /**
-     * Get Output File
+     * Get Output File Stream
+     * This should NOT be null
      *
-     * @return Output File
+     * @return Output File Stream
      */
     public InputStream getOutputFileStream();
+
+    /**
+     * Get current transcoded file size
+     * Size will changed if the process is running
+     *
+     * @return File Size
+     */
+    public long getCurrentSize();
 
     /**
      * Transcoded Process Started or Not
@@ -52,4 +74,25 @@ public interface TranscoderProcess {
      * @return True if Stopped
      */
     public boolean isStopped();
+
+    /**
+     * Set Transcoded Process Stopped
+     *
+     * @param stopped Stopped
+     */
+    public void setStopped(boolean stopped);
+
+    /**
+     * Set Transcoded Process Finished
+     *
+     * @param finished Finished
+     */
+    public void setFinished(boolean finished);
+
+    /**
+     * Set Transcoded Process Started
+     *
+     * @param started Started
+     */
+    public void setStarted(boolean started);
 }
