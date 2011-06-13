@@ -87,14 +87,24 @@ public class HttpHandler implements HttpRequestHandler {
             // Query the library and get the entity
             HttpEntity entity = null;
             if ("image".equalsIgnoreCase(type)) {
-                Image image = mediaLibrary.getImageById(id);
+                // Image
+                Image image = this.mediaLibrary.getImageById(id);
                 if (image != null) {
-                    File imageFile = new File(image.getAbsoluteName());
-                    String imageType = image.getType();
-                    String mime = transcoder.getImageTranscodedMime(clientProfile, imageType);
-                    File file = transcoder.getImageTranscodedFile(clientProfile, imageType, imageFile);
-                    entity = new FileEntity(file, mime);
-                    response.setStatusCode(HttpStatus.SC_OK);
+                    if (!transcoded) {
+                        // Image File
+                        List<File> files = new ArrayList<File>();
+                        File imageFile = new File(image.getAbsolutePath());
+                        files.add(imageFile);
+                        // MIME
+                        String mime = this.transcoder.getImageTranscodedMime(clientProfile, image.getType(), image.getWidth(), image.getHeight());
+                        // HTTP Entity
+                        entity = new RangeFileEntity(files, mime, range);
+                        if (range != null) {
+                            response.setStatusCode(HttpStatus.SC_PARTIAL_CONTENT);
+                        } else {
+                            response.setStatusCode(HttpStatus.SC_OK);
+                        }
+                    }
                 }
             } else if ("movie".equalsIgnoreCase(type)) {
                 Movie movie = mediaLibrary.getMovieById(id);

@@ -17,7 +17,7 @@ public interface ImageFile {
     /**
      * Set the id
      *
-     * @param id
+     * @param id ID
      */
     public void setId(String id);
 
@@ -36,37 +36,37 @@ public interface ImageFile {
     public void setFileName(String fileName);
 
     /**
-     * Get Image File Path (Directory)
+     * Get Image File Path (Parent Directory)
      *
-     * @return File Path (Directory)
+     * @return File Path (Parent Directory)
      */
     public String getFilePath();
 
     /**
-     * Set  Image File Path (Directory)
+     * Set Image File Path (Parent Directory)
      *
-     * @param filePath Movie File Path (Directory)
+     * @param filePath File Path (Parent Directory)
      */
     public void setFilePath(String filePath);
 
     /**
-     * Get Image Absolute File Name (Including Path)
+     * Get Image Absolute File Path
      *
-     * @return Absolute File Name (Including Path)
+     * @return Absolute File Path
      */
-    public String getAbsoluteName();
+    public String getAbsolutePath();
 
     /**
-     * Set Image Absolute File Name (Including Path)
+     * Set Image Absolute File Path
      *
-     * @param absoluteName Absolute File Name (Including Path)
+     * @param absolutePath Absolute File Path
      */
-    public void setAbsoluteName(String absoluteName);
+    public void setAbsolutePath(String absolutePath);
 
     /**
      * Get Image File Extension
      *
-     * @return Movie File Extension
+     * @return File Extension
      */
     public String getFileExtension();
 
@@ -76,34 +76,6 @@ public interface ImageFile {
      * @param fileExtension Movie File Extension
      */
     public void setFileExtension(String fileExtension);
-
-    /**
-     * Get Image Title
-     *
-     * @return Title
-     */
-    public String getTitle();
-
-    /**
-     * Set Image Title
-     *
-     * @param title Title
-     */
-    public void setTitle(String title);
-
-    /**
-     * Get Image Album
-     *
-     * @return Image Album
-     */
-    public String getAlbum();
-
-    /**
-     * Set Image Album
-     *
-     * @param album Image Album
-     */
-    public void setAlbum(String album);
 
     /**
      * Get Image Type
@@ -232,18 +204,18 @@ public interface ImageFile {
     public void setExposureTime(String exposureTime);
 
     /**
-     * Get Image ISO Speed Ratings
+     * Get Image ISO
      *
-     * @return ISO Speed Ratings
+     * @return ISO
      */
-    public int getISOSpeedRatings();
+    public int getISO();
 
     /**
-     * Set Image ISO Speed Ratings
+     * Set Image ISO
      *
-     * @param isoSpeedRatings ISO Speed Ratings
+     * @param iso ISO
      */
-    public void setISOSpeedRatings(int isoSpeedRatings);
+    public void setISO(int iso);
 
     /**
      * Get Image Focal Length (mm)
@@ -258,4 +230,116 @@ public interface ImageFile {
      * @param focalLength Focal Length
      */
     public void setFocalLength(String focalLength);
+
+    /**
+     * Get Image User Comment
+     *
+     * @return User Comment
+     */
+    public String getUserComment();
+
+    /**
+     * Set Image User Comment
+     *
+     * @param userComment User Comment
+     */
+    public void setUserComment(String userComment);
+
+    /**
+     * Get Image Width DPI
+     *
+     * @return Width DPI
+     */
+    public int getWidthDPI();
+
+    /**
+     * Set Image Width DPI
+     *
+     * @param widthDPI Width DPI
+     */
+    public void setWidthDPI(int widthDPI);
+
+    /**
+     * Get Image Height DPI
+     *
+     * @return Height DPI
+     */
+    public int getHeightDPI();
+
+    /**
+     * Set Image Height DPI
+     *
+     * @param heightDPI Height DPI
+     */
+    public void setHeightDPI(int heightDPI);
+
+    /**
+     * Get Image MIME Type
+     *
+     * @return MIME Type
+     */
+    public String getMimeType();
+
+    /**
+     * Set Image MIME Type
+     *
+     * @param mimeType MIME Type
+     */
+    public void setMimeType(String mimeType);
+
+    /**
+     * Get Image Camera Company
+     *
+     * @return Camera Company
+     */
+    public String getCameraMaker();
+
+    /**
+     * Set Image Camera Company
+     *
+     * @param cameraMaker Camera Company
+     */
+    public void setCameraMaker(String cameraMaker);
+
+    /**
+     * Get Image F Number
+     *
+     * @return F Number
+     */
+    public String getFNumber();
+
+    /**
+     * Set Image F Number
+     *
+     * @param fNumber F Number
+     */
+    public void setFNumber(String fNumber);
+
+    /**
+     * Get Image Shutter Speed
+     *
+     * @return Shutter Speed
+     */
+    public String getShutterSpeed();
+
+    /**
+     * Set Image Shutter Speed
+     *
+     * @param shutterSpeed Shutter Speed
+     */
+    public void setShutterSpeed(String shutterSpeed);
+
+    /**
+     * Get Image Flash
+     *
+     * @return Flash
+     */
+    public int getFlash();
+
+    /**
+     * Set Image Flash
+     *
+     * @param flash Flash
+     */
+    public void setFlash(int flash);
 }

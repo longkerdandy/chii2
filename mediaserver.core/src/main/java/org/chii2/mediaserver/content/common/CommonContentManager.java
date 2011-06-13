@@ -5,24 +5,23 @@ import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
+import org.chii2.mediaserver.api.content.item.VisualPictureItem;
 import org.chii2.mediaserver.api.content.item.VisualVideoItem;
 import org.chii2.mediaserver.api.http.HttpServerService;
 import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
 import org.chii2.mediaserver.content.common.Item.PhotoItem;
+import org.chii2.mediaserver.content.common.Item.PictureItem;
 import org.chii2.mediaserver.content.common.container.*;
 import org.chii2.transcoder.api.core.TranscoderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teleal.cling.model.message.UpnpHeaders;
 import org.teleal.cling.support.contentdirectory.DIDLParser;
-import org.teleal.cling.support.model.DIDLObject;
-import org.teleal.cling.support.model.ProtocolInfo;
-import org.teleal.cling.support.model.Res;
-import org.teleal.cling.support.model.SortCriterion;
-import org.teleal.cling.support.model.dlna.DLNAProfiles;
-import org.teleal.common.util.MimeType;
+import org.teleal.cling.support.model.*;
+import org.teleal.cling.support.model.dlna.*;
 
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -43,6 +42,8 @@ public class CommonContentManager implements ContentManager {
     public final static String MOVIE_BASE_STORAGE_FOLDER_ID = "1501";
     // Pictures Storage Folder Container ID Prefix
     public final static String PICTURES_STORAGE_FOLDER_PREFIX = "PSFC-";
+    // Picture Item ID Prefix
+    public final static String PICTURE_ITEM_PREFIX = "PICI-";
     // Photo Item ID Prefix
     public final static String PHOTO_ITEM_PREFIX = "PI-";
     // Movie Item ID Prefix
@@ -124,10 +125,6 @@ public class CommonContentManager implements ContentManager {
             container.loadContents(startIndex, requestCount, orderBy, this);
             return container;
         }
-        // Photo Item
-        else if (isPhotoItem(objectId)) {
-            return getPhotoById(objectId, filter);
-        }
 
         /** ------------------------- Video -------------------------**/
         // Video Container
@@ -178,16 +175,16 @@ public class CommonContentManager implements ContentManager {
         // Get image albums from Chii2 Media Library
         List<String> albums;
         try {
-            albums = mediaLibrary.getImageAlbums((int) startIndex, (int) maxCount, sorts);
+            albums = this.mediaLibrary.getImageAlbums((int) startIndex, (int) maxCount, sorts);
         } catch (IllegalArgumentException e) {
-            albums = mediaLibrary.getImageAlbums();
+            albums = this.mediaLibrary.getImageAlbums(-1, -1, null);
         }
 
         // Add to result
         if (albums != null) {
             for (String album : albums) {
                 if (StringUtils.isNotEmpty(album)) {
-                    String id = forgeContainerId(album, PICTURES_STORAGE_FOLDER_PREFIX);
+                    String id = this.forgeContainerId(album, PICTURES_STORAGE_FOLDER_PREFIX);
                     containers.add(new PicturesStorageFolderContainer(filter, id, album));
                 }
             }
@@ -199,11 +196,11 @@ public class CommonContentManager implements ContentManager {
 
     @Override
     public long getPicturesStorageFoldersCount() {
-        return mediaLibrary.getImageAlbumsCount();
+        return this.mediaLibrary.getImageAlbumsCount();
     }
 
     @Override
-    public List<PhotoItem> getPhotosByAlbum(String album, String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
+    public List<VisualPictureItem> getPicturesByAlbum(String album, String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
         // Forge sort
         Map<String, String> sorts = new HashMap<String, String>();
         for (SortCriterion sort : orderBy) {
@@ -211,7 +208,7 @@ public class CommonContentManager implements ContentManager {
             if ("dc:title".equalsIgnoreCase(sort.getPropertyName())) {
                 field = "title";
             } else if ("dc:date".equalsIgnoreCase(sort.getPropertyName())) {
-                field = "date_taken";
+                field = "file.date_taken";
             }
             if (field != null) {
                 if (sort.isAscending()) {
@@ -223,88 +220,107 @@ public class CommonContentManager implements ContentManager {
         }
         // Get images from library
         List<? extends Image> images;
+
+        int start = -1;
+        int max = -1;
         try {
-            images = mediaLibrary.getImagesByAlbum(album, (int) startIndex, (int) maxCount, sorts);
-        } catch (IllegalArgumentException e) {
-            images = mediaLibrary.getImagesByAlbum(album);
+            start = (int) startIndex;
+            max = (int) maxCount;
+        } catch (Exception ignore) {
         }
+        images = this.mediaLibrary.getImagesByField("album", album, true, start, max, sorts);
+
         // Results
-        List<PhotoItem> photos = new ArrayList<PhotoItem>();
-        // Create photo item and add to results
+        List<VisualPictureItem> pictures = new ArrayList<VisualPictureItem>();
+        // Create picture item and add to results
         for (Image image : images) {
-            if (image != null) {
-                String id = forgeItemId(image.getId(), parentId, PHOTO_ITEM_PREFIX);
-                URI url = httpServer.forgeUrl("image", getClientProfile(), false, image.getId());
-                String profile = getClientProfile();
-                MimeType mime = new MimeType("image", transcoder.getImageTranscodedType(profile, image.getType()));
-                // Resources
-                List<Res> resources = new ArrayList<Res>();
-                Res resource = new Res();
-                resource.setValue(url.toString());
-                resource.setProtocolInfo(new ProtocolInfo(mime));
+            // Item
+            VisualPictureItem pictureItem;
+            // ID from library
+            String libraryId = image.getId();
+            // ID
+            String id;
+            // Title
+            String title = image.getTitle();
+            // Photo?
+            if (image.isPhoto()) {
+                id = forgeItemId(libraryId, parentId, PHOTO_ITEM_PREFIX);
+                pictureItem = new PhotoItem(filter, id, parentId, title, image.getAlbum());
+            } else {
+                id = forgeItemId(libraryId, parentId, PICTURE_ITEM_PREFIX);
+                pictureItem = new PictureItem(filter, id, parentId, title, image.getAlbum());
+            }
+
+            //Picture Date
+            Date date = image.getDateTaken();
+            if (filter.contains("dc:date") && date != null) {
+                pictureItem.setDate(new SimpleDateFormat("yyyy-MM-dd").format(date));
+            }
+            String comment = image.getUserComment();
+            // Description
+            if (filter.contains("dc:description") && StringUtils.isNotBlank(comment)) {
+                pictureItem.setDescription(comment);
+            }
+            // Long Description
+            if (filter.contains("upnp:longDescription") && StringUtils.isNotBlank(comment)) {
+                pictureItem.setLongDescription(comment);
+            }
+            // Rating
+            float rating = image.getRating();
+            if (filter.contains("upnp:rating") && rating > 0) {
+                pictureItem.setRating(Float.toString(rating));
+            }
+
+            // Resource
+            if (this.transcoder.isValidImage(this.getClientProfile(), image.getType(), image.getWidth(), image.getHeight())) {
+                // Resource
+                Res originalResource = this.getResource();
+                // URL
+                URI originalUri = this.httpServer.forgeUrl("image", getClientProfile(), false, libraryId);
+                originalResource.setValue(originalUri.toString());
+                // Profile
+                DLNAProfiles originalProfile = this.transcoder.getImageTranscodedProfile(this.getClientProfile(), image.getType(), image.getWidth(), image.getHeight());
+                // MIME
+                String mime = this.transcoder.getImageTranscodedMime(this.getClientProfile(), image.getType(), image.getWidth(), image.getHeight());
+                // This should not happens
+                if (StringUtils.isBlank(mime)) {
+                    mime = image.getMimeType();
+                    logger.warn("Can't determine image MIME type, use {} from file information.", mime);
+                }
+                // DLNA Attribute
+                EnumMap<DLNAAttribute.Type, DLNAAttribute> dlnaAttributes = new EnumMap<DLNAAttribute.Type, DLNAAttribute>(DLNAAttribute.Type.class);
+                if (originalProfile != null && originalProfile != DLNAProfiles.NONE) {
+                    dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_PN, new DLNAProfileAttribute(originalProfile));
+                }
+                dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_OP, new DLNAOperationsAttribute(DLNAOperations.RANGE));
+                dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_FLAGS, new DLNAFlagsAttribute(DLNAFlags.STREAMING_TRANSFER_MODE, DLNAFlags.BACKGROUND_TRANSFERT_MODE, DLNAFlags.DLNA_V15));
+                originalResource.setProtocolInfo(new DLNAProtocolInfo(Protocol.HTTP_GET, ProtocolInfo.WILDCARD, mime, dlnaAttributes));
+                // Resolution
                 if (filter.contains("res@resolution")) {
-                    resource.setResolution(image.getWidth(), image.getHeight());
+                    originalResource.setResolution(image.getWidth(), image.getHeight());
                 }
+                // Color Depth
                 if (filter.contains("res@colorDepth")) {
-                    // TODO Only adjust True Color here, may need more condition
-                    if ("TrueColor".equalsIgnoreCase(image.getColorType())) {
-                        resource.setColorDepth((long) 24);
-                    } else {
-                        resource.setColorDepth((long) image.getColorDepth());
-                    }
+                    originalResource.setColorDepth((long) image.getColorDepth());
                 }
+                // Size
                 if (filter.contains("res@size")) {
-                    resource.setSize(image.getSize());
+                    originalResource.setSize(image.getSize());
                 }
-                resources.add(resource);
-
-                if (StringUtils.isNotEmpty(id)) {
-                    photos.add(new PhotoItem(filter, id, parentId, image.getTitle(), image.getDateTaken(), image.getAlbum(), null, null, resources));
-                }
+                // Add Resource to item
+                pictureItem.addResource(originalResource);
+            } else {
+                // TODO: Transcoded Image Handling
             }
+            // Add to results
+            pictures.add(pictureItem);
         }
-        return photos;
+        return pictures;
     }
 
     @Override
-    public long getPhotosCountByAlbum(String album) {
+    public long getPicturesCountByAlbum(String album) {
         return mediaLibrary.getImagesCountByAlbum(album);
-    }
-
-    @Override
-    public PhotoItem getPhotoById(String id, String filter) {
-        String libraryId = getItemLibraryId(id);
-        Image image = mediaLibrary.getImageById(libraryId);
-        if (image != null) {
-            String parentId = getItemParentId(id);
-            URI url = httpServer.forgeUrl("image", getClientProfile(), false, image.getId());
-            String profile = getClientProfile();
-            MimeType mime = new MimeType("image", transcoder.getImageTranscodedType(profile, image.getType()));
-            // Resources
-            List<Res> resources = new ArrayList<Res>();
-            Res resource = new Res();
-            resource.setValue(url.toString());
-            resource.setProtocolInfo(new ProtocolInfo(mime));
-            if (filter.contains("res@resolution")) {
-                resource.setResolution(image.getWidth(), image.getHeight());
-            }
-            if (filter.contains("res@colorDepth")) {
-                // TODO Only adjust True Color here, may need more condition
-                if ("TrueColor".equalsIgnoreCase(image.getColorType())) {
-                    resource.setColorDepth((long) 24);
-                } else {
-                    resource.setColorDepth((long) image.getColorDepth());
-                }
-            }
-            if (filter.contains("res@size")) {
-                resource.setSize(image.getSize());
-            }
-            resources.add(resource);
-
-            return new PhotoItem(filter, id, parentId, image.getTitle(), image.getDateTaken(), image.getAlbum(), null, null, resources);
-        } else {
-            return null;
-        }
     }
 
     @Override
@@ -384,11 +400,6 @@ public class CommonContentManager implements ContentManager {
     @Override
     public boolean isPicturesStorageFolderContainer(String id) {
         return id != null && id.length() > 5 && id.substring(0, 5).equalsIgnoreCase(PICTURES_STORAGE_FOLDER_PREFIX);
-    }
-
-    @Override
-    public boolean isPhotoItem(String id) {
-        return id != null && id.length() > 3 && id.substring(0, 3).equalsIgnoreCase(PHOTO_ITEM_PREFIX);
     }
 
     @Override

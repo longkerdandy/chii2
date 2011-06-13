@@ -8,14 +8,20 @@ import java.util.List;
  */
 public interface ImageInfoProviderService {
 
+    // Event Topic for image information request
+    // This Event should contains a IMAGE_FILE_PROPERTY, which is a List of File
+    public final static String IMAGE_INFO_REQUEST_TOPIC = "org/chii2/medialibrary/provider/image/INFO_REQUEST";
     // Event Topic for image information provided
+    // This Event should contains a IMAGE_INFO_PROPERTY, which is a List of Image
     public final static String IMAGE_INFO_PROVIDED_TOPIC = "org/chii2/medialibrary/provider/image/INFO_PROVIDED";
     // Event Topic for image information failed (with parse or fetch)
     public final static String IMAGE_INFO_FAILED_TOPIC = "org/chii2/medialibrary/provider/image/INFO_FAILED";
-    // Image file property key in the image info provided events, this should be the file list from the request
+    // Image file property key in the image info REQUEST & PROVIDED & FAIL events, this should be the file list from the request
     public final static String IMAGE_FILE_PROPERTY = "image_file";
-    // Image information property key in the image info provided events, this should be the image information result from provider
+    // Image information property key in the image info PROVIDED events, this should be the image information result from provider
     public final static String IMAGE_INFO_PROPERTY = "image_info";
+    // Fail reason property key in the image info FAILED events
+    public final static String FAIL_MESSAGE_PROPERTY = "fail_msg";
 
     /**
      * Get the provider name

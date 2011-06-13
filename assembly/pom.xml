@@ -62,7 +62,7 @@
         </dependency>
         <dependency>
             <groupId>org.chii2</groupId>
-            <artifactId>chii2.medialibrary.graphicsmagickprovider</artifactId>
+            <artifactId>chii2.medialibrary.provider.sanselan</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -1,6 +1,7 @@
 package org.chii2.medialibrary.api.core;
 
 import org.chii2.medialibrary.api.persistence.entity.Image;
+import org.chii2.medialibrary.api.persistence.entity.ImageFile;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 
 import java.util.List;
@@ -121,22 +122,6 @@ public interface MediaLibraryService {
     /**
      * Get all the Images
      *
-     * @return Image List
-     */
-    public List<? extends Image> getImages();
-
-    /**
-     * Get all the Images
-     *
-     * @param firstResult First Result
-     * @param maxResults  Max Result
-     * @return Image List
-     */
-    public List<? extends Image> getImages(int firstResult, int maxResults);
-
-    /**
-     * Get all the Images
-     *
      * @param firstResult First Result
      * @param maxResults  Max Result
      * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
@@ -153,49 +138,18 @@ public interface MediaLibraryService {
     public Image getImageById(String id);
 
     /**
-     * Get all possible image records by image name
+     * Get all possible image records by specific image field
+     * Add "file." before ImageFile field
      *
-     * @param imageName Image Name
-     * @return Image List
-     */
-    public List<? extends Image> getImagesByName(String imageName);
-
-    /**
-     * Get image records by image name
-     *
-     * @param firstResult First Result
-     * @param maxResults  Max Result
-     * @param imageName   Image Name
-     * @return Image List
-     */
-    public List<? extends Image> getImagesByName(String imageName, int firstResult, int maxResults);
-
-    /**
-     * Get image records by image name
-     *
+     * @param fieldName   Field Name
+     * @param fieldValue  Field Value
+     * @param strict      Strict compare field value equal, else will use %fieldValue%
      * @param firstResult First Result
      * @param maxResults  Max Result
      * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
-     * @param imageName   Image Name
      * @return Image List
      */
-    public List<? extends Image> getImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts);
-
-    /**
-     * Get all image albums
-     *
-     * @return Image Albums
-     */
-    public List<String> getImageAlbums();
-
-    /**
-     * Get image albums from index with max limit
-     *
-     * @param firstResult First Result
-     * @param maxResults  Max Result
-     * @return Image Albums
-     */
-    public List<String> getImageAlbums(int firstResult, int maxResults);
+    public List<? extends Image> getImagesByField(String fieldName, String fieldValue, boolean strict, int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get image albums from index with max limit
@@ -214,34 +168,6 @@ public interface MediaLibraryService {
      */
     public long getImageAlbumsCount();
 
-    /**
-     * Get images by image album
-     *
-     * @param album Image Album
-     * @return Images
-     */
-    public List<? extends Image> getImagesByAlbum(String album);
-
-    /**
-     * Get images by image album
-     *
-     * @param album       Image Album
-     * @param firstResult First Result
-     * @param maxResults  Max Result
-     * @return Images
-     */
-    public List<? extends Image> getImagesByAlbum(String album, int firstResult, int maxResults);
-
-    /**
-     * Get images by image album
-     *
-     * @param album       Image Album
-     * @param firstResult First Result
-     * @param maxResults  Max Result
-     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
-     * @return Images
-     */
-    public List<? extends Image> getImagesByAlbum(String album, int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get count of images belong to  specific album
@@ -250,4 +176,12 @@ public interface MediaLibraryService {
      * @return Count
      */
     public long getImagesCountByAlbum(String album);
+
+    /**
+     * Get Image File by ID
+     *
+     * @param id Image File ID
+     * @return Image File
+     */
+    public ImageFile getImageFileById(String id);
 }

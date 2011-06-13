@@ -5,6 +5,7 @@ import org.apache.commons.lang.time.DurationFormatUtils;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
+import org.chii2.mediaserver.api.content.item.VisualPictureItem;
 import org.chii2.mediaserver.api.content.item.VisualVideoItem;
 import org.chii2.mediaserver.api.http.HttpServerService;
 import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
@@ -82,23 +83,22 @@ public class XBoxContentManager extends CommonContentManager {
         else if (isPicturesContainer(objectId)) {
             VisualContainer container = new PicturesContainer(filter);
             container.loadContents(startIndex, requestCount, orderBy, this);
+            this.convertImageContainerS2T(container);
             return container;
         }
         // Pictures Folders Container
         else if (isPicturesFoldersContainer(objectId)) {
             VisualContainer container = new PicturesFoldersContainer(filter);
             container.loadContents(startIndex, requestCount, orderBy, this);
+            this.convertImageContainerS2T(container);
             return container;
         }
         // Pictures Storage Folder Container (Dynamic)
         else if (isPicturesStorageFolderContainer(objectId)) {
             VisualContainer container = new PicturesStorageFolderContainer(filter, objectId, getContainerTitle(objectId));
             container.loadContents(startIndex, requestCount, orderBy, this);
+            this.convertImageContainerS2T(container);
             return container;
-        }
-        // Photo Item
-        else if (isPhotoItem(objectId)) {
-            return getPhotoById(objectId, filter);
         }
 
         /** ------------------------- Video -------------------------**/
@@ -342,6 +342,26 @@ public class XBoxContentManager extends CommonContentManager {
 
         }
         return movieItems;
+    }
+
+    /**
+     * Convert Simplified Chinese to Traditional Chinese
+     * This because XBox360 can't correctly display Simplified Chinese at the moment
+     *
+     * @param container Image Contain
+     */
+    public void convertImageContainerS2T(VisualContainer container) {
+        container.setTitle(EncodingUtils.convertS2T(container.getTitle()));
+        for (Container subContainer : container.getContainers()) {
+            subContainer.setTitle(EncodingUtils.convertS2T(subContainer.getTitle()));
+        }
+        for (Item item : container.getItems()) {
+            VisualPictureItem subItem = (VisualPictureItem) item;
+            subItem.setTitle(EncodingUtils.convertS2T(subItem.getTitle()));
+            subItem.setAlbum(EncodingUtils.convertS2T(subItem.getAlbum()));
+            subItem.setDescription(EncodingUtils.convertS2T(subItem.getDescription()));
+            subItem.setLongDescription(EncodingUtils.convertS2T(subItem.getLongDescription()));
+        }
     }
 
     /**

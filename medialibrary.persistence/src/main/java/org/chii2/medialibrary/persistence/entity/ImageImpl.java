@@ -1,5 +1,6 @@
 package org.chii2.medialibrary.persistence.entity;
 
+import org.apache.commons.lang.StringUtils;
 import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.medialibrary.api.persistence.entity.ImageFile;
 
@@ -12,16 +13,24 @@ import java.util.UUID;
  */
 @Entity(name = "IMAGE")
 @Table(name = "IMAGE")
-@NamedQueries({
-        @NamedQuery(name = "Image.deleteAll",
-                query = "DELETE FROM IMAGE i")
-})
 public class ImageImpl implements Image {
 
     // ID (Primary Key) in UUID format
     @Id
     @Column(name = "ID")
     private String id;
+
+    // Image Title
+    @Column(name = "TITLE")
+    private String title;
+
+    // Image Album
+    @Column(name = "ALBUM")
+    private String album;
+
+    // Image Rating
+    @Column(name = "Rating")
+    private float rating;
 
     // Image File
     @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
@@ -45,6 +54,36 @@ public class ImageImpl implements Image {
     }
 
     @Override
+    public String getTitle() {
+        return title;
+    }
+
+    @Override
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    @Override
+    public String getAlbum() {
+        return album;
+    }
+
+    @Override
+    public void setAlbum(String album) {
+        this.album = album;
+    }
+
+    @Override
+    public float getRating() {
+        return rating;
+    }
+
+    @Override
+    public void setRating(float rating) {
+        this.rating = rating;
+    }
+
+    @Override
     public ImageFile getFile() {
         return file;
     }
@@ -54,6 +93,11 @@ public class ImageImpl implements Image {
         if (imageFile.getClass() == ImageFileImpl.class) {
             this.file = (ImageFileImpl) imageFile;
         }
+    }
+
+    @Override
+    public boolean isPhoto() {
+        return StringUtils.isNotBlank(this.getCameraModel()) || StringUtils.isNotBlank(this.getCameraMaker());
     }
 
     @Override
@@ -67,23 +111,13 @@ public class ImageImpl implements Image {
     }
 
     @Override
-    public String getAbsoluteName() {
-        return file.getAbsoluteName();
+    public String getAbsolutePath() {
+        return file.getAbsolutePath();
     }
 
     @Override
     public String getFileExtension() {
         return file.getFileExtension();
-    }
-
-    @Override
-    public String getTitle() {
-        return file.getTitle();
-    }
-
-    @Override
-    public String getAlbum() {
-        return file.getAlbum();
     }
 
     @Override
@@ -132,12 +166,52 @@ public class ImageImpl implements Image {
     }
 
     @Override
-    public int getISOSpeedRatings() {
-        return file.getISOSpeedRatings();
+    public int getISO() {
+        return file.getISO();
     }
 
     @Override
     public String getFocalLength() {
         return file.getFocalLength();
+    }
+
+    @Override
+    public String getUserComment() {
+        return file.getUserComment();
+    }
+
+    @Override
+    public int getWidthDPI() {
+        return file.getWidthDPI();
+    }
+
+    @Override
+    public int getHeightDPI() {
+        return file.getHeightDPI();
+    }
+
+    @Override
+    public String getMimeType() {
+        return file.getMimeType();
+    }
+
+    @Override
+    public String getCameraMaker() {
+        return file.getCameraMaker();
+    }
+
+    @Override
+    public String getFNumber() {
+        return file.getFNumber();
+    }
+
+    @Override
+    public String getShutterSpeed() {
+        return file.getShutterSpeed();
+    }
+
+    @Override
+    public int getFlash() {
+        return file.getFlash();
     }
 }

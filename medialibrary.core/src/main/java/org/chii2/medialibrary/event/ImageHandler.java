@@ -1,11 +1,9 @@
 package org.chii2.medialibrary.event;
 
-import org.apache.commons.lang.StringUtils;
 import org.chii2.medialibrary.api.file.FileService;
 import org.chii2.medialibrary.api.persistence.PersistenceService;
 import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.medialibrary.api.provider.ImageInfoProviderService;
-import org.chii2.util.ConfigUtils;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.event.Event;
@@ -17,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 
 /**
@@ -29,14 +28,8 @@ public class ImageHandler implements EventHandler {
     private EventAdmin eventAdmin;
     // Injected Persistence Service
     private PersistenceService persistenceService;
-    // Injected list of Image Information Provider Service
-    private List<ImageInfoProviderService> providerServices;
     //Configuration FIle
     private final static String CONFIG_FILE = "org.chii2.medialibrary.core";
-    // Image provider configuration
-    private final static String IMAGE_PROVIDER = "image.provider";
-    // Preferred Image Information Provider, load from configuration file
-    private String preferredProvider = "GraphicsMagick";
     // Logger
     private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.event");
 
@@ -58,14 +51,6 @@ public class ImageHandler implements EventHandler {
         if (props == null || props.isEmpty()) {
             logger.error("ImageHandler load configuration <{}> with error.", CONFIG_FILE);
         } else {
-            // Load preferred image information provider
-            String provider = ConfigUtils.loadConfiguration(props, IMAGE_PROVIDER);
-            if (StringUtils.isNotBlank(provider)) {
-                preferredProvider = provider;
-                logger.debug("ImageHandler configuration <{}> loaded.", IMAGE_PROVIDER);
-            } else {
-                logger.error("ImageHandler configuration <{}> is not valid.", IMAGE_PROVIDER);
-            }
         }
     }
 
@@ -83,79 +68,44 @@ public class ImageHandler implements EventHandler {
         if (FileService.IMAGE_SCAN_PROVIDED_TOPIC.equals(event.getTopic())) {
             // Get List of file names from event, this should be fine
             @SuppressWarnings("unchecked")
-            List<File> files = (List<File>) event.getProperty("files");
+            List<File> files = (List<File>) event.getProperty(FileService.FILE_PROPERTY);
             logger.debug("Receive a image scan event with {} records.", files.size());
-            doScanProcess(files);
+            this.postImageInfoRequestEvent(files);
         } else if (ImageInfoProviderService.IMAGE_INFO_PROVIDED_TOPIC.equals(event.getTopic())) {
             // Get List of Image Information from event, this should be fine
             @SuppressWarnings("unchecked")
             List<Image> images = (List<Image>) event.getProperty(ImageInfoProviderService.IMAGE_INFO_PROPERTY);
             logger.debug("Receive a image information provided event with {} records.", images.size());
-            doInfoProvidedProcess(images);
+            // Purge current images
+            persistenceService.deleteImages();
+            // Merge into DB
+            if (images != null) {
+                logger.info("Merge {} images into database", images.size());
+                for (Image image : images) {
+                    persistenceService.merge(image);
+                }
+            }
         } else if (ImageInfoProviderService.IMAGE_INFO_FAILED_TOPIC.equals(event.getTopic())) {
             // Get List of file names from event, this should be fine
             @SuppressWarnings("unchecked")
             List<File> files = (List<File>) event.getProperty(ImageInfoProviderService.IMAGE_FILE_PROPERTY);
             logger.debug("Receive a image information failed event with {} records.", files.size());
-            doInfoFailedProcess(files);
         }
     }
 
     /**
-     * Parse the scanned image files, (current implementation use GraphicsMagick to handle image metadata)
-     * and sync to the database
+     * Send a image information request event
      *
-     * @param files Scanned Image Files
+     * @param files Files to be parsed
      */
-    private void doScanProcess(List<File> files) {
-        if (providerServices != null && !providerServices.isEmpty()) {
-            // Whether provider match the preferred configuration
-            boolean providerMatched = false;
-            // Loop available providers
-            for (ImageInfoProviderService provider : providerServices) {
-                if (preferredProvider.equalsIgnoreCase(provider.getProviderName())) {
-                    // Matched
-                    // Purge current images
-                    persistenceService.deleteAllImages();
-                    // Use provider parse image information
-                    provider.getImageInformation(files);
-                    // Mark match found
-                    providerMatched = true;
-                    // Stop looping
-                    break;
-                }
-            }
-            // If not matched
-            if (!providerMatched) {
-                logger.error("The image information provider {} is not present.", preferredProvider);
-            }
-        } else {
-            // This won't happens
-            logger.error("No Image Information provider available");
-        }
-    }
-
-    /**
-     * Merge each image into database
-     *
-     * @param images Images
-     */
-    private void doInfoProvidedProcess(List<Image> images) {
-        if (images != null && !images.isEmpty()) {
-            logger.debug("Merge {} images into database", images.size());
-            for (Image image : images) {
-                persistenceService.merge(image);
-            }
-        }
-    }
-
-    /**
-     * Image Information failed, do nothing atm
-     *
-     * @param files Image files
-     */
-    private void doInfoFailedProcess(List<File> files) {
-        // Do nothing at the moment
+    private void postImageInfoRequestEvent(List<File> files) {
+        // Prepare properties
+        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        properties.put(ImageInfoProviderService.IMAGE_FILE_PROPERTY, files);
+        // Send a event
+        Event event = new Event(ImageInfoProviderService.IMAGE_INFO_REQUEST_TOPIC, properties);
+        logger.debug("Send a image information request event with {} files.", files.size());
+        eventAdmin.postEvent(event);
     }
 
     /**
@@ -186,15 +136,5 @@ public class ImageHandler implements EventHandler {
     @SuppressWarnings("unused")
     public void setPersistenceService(PersistenceService persistenceService) {
         this.persistenceService = persistenceService;
-    }
-
-    /**
-     * Inject Movie Information Provider Services
-     *
-     * @param providerServices Movie Information Provider Services
-     */
-    @SuppressWarnings("unused")
-    public void setProviderServices(List<ImageInfoProviderService> providerServices) {
-        this.providerServices = providerServices;
     }
 }

@@ -79,9 +79,9 @@ public interface ContentManager {
     public long getPicturesStorageFoldersCount();
 
     /**
-     * Get photos by photo album
+     * Get pictures by album
      *
-     * @param album      Photo Album
+     * @param album      Picture Album
      * @param parentId   Parent Container ID
      * @param filter     Content Filter
      * @param startIndex Start Index
@@ -89,24 +89,15 @@ public interface ContentManager {
      * @param orderBy    Sort Criterion
      * @return List of Photo Item
      */
-    public List<? extends VisualPictureItem> getPhotosByAlbum(String album, String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy);
+    public List<? extends VisualPictureItem> getPicturesByAlbum(String album, String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy);
 
     /**
-     * Get total photos count by photo album
+     * Get total pictures count by album
      *
-     * @param album Photo Album
+     * @param album Album
      * @return Count
      */
-    public long getPhotosCountByAlbum(String album);
-
-    /**
-     * Get photo by photo id
-     *
-     * @param id     ID
-     * @param filter Content Filter
-     * @return Photo Item
-     */
-    public VisualPictureItem getPhotoById(String id, String filter);
+    public long getPicturesCountByAlbum(String album);
 
     /**
      * Get movies
@@ -201,14 +192,6 @@ public interface ContentManager {
      * @return True if id is Pictures Storage Folder Container
      */
     public boolean isPicturesStorageFolderContainer(String id);
-
-    /**
-     * ID is Photo Item
-     *
-     * @param id ID
-     * @return True if id is Photo Item
-     */
-    public boolean isPhotoItem(String id);
 
     /**
      * ID is Video Container

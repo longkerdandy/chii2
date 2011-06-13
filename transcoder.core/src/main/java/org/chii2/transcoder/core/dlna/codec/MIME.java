@@ -5,6 +5,24 @@ package org.chii2.transcoder.core.dlna.codec;
  */
 public class MIME {
     /**
+     * Get Image MIME
+     *
+     * @param imageType   Image Type
+     * @param imageWidth  Image Width
+     * @param imageHeight Image Height
+     * @return MIME
+     */
+    public static String getImageMime(String imageType, int imageWidth, int imageHeight) {
+        if (ImageType.match(imageType, ImageType.JPEG)) {
+            return "image/jpeg";
+        } else if (ImageType.match(imageType, ImageType.PNG)) {
+            return "image/png";
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Get Video MIME
      *
      * @param container          Container

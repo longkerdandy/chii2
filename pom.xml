@@ -12,6 +12,7 @@
 
     <modules>
         <module>assembly</module>
+
         <module>medialibrary.api</module>
         <module>medialibrary.core</module>
         <module>medialibrary.datasource</module>
@@ -20,17 +21,18 @@
         <module>medialibrary.provider.mediainfo</module>
         <module>medialibrary.provider.tmdb</module>
         <module>medialibrary.shell</module>
-        <module>medialibrary.graphicsmagickprovider</module>
+        <module>medialibrary.provider.sanselan</module>
 
         <module>mediaserver.api</module>
         <module>mediaserver.core</module>
         <module>mediaserver.http</module>
+        <module>mediaserver.provider.sohu</module>
 
         <module>transcoder.api</module>
         <module>transcoder.core</module>
 
         <module>utility</module>
-        <module>mediaserver.provider.sohu</module>
+
     </modules>
 
     <repositories>
@@ -95,7 +97,7 @@
             </dependency>
             <dependency>
                 <groupId>org.chii2</groupId>
-                <artifactId>chii2.medialibrary.graphicsmagickprovider</artifactId>
+                <artifactId>chii2.medialibrary.provider.sanselan</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
@@ -214,6 +216,13 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>2.0.1</version>
+            </dependency>
+
+            <!-- Sanselan -->
+            <dependency>
+                <groupId>org.apache.sanselan</groupId>
+                <artifactId>sanselan</artifactId>
+                <version>0.97-incubator</version>
             </dependency>
 
             <!-- Apache HTTP Components -->

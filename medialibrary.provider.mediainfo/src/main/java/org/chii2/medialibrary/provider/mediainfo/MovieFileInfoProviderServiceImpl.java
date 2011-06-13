@@ -156,7 +156,7 @@ public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderSe
     }
 
     /**
-     * Life Cycle Init
+     * Life Cycle Destroy
      */
     @SuppressWarnings("unused")
     public void destroy() {
@@ -187,7 +187,7 @@ public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderSe
     public void getMovieFileInformation(File movieFile) {
         List<File> fileList = new ArrayList<File>();
         fileList.add(movieFile);
-        getMovieFileInformation(fileList);
+        this.getMovieFileInformation(fileList);
     }
 
     @Override

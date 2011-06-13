@@ -109,7 +109,9 @@ public class RangeFileEntity extends AbstractHttpEntity implements Cloneable {
                     if (l == -1) {
                         fileIndex++;
                         if (fileIndex < files.size()) {
-                            inputStream.close();
+                            if (inputStream != null) {
+                                inputStream.close();
+                            }
                             inputStream = new FileInputStream(files.get(fileIndex));
                             continue;
                         } else {
@@ -126,7 +128,9 @@ public class RangeFileEntity extends AbstractHttpEntity implements Cloneable {
                     if (l == -1) {
                         fileIndex++;
                         if (fileIndex < files.size()) {
-                            inputStream.close();
+                            if (inputStream != null) {
+                                inputStream.close();
+                            }
                             inputStream = new FileInputStream(files.get(fileIndex));
                             continue;
                         } else {
@@ -158,9 +162,9 @@ public class RangeFileEntity extends AbstractHttpEntity implements Cloneable {
     private int getFileIndex() {
         if (rangeBegin >= 0 && files != null && !files.isEmpty()) {
             int index;
-            long size;
+            long size = 0;
             for (index = 0; index < files.size(); index++) {
-                size = files.get(index).length();
+                size = size + files.get(index).length();
                 if (rangeBegin < size) {
                     return index;
                 }

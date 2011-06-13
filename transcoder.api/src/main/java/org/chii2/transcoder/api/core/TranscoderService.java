@@ -3,7 +3,6 @@ package org.chii2.transcoder.api.core;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.teleal.cling.support.model.dlna.DLNAProfiles;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -15,13 +14,6 @@ public interface TranscoderService {
     public final static String PROFILE_COMMON = "common";
     // XBox Profile
     public final static String PROFILE_XBOX = "xbox";
-
-    // Image GIF Type
-    public final static String IMAGE_TYPE_GIF = "gif";
-    // Image JPEG Type
-    public final static String IMAGE_TYPE_JPEG = "jpeg";
-    // Image PNG Type
-    public final static String IMAGE_TYPE_PNG = "png";
 
     /**
      * Get Client Profile based on user agent information
@@ -105,7 +97,7 @@ public interface TranscoderService {
      * @param imageType   Image Type
      * @param imageWidth  Image Width
      * @param imageHeight Image Height
-     * @return Image Profile
+     * @return Image Profilen
      */
     public DLNAProfiles getImageProfile(String imageType, int imageWidth, int imageHeight);
 
@@ -146,35 +138,40 @@ public interface TranscoderService {
     public List<TranscoderProcess> getTranscodedProcesses(String client, Movie movie);
 
     /**
-     * Get Transcoded Type for image on specific client
+     * Whether the image is valid for the client
      *
-     * @param client    Client Profile
-     * @param imageType Original Image Type
-     * @return Transcoded Type
+     * @param client      Client
+     * @param imageType   Image Type
+     * @param imageWidth  Image Width
+     * @param imageHeight Image Height
+     * @return True if valid
      */
-    public String getImageTranscodedType(String client, String imageType);
+    public boolean isValidImage(String client, String imageType, int imageWidth, int imageHeight);
 
     /**
-     * Get Transcoded Image MIME Type on specific client
+     * Get Image Transcoded DLNA Profile
      *
-     * @param client    Client Profile
-     * @param imageType Original Image Type
-     * @return Transcoded MIME Type
+     * @param client      Client
+     * @param imageType   Image Type
+     * @param imageWidth  Image Width
+     * @param imageHeight Image Height
+     * @return Image Profile
      */
-    public String getImageTranscodedMime(String client, String imageType);
+    public DLNAProfiles getImageTranscodedProfile(String client, String imageType, int imageWidth, int imageHeight);
 
     /**
-     * Get Transcoded Image File on specific client
+     * Get Image Transcoded MIME
      *
-     * @param client    Client Profile
-     * @param imageType Original Image Type
-     * @param imageFile Original Image File
-     * @return Transcoded Image File
+     * @param client      Client Profile
+     * @param imageType   Original Image Type
+     * @param imageWidth  Image Width
+     * @param imageHeight Image Height
+     * @return MIME Type
      */
-    public File getImageTranscodedFile(String client, String imageType, File imageFile);
+    public String getImageTranscodedMime(String client, String imageType, int imageWidth, int imageHeight);
 
     /**
-     * Get Transcoded Video DLNA Profi;e
+     * Get Transcoded Video DLNA Profile
      *
      * @param client             Client
      * @param container          Container

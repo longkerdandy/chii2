@@ -22,6 +22,48 @@ public interface Image {
     public void setId(String id);
 
     /**
+     * Get Image Title
+     *
+     * @return Title
+     */
+    public String getTitle();
+
+    /**
+     * Set Image Title
+     *
+     * @param title Title
+     */
+    public void setTitle(String title);
+
+    /**
+     * Get Image Album
+     *
+     * @return Album
+     */
+    public String getAlbum();
+
+    /**
+     * Set Image Album
+     *
+     * @param album Album
+     */
+    public void setAlbum(String album);
+
+    /**
+     * Get Image Rating
+     *
+     * @return Rating
+     */
+    public float getRating();
+
+    /**
+     * Set Image Rating
+     *
+     * @param rating Rating
+     */
+    public void setRating(float rating);
+
+    /**
      * Get the Image File
      *
      * @return Image File
@@ -34,6 +76,13 @@ public interface Image {
      * @param imageFile Image File
      */
     public void setFile(ImageFile imageFile);
+
+    /**
+     * Image is photo
+     *
+     * @return True if image is photo
+     */
+    public boolean isPhoto();
 
     /**
      * Get Image File Name
@@ -54,7 +103,7 @@ public interface Image {
      *
      * @return Absolute File Name (Including Path)
      */
-    public String getAbsoluteName();
+    public String getAbsolutePath();
 
     /**
      * Get Image File Extension
@@ -62,20 +111,6 @@ public interface Image {
      * @return Movie File Extension
      */
     public String getFileExtension();
-
-    /**
-     * Get Image Title
-     *
-     * @return Title
-     */
-    public String getTitle();
-
-    /**
-     * Get Image Album
-     *
-     * @return Image Album
-     */
-    public String getAlbum();
 
     /**
      * Get Image Type
@@ -141,11 +176,11 @@ public interface Image {
     public String getExposureTime();
 
     /**
-     * Get Image ISO Speed Ratings
+     * Get Image ISO
      *
-     * @return ISO Speed Ratings
+     * @return ISO
      */
-    public int getISOSpeedRatings();
+    public int getISO();
 
     /**
      * Get Image Focal Length (mm)
@@ -153,4 +188,60 @@ public interface Image {
      * @return Focal Length
      */
     public String getFocalLength();
+
+    /**
+     * Get Image User Comment
+     *
+     * @return User Comment
+     */
+    public String getUserComment();
+
+    /**
+     * Get Image Width DPI
+     *
+     * @return Width DPI
+     */
+    public int getWidthDPI();
+
+    /**
+     * Get Image Height DPI
+     *
+     * @return Height DPI
+     */
+    public int getHeightDPI();
+
+    /**
+     * Get Image MIME Type
+     *
+     * @return MIME Type
+     */
+    public String getMimeType();
+
+    /**
+     * Get Image Camera Company
+     *
+     * @return Camera Company
+     */
+    public String getCameraMaker();
+
+    /**
+     * Get Image F Number
+     *
+     * @return F Number
+     */
+    public String getFNumber();
+
+    /**
+     * Get Image Shutter Speed
+     *
+     * @return Shutter Speed
+     */
+    public String getShutterSpeed();
+
+    /**
+     * Get Image Flash
+     *
+     * @return Flash
+     */
+    public int getFlash();
 }

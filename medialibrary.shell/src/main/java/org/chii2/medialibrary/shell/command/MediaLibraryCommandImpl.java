@@ -54,14 +54,14 @@ public class MediaLibraryCommandImpl implements MediaLibraryCommand {
             } else if ("image".equalsIgnoreCase(arguments[0]) || "images".equalsIgnoreCase(arguments[0])) {
                 // Show all the movies
                 if (arguments.length == 1) {
-                    List<? extends Image> images = mediaLibrary.getImages();
+                    List<? extends Image> images = mediaLibrary.getImages(-1, -1, null);
                     printImageTable(images);
                 } else {
                     if (isUUID(getSubArray(arguments))) {
                         Image image = mediaLibrary.getImageById(getName(getSubArray(arguments)));
                         printImageTable(image);
                     } else {
-                        List<? extends Image> images = mediaLibrary.getImagesByName(getName(getSubArray(arguments)));
+                        List<? extends Image> images = mediaLibrary.getImagesByField("file.file_name", getName(getSubArray(arguments)), false, -1, -1, null);
                         printImageTable(images);
                     }
                 }
@@ -190,7 +190,7 @@ public class MediaLibraryCommandImpl implements MediaLibraryCommand {
             String[][] content = new String[images.size()][9];
             for (int i = 0; i < images.size(); i++) {
                 content[i][0] = StringUtils.defaultString(images.get(i).getId());
-                content[i][1] = StringUtils.defaultString(images.get(i).getAbsoluteName());
+                content[i][1] = StringUtils.defaultString(images.get(i).getAbsolutePath());
                 content[i][2] = StringUtils.defaultString(images.get(i).getAlbum());
                 content[i][3] = StringUtils.defaultString(images.get(i).getTitle());
                 content[i][4] = String.valueOf(images.get(i).getSize());

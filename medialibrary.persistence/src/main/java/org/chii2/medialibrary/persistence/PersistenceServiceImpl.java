@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
@@ -228,10 +227,20 @@ public class PersistenceServiceImpl implements PersistenceService {
             for (Map.Entry<String, String> entry : sorts.entrySet()) {
                 String field = entry.getKey();
                 String sortType = entry.getValue();
-                if (field != null && sortType != null && sortType.equalsIgnoreCase("asc")) {
-                    orders.add(builder.asc(images.join("file").get(field)));
-                } else if (field != null && sortType != null && sortType.equalsIgnoreCase("desc")) {
-                    orders.add(builder.desc(images.join("file").get(field)));
+                if (field != null && sortType != null) {
+                    if (field.startsWith("file.")) {
+                        if (sortType.equalsIgnoreCase("asc")) {
+                            orders.add(builder.asc(images.join("files").get(field.substring(5))));
+                        } else if (sortType.equalsIgnoreCase("desc")) {
+                            orders.add(builder.desc(images.join("files").get(field.substring(5))));
+                        }
+                    } else {
+                        if (sortType.equalsIgnoreCase("asc")) {
+                            orders.add(builder.asc(images.get(field)));
+                        } else if (sortType.equalsIgnoreCase("desc")) {
+                            orders.add(builder.asc(images.get(field)));
+                        }
+                    }
                 }
             }
             selectQuery.orderBy(orders);
@@ -251,43 +260,49 @@ public class PersistenceServiceImpl implements PersistenceService {
 
     @Override
     public Image getImageById(String id) {
-        // From Query
-        CriteriaQuery<ImageImpl> fromQuery = builder.createQuery(ImageImpl.class);
-        Root<ImageImpl> images = fromQuery.from(ImageImpl.class);
-        // Select Query
-        CriteriaQuery<ImageImpl> selectQuery = fromQuery.select(images);
-        // Where Query
-        selectQuery.where(builder.equal(images.get("id"), id));
-        // Final Query
-        TypedQuery<ImageImpl> typedQuery = entityManager.createQuery(selectQuery);
-        try {
-            return typedQuery.getSingleResult();
-        } catch (NoResultException e) {
-            logger.debug("Try to get image <{}> but not exist.", id);
-            return null;
-        }
+        return entityManager.find(ImageImpl.class, id);
     }
 
     @Override
-    public List<? extends Image> getImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts) {
+    public List<? extends Image> getImagesByField(String fieldName, String fieldValue, boolean strict, int firstResult, int maxResults, Map<String, String> sorts) {
         // From Query
         CriteriaQuery<ImageImpl> fromQuery = builder.createQuery(ImageImpl.class);
         Root<ImageImpl> images = fromQuery.from(ImageImpl.class);
-        Path<String> name = images.join("file").get("fileName");
+        Path<String> name;
+        if (fieldName.startsWith("file.")) {
+            name = images.join("file").get(fieldName.substring(5));
+        } else {
+            name = images.get(fieldName);
+        }
+
         // Select Query
         CriteriaQuery<ImageImpl> selectQuery = fromQuery.select(images);
         // Where Query
-        selectQuery.where(builder.like(builder.lower(name), "%" + imageName.toLowerCase() + "%"));
+        if (strict) {
+            selectQuery.where(builder.like(builder.lower(name), fieldValue.toLowerCase()));
+        } else {
+            selectQuery.where(builder.like(builder.lower(name), "%" + fieldValue.toLowerCase() + "%"));
+        }
         // Order query
         if (sorts != null) {
             List<Order> orders = new ArrayList<Order>();
             for (Map.Entry<String, String> entry : sorts.entrySet()) {
                 String field = entry.getKey();
                 String sortType = entry.getValue();
-                if (field != null && sortType != null && sortType.equalsIgnoreCase("asc")) {
-                    orders.add(builder.asc(images.join("file").get(field)));
-                } else if (field != null && sortType != null && sortType.equalsIgnoreCase("desc")) {
-                    orders.add(builder.desc(images.join("file").get(field)));
+                if (field != null && sortType != null) {
+                    if (field.startsWith("file.")) {
+                        if (sortType.equalsIgnoreCase("asc")) {
+                            orders.add(builder.asc(images.join("files").get(field.substring(5))));
+                        } else if (sortType.equalsIgnoreCase("desc")) {
+                            orders.add(builder.desc(images.join("files").get(field.substring(5))));
+                        }
+                    } else {
+                        if (sortType.equalsIgnoreCase("asc")) {
+                            orders.add(builder.asc(images.get(field)));
+                        } else if (sortType.equalsIgnoreCase("desc")) {
+                            orders.add(builder.asc(images.get(field)));
+                        }
+                    }
                 }
             }
             selectQuery.orderBy(orders);
@@ -306,47 +321,26 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
-    public void deleteAllImages() {
-        // Delete all images
-        entityManager.createNamedQuery("Image.deleteAll", ImageImpl.class).executeUpdate();
-    }
-
-    @Override
-    public ImageFile getImageFileById(String id) {
-        // From Query
-        CriteriaQuery<ImageFileImpl> fromQuery = builder.createQuery(ImageFileImpl.class);
-        Root<ImageFileImpl> imageFiles = fromQuery.from(ImageFileImpl.class);
-        // Select Query
-        CriteriaQuery<ImageFileImpl> selectQuery = fromQuery.select(imageFiles);
-        // Where Query
-        selectQuery.where(builder.equal(imageFiles.get("id"), id));
-        // Final Query
-        TypedQuery<ImageFileImpl> typedQuery = entityManager.createQuery(selectQuery);
-        try {
-            return typedQuery.getSingleResult();
-        } catch (NoResultException e) {
-            logger.debug("Try to get image file <{}> but not exist.", id);
-            return null;
-        }
-    }
-
-    @Override
     public List<String> getImageAlbums(int firstResult, int maxResults, Map<String, String> sorts) {
         // From Query
         CriteriaQuery<String> fromQuery = builder.createQuery(String.class);
-        Root<ImageFileImpl> imageFiles = fromQuery.from(ImageFileImpl.class);
+        Root<ImageImpl> images = fromQuery.from(ImageImpl.class);
         // Select Query
-        CriteriaQuery<String> selectQuery = fromQuery.multiselect(imageFiles.get("album"));
+        CriteriaQuery<String> selectQuery = fromQuery.multiselect(images.get("album"));
         selectQuery.distinct(true);
         if (sorts != null) {
             List<Order> orders = new ArrayList<Order>();
             for (Map.Entry<String, String> entry : sorts.entrySet()) {
                 String field = entry.getKey();
                 String sortType = entry.getValue();
-                if (field != null && sortType != null && sortType.equalsIgnoreCase("asc")) {
-                    orders.add(builder.asc(imageFiles.get(field)));
-                } else if (field != null && sortType != null && sortType.equalsIgnoreCase("desc")) {
-                    orders.add(builder.desc(imageFiles.get(field)));
+                if (field != null && sortType != null) {
+                    if (field.equals("album")) {
+                        if (sortType.equalsIgnoreCase("asc")) {
+                            orders.add(builder.asc(images.get(field)));
+                        } else if (sortType.equalsIgnoreCase("desc")) {
+                            orders.add(builder.asc(images.get(field)));
+                        }
+                    }
                 }
             }
             selectQuery.orderBy(orders);
@@ -366,66 +360,22 @@ public class PersistenceServiceImpl implements PersistenceService {
 
     @Override
     public long getImageAlbumsCount() {
-        // From Query
-        CriteriaQuery<Long> fromQuery = builder.createQuery(Long.class);
-        Root<ImageFileImpl> imageFiles = fromQuery.from(ImageFileImpl.class);
-        // Select Query
-        CriteriaQuery<Long> selectQuery = fromQuery.select(builder.count(imageFiles));
-        // Final Query
-        TypedQuery<Long> typedQuery = entityManager.createQuery(selectQuery);
-        return typedQuery.getSingleResult();
-    }
-
-    @Override
-    public List<? extends Image> getImagesByAlbum(String album, int firstResult, int maxResults, Map<String, String> sorts) {
-        // From Query
-        CriteriaQuery<ImageImpl> fromQuery = builder.createQuery(ImageImpl.class);
-        Root<ImageImpl> images = fromQuery.from(ImageImpl.class);
-        Path<String> albumField = images.join("file").get("album");
-        // Select Query
-        CriteriaQuery<ImageImpl> selectQuery = fromQuery.select(images);
-        // Where Query
-        selectQuery.where(builder.equal(albumField, album));
-        // Order query
-        if (sorts != null) {
-            List<Order> orders = new ArrayList<Order>();
-            for (Map.Entry<String, String> entry : sorts.entrySet()) {
-                String field = entry.getKey();
-                String sortType = entry.getValue();
-                if (field != null && sortType != null && sortType.equalsIgnoreCase("asc")) {
-                    orders.add(builder.asc(images.join("file").get(field)));
-                } else if (field != null && sortType != null && sortType.equalsIgnoreCase("desc")) {
-                    orders.add(builder.desc(images.join("file").get(field)));
-                }
-            }
-            selectQuery.orderBy(orders);
-        }
-        // Final Query
-        TypedQuery<ImageImpl> typedQuery = entityManager.createQuery(selectQuery);
-        // First Result
-        if (firstResult >= 0) {
-            typedQuery = typedQuery.setFirstResult(firstResult);
-        }
-        // Max Results
-        if (maxResults >= 0) {
-            typedQuery = typedQuery.setMaxResults(maxResults);
-        }
-        return typedQuery.getResultList();
+        return entityManager.createQuery("SELECT COUNT(i) FROM IMAGE i", Long.class).getSingleResult();
     }
 
     @Override
     public long getImagesCountByAlbum(String album) {
-        // From Query
-        CriteriaQuery<Long> fromQuery = builder.createQuery(Long.class);
-        Root<ImageImpl> images = fromQuery.from(ImageImpl.class);
-        Path<String> albumField = images.join("file").get("album");
-        // Select Query
-        CriteriaQuery<Long> selectQuery = fromQuery.select(builder.count(images));
-        // Where Query
-        selectQuery.where(builder.equal(albumField, album));
-        // Final Query
-        TypedQuery<Long> typedQuery = entityManager.createQuery(selectQuery);
-        return typedQuery.getSingleResult();
+        return entityManager.createQuery("SELECT COUNT(i) FROM IMAGE i WHERE i.album = ?1", Long.class).setParameter(1, album).getSingleResult();
+    }
+
+    @Override
+    public ImageFile getImageFileById(String id) {
+        return entityManager.find(ImageFileImpl.class, id);
+    }
+
+    @Override
+    public int deleteImages() {
+        return entityManager.createQuery("DELETE FROM IMAGE i").executeUpdate();
     }
 
     @Override

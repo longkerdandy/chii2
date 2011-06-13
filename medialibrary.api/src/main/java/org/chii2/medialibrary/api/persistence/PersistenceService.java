@@ -120,15 +120,18 @@ public interface PersistenceService {
     public Image getImageById(String id);
 
     /**
-     * Get all possible image records by image name
+     * Get all possible image records by specific image field
+     * Add "file." before ImageFile field
      *
-     * @param imageName   Image Name
+     * @param fieldName   Field Name
+     * @param fieldValue  Field Value
+     * @param strict      Strict compare field value equal, else will use %fieldValue%
      * @param firstResult First Result
      * @param maxResults  Max Result
      * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
      * @return Image List
      */
-    public List<? extends Image> getImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts);
+    public List<? extends Image> getImagesByField(String fieldName, String fieldValue, boolean strict, int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
      * Get image albums from index with max limit
@@ -148,17 +151,6 @@ public interface PersistenceService {
     public long getImageAlbumsCount();
 
     /**
-     * Get images by image album
-     *
-     * @param album       Image Album
-     * @param firstResult First Result
-     * @param maxResults  Max Result
-     * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
-     * @return Image Albums
-     */
-    public List<? extends Image> getImagesByAlbum(String album, int firstResult, int maxResults, Map<String, String> sorts);
-
-    /**
      * Get count of images belong to  specific album
      *
      * @param album Image Album
@@ -167,17 +159,19 @@ public interface PersistenceService {
     public long getImagesCountByAlbum(String album);
 
     /**
-     * Delete all images in library
-     */
-    public void deleteAllImages();
-
-    /**
      * Get Image File by ID
      *
      * @param id Image File ID
      * @return Image File
      */
     public ImageFile getImageFileById(String id);
+
+    /**
+     * Delete all images in library
+     *
+     * @return the number of instances that were deleted
+     */
+    public int deleteImages();
 
     /**
      * Delete all Movie Information

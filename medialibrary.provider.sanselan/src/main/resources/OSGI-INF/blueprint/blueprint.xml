@@ -14,8 +14,8 @@
     <reference id="imageFactoryService"
                interface="org.chii2.medialibrary.api.persistence.factory.ImageFactory"/>
 
-    <!-- Chii2 Media Library GraphicsMagick Provider Bean -->
-    <bean id="gmProvider" class="org.chii2.medialibrary.provider.graphicsmagick.ImageInfoProviderServiceImpl"
+    <!-- Chii2 Media Library Sanselan Provider Bean -->
+    <bean id="sanselanProvider" class="org.chii2.medialibrary.provider.sanselan.ImageInfoProviderServiceImpl"
           init-method="init"
           destroy-method="destroy">
         <property name="configAdmin" ref="configAdminService"/>
@@ -23,8 +23,20 @@
         <property name="imageFactory" ref="imageFactoryService"/>
     </bean>
 
-    <!-- Chii2 Media Library GraphicsMagick Provider Service -->
-    <service ref="gmProvider" interface="org.chii2.medialibrary.api.provider.ImageInfoProviderService">
+    <!-- Chii2 Media Library Sanselan Provider Service -->
+    <service ref="sanselanProvider">
+        <interfaces>
+            <value>org.chii2.medialibrary.api.provider.ImageInfoProviderService</value>
+            <value>org.osgi.service.event.EventHandler</value>
+        </interfaces>
+        <service-properties>
+            <!-- Register Event Topics -->
+            <entry key="event.topics">
+                <list>
+                    <value>org/chii2/medialibrary/provider/image/INFO_REQUEST</value>
+                </list>
+            </entry>
+        </service-properties>
     </service>
 
 </blueprint>

@@ -18,10 +18,6 @@
     <reference id="movieFactoryManager"
                interface="org.chii2.medialibrary.api.persistence.factory.MovieFactory"/>
 
-    <!-- Chii2 Media Library Image Information Provider Service -->
-    <reference-list id="imageProviderManager"
-                    interface="org.chii2.medialibrary.api.provider.ImageInfoProviderService"/>
-
     <!-- Chii2 Media Library Core Bean -->
     <bean id="medialibraryService" class="org.chii2.medialibrary.MediaLibraryServiceImpl"
           init-method="init"
@@ -47,7 +43,6 @@
         <property name="configAdmin" ref="configAdminService"/>
         <property name="eventAdmin" ref="eventAdminService"/>
         <property name="persistenceService" ref="persistenceManager"/>
-        <property name="providerServices" ref="imageProviderManager"/>
     </bean>
 
     <!-- Chii2 Media Library Core Service -->

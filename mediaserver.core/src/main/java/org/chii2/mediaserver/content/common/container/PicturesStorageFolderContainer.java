@@ -59,15 +59,15 @@ public class PicturesStorageFolderContainer extends VisualContainer {
     @Override
     public void loadContents(long startIndex, long maxCount, SortCriterion[] orderBy, ContentManager contentManager) {
         // Read from library
-        List<? extends VisualPictureItem> photos = contentManager.getPhotosByAlbum(getTitle(), getId(), filter, startIndex, maxCount, orderBy);
+        List<? extends VisualPictureItem> pictures = contentManager.getPicturesByAlbum(getTitle(), getId(), filter, startIndex, maxCount, orderBy);
         // Total count
-        long count = contentManager.getPhotosCountByAlbum(getTitle());
+        long count = contentManager.getPicturesCountByAlbum(getTitle());
         // Add children
-        if (photos != null && count > 0) {
-            for (VisualPictureItem photo : photos) {
-                addItem(photo);
+        if (pictures != null && count > 0) {
+            for (VisualPictureItem picture : pictures) {
+                addItem(picture);
             }
-            setChildCount(photos.size());
+            setChildCount(pictures.size());
             setTotalChildCount(count);
         } else {
             setChildCount(0);

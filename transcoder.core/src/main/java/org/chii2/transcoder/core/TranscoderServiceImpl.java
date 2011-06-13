@@ -7,10 +7,7 @@ import org.chii2.transcoder.api.core.TranscoderProcess;
 import org.chii2.transcoder.api.core.TranscoderService;
 import org.chii2.transcoder.core.cache.TranscodedCache;
 import org.chii2.transcoder.core.dlna.catalog.*;
-import org.chii2.transcoder.core.dlna.codec.AudioCodec;
-import org.chii2.transcoder.core.dlna.codec.Container;
-import org.chii2.transcoder.core.dlna.codec.MIME;
-import org.chii2.transcoder.core.dlna.codec.VideoCodec;
+import org.chii2.transcoder.core.dlna.codec.*;
 import org.chii2.transcoder.core.ffmpeg.FFmpegConverterParameter;
 import org.chii2.transcoder.core.ffmpeg.FFmpegProcess;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -337,32 +334,44 @@ public class TranscoderServiceImpl implements TranscoderService {
     }
 
     @Override
-    public String getImageTranscodedType(String client, String imageType) {
-        if ("GIF".equalsIgnoreCase(imageType) || "GIFf".equalsIgnoreCase(imageType)) {
-            return IMAGE_TYPE_GIF;
-        } else if ("JPEG".equalsIgnoreCase(imageType) || "JPG".equalsIgnoreCase(imageType)) {
-            return IMAGE_TYPE_JPEG;
-        } else if ("PNG".equalsIgnoreCase(imageType) || "PNGf".equalsIgnoreCase(imageType)) {
-            return IMAGE_TYPE_PNG;
+    public boolean isValidImage(String client, String imageType, int imageWidth, int imageHeight) {
+        if (PROFILE_COMMON.equalsIgnoreCase(client)) {
+            return ImageType.match(imageType, ImageType.JPEG) || ImageType.match(imageType, ImageType.PNG);
+        } else if (PROFILE_XBOX.equalsIgnoreCase(client)) {
+            return ImageType.match(imageType, ImageType.JPEG);
         } else {
-            return IMAGE_TYPE_JPEG;
+            return false;
         }
     }
 
     @Override
-    public String getImageTranscodedMime(String client, String imageType) {
-        if ("JPEG".equalsIgnoreCase(imageType) || "JPG".equalsIgnoreCase(imageType)) {
-            return "image/jpeg";
-        } else if ("PNG".equalsIgnoreCase(imageType) || "PNGf".equalsIgnoreCase(imageType)) {
-            return "image/png";
+    public DLNAProfiles getImageTranscodedProfile(String client, String imageType, int imageWidth, int imageHeight) {
+        if (PROFILE_COMMON.equalsIgnoreCase(client)) {
+            if (ImageType.match(imageType, ImageType.JPEG) || ImageType.match(imageType, ImageType.PNG)) {
+                return this.getImageProfile(imageType, imageWidth, imageHeight);
+            } else {
+                return this.getImageProfile("JPEG", imageWidth, imageHeight);
+            }
+        } else if (PROFILE_XBOX.equalsIgnoreCase(client)) {
+            return this.getImageProfile("JPEG", imageWidth, imageHeight);
         } else {
-            return "image/jpeg";
+            return this.getImageProfile("JPEG", imageWidth, imageHeight);
         }
     }
 
     @Override
-    public File getImageTranscodedFile(String client, String imageType, File imageFile) {
-        return imageFile;
+    public String getImageTranscodedMime(String client, String imageType, int imageWidth, int imageHeight) {
+        if (PROFILE_COMMON.equalsIgnoreCase(client)) {
+            if (ImageType.match(imageType, ImageType.JPEG) || ImageType.match(imageType, ImageType.PNG)) {
+                return MIME.getImageMime(imageType, imageWidth, imageHeight);
+            } else {
+                return MIME.getImageMime("JPEG", imageWidth, imageHeight);
+            }
+        } else if (PROFILE_XBOX.equalsIgnoreCase(client)) {
+            return MIME.getImageMime("JPEG", imageWidth, imageHeight);
+        } else {
+            return MIME.getImageMime("JPEG", imageWidth, imageHeight);
+        }
     }
 
     @Override

@@ -50,12 +50,4 @@ public class ContentManagerTest {
         assert !contentManger.isPicturesStorageFolderContainer("PI-PSFC-Singapore-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
         assert !contentManger.isPicturesStorageFolderContainer("PI-PSFC-Universal Studios-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
     }
-
-    @Test
-    public void isPhotoItemTest() {
-        assert !contentManger.isPhotoItem("PSFC-Singapore");
-        assert !contentManger.isPhotoItem("PSFC-Universal Studios");
-        assert contentManger.isPhotoItem("PI-PSFC-Singapore-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
-        assert contentManger.isPhotoItem("PI-PSFC-Universal Studios-19f08e4e-b25e-4a2f-9e2b-55d2d40a4261");
-    }
 }

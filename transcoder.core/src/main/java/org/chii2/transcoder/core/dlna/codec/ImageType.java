@@ -4,7 +4,6 @@ package org.chii2.transcoder.core.dlna.codec;
  * Image Type
  */
 public enum ImageType {
-    // TODO: Not sure about image type strings
     JPEG(new String[]{"JPEG"}),
     PNG(new String[]{"PNG"});
 

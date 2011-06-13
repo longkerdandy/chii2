@@ -22,25 +22,17 @@ public class ImageFileImpl implements ImageFile {
     @Column(name = "FILE_NAME")
     private String fileName;
 
-    // File Path
+    // File Parent Path
     @Column(name = "FILE_PATH")
     private String filePath;
 
-    // Absolute File Name
-    @Column(name = "ABSOLUTE_NAME")
-    private String absoluteName;
+    // Absolute File Path
+    @Column(name = "ABSOLUTE_PATH")
+    private String absolutePath;
 
     // File Extension
     @Column(name = "FILE_EXTENSION")
     private String fileExtension;
-
-    // Image Title
-    @Column(name = "TITLE")
-    private String title;
-
-    // Image Album
-    @Column(name = "ALBUM")
-    private String album;
 
     // Image Type
     @Column(name = "IMAGE_TYPE")
@@ -58,6 +50,14 @@ public class ImageFileImpl implements ImageFile {
     @Column(name = "HEIGHT")
     private int height;
 
+    // Image Width DPI
+    @Column(name = "WIDTH_DPI")
+    private int widthDPI;
+
+    // Image Height DPI
+    @Column(name = "HEIGHT_DPI")
+    private int heightDPI;
+
     // Image Color Depth
     @Column(name = "COLOR_DEPTH")
     private int colorDepth;
@@ -65,6 +65,14 @@ public class ImageFileImpl implements ImageFile {
     // Image Color Type
     @Column(name = "COLOR_TYPE")
     private String colorType;
+
+    // Image MIME Type
+    @Column(name = "MIME_TYPE")
+    private String mimeType;
+
+    // Image Camera Company
+    @Column(name = "CAMERA_MAKER")
+    private String cameraMaker;
 
     // Image Camera Model
     @Column(name = "CAMERA_MODEL")
@@ -79,13 +87,30 @@ public class ImageFileImpl implements ImageFile {
     @Column(name = "EXPOSURE_TIME")
     private String exposureTime;
 
-    // Image ISO Speed Ratings
-    @Column(name = "ISO_SPEED_RATINGS")
-    private int isoSpeedRatings;
+    // Image ISO
+    @Column(name = "ISO")
+    private int iso;
 
     // Image Focal Length
     @Column(name = "FOCAL_LENGTH")
     private String focalLength;
+
+    // Image FNumber
+    @Column(name = "F_NUMBER")
+    private String fNumber;
+
+    // Image Shutter Speed
+    @Column(name = "SHUTTER_SPEED")
+    private String shutterSpeed;
+
+    // Image Flash
+    @Column(name = "FLASH")
+    private int flash;
+
+    // Image User Comment
+    // TODO: User should be able to modify the comment, and changes should be saved to physical file
+    @Column(name = "USER_COMMENT")
+    private String userComment;
 
     /**
      * Constructor
@@ -125,13 +150,13 @@ public class ImageFileImpl implements ImageFile {
     }
 
     @Override
-    public String getAbsoluteName() {
-        return absoluteName;
+    public String getAbsolutePath() {
+        return absolutePath;
     }
 
     @Override
-    public void setAbsoluteName(String absoluteName) {
-        this.absoluteName = absoluteName;
+    public void setAbsolutePath(String absolutePath) {
+        this.absolutePath = absolutePath;
     }
 
     @Override
@@ -142,26 +167,6 @@ public class ImageFileImpl implements ImageFile {
     @Override
     public void setFileExtension(String fileExtension) {
         this.fileExtension = fileExtension;
-    }
-
-    @Override
-    public String getTitle() {
-        return title;
-    }
-
-    @Override
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    @Override
-    public String getAlbum() {
-        return album;
-    }
-
-    @Override
-    public void setAlbum(String album) {
-        this.album = album;
     }
 
     @Override
@@ -200,11 +205,6 @@ public class ImageFileImpl implements ImageFile {
     }
 
     @Override
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    @Override
     public int getColorDepth() {
         return colorDepth;
     }
@@ -222,6 +222,11 @@ public class ImageFileImpl implements ImageFile {
     @Override
     public void setColorType(String colorType) {
         this.colorType = colorType;
+    }
+
+    @Override
+    public void setHeight(int height) {
+        this.height = height;
     }
 
     @Override
@@ -255,13 +260,13 @@ public class ImageFileImpl implements ImageFile {
     }
 
     @Override
-    public int getISOSpeedRatings() {
-        return isoSpeedRatings;
+    public int getISO() {
+        return iso;
     }
 
     @Override
-    public void setISOSpeedRatings(int isoSpeedRatings) {
-        this.isoSpeedRatings = isoSpeedRatings;
+    public void setISO(int iso) {
+        this.iso = iso;
     }
 
     @Override
@@ -272,5 +277,85 @@ public class ImageFileImpl implements ImageFile {
     @Override
     public void setFocalLength(String focalLength) {
         this.focalLength = focalLength;
+    }
+
+    @Override
+    public String getUserComment() {
+        return userComment;
+    }
+
+    @Override
+    public void setUserComment(String userComment) {
+        this.userComment = userComment;
+    }
+
+    @Override
+    public int getWidthDPI() {
+        return widthDPI;
+    }
+
+    @Override
+    public void setWidthDPI(int widthDPI) {
+        this.widthDPI = widthDPI;
+    }
+
+    @Override
+    public int getHeightDPI() {
+        return heightDPI;
+    }
+
+    @Override
+    public void setHeightDPI(int heightDPI) {
+        this.heightDPI = heightDPI;
+    }
+
+    @Override
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    @Override
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    @Override
+    public String getCameraMaker() {
+        return cameraMaker;
+    }
+
+    @Override
+    public void setCameraMaker(String cameraMaker) {
+        this.cameraMaker = cameraMaker;
+    }
+
+    @Override
+    public String getFNumber() {
+        return fNumber;
+    }
+
+    @Override
+    public void setFNumber(String fNumber) {
+        this.fNumber = fNumber;
+    }
+
+    @Override
+    public String getShutterSpeed() {
+        return shutterSpeed;
+    }
+
+    @Override
+    public void setShutterSpeed(String shutterSpeed) {
+        this.shutterSpeed = shutterSpeed;
+    }
+
+    @Override
+    public int getFlash() {
+        return flash;
+    }
+
+    @Override
+    public void setFlash(int flash) {
+        this.flash = flash;
     }
 }

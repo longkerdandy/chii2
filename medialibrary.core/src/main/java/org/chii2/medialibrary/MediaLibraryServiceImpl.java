@@ -3,6 +3,7 @@ package org.chii2.medialibrary;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.medialibrary.api.file.FileService;
 import org.chii2.medialibrary.api.persistence.entity.Image;
+import org.chii2.medialibrary.api.persistence.entity.ImageFile;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.persistence.PersistenceService;
 import org.osgi.service.event.Event;
@@ -120,16 +121,6 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     }
 
     @Override
-    public List<? extends Image> getImages() {
-        return persistenceService.getImages(-1, -1, null);
-    }
-
-    @Override
-    public List<? extends Image> getImages(int firstResult, int maxResults) {
-        return persistenceService.getImages(firstResult, maxResults, null);
-    }
-
-    @Override
     public List<? extends Image> getImages(int firstResult, int maxResults, Map<String, String> sorts) {
         return persistenceService.getImages(firstResult, maxResults, sorts);
     }
@@ -140,28 +131,8 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     }
 
     @Override
-    public List<? extends Image> getImagesByName(String imageName) {
-        return persistenceService.getImagesByName(imageName, -1, -1, null);
-    }
-
-    @Override
-    public List<? extends Image> getImagesByName(String imageName, int firstResult, int maxResults) {
-        return persistenceService.getImagesByName(imageName, firstResult, maxResults, null);
-    }
-
-    @Override
-    public List<? extends Image> getImagesByName(String imageName, int firstResult, int maxResults, Map<String, String> sorts) {
-        return persistenceService.getImagesByName(imageName, firstResult, maxResults, sorts);
-    }
-
-    @Override
-    public List<String> getImageAlbums() {
-        return persistenceService.getImageAlbums(-1, -1, null);
-    }
-
-    @Override
-    public List<String> getImageAlbums(int firstResult, int maxResults) {
-        return persistenceService.getImageAlbums(firstResult, maxResults, null);
+    public List<? extends Image> getImagesByField(String fieldName, String fieldValue, boolean strict, int firstResult, int maxResults, Map<String, String> sorts) {
+        return persistenceService.getImagesByField(fieldName, fieldValue, strict, firstResult, maxResults, sorts);
     }
 
     @Override
@@ -175,23 +146,13 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     }
 
     @Override
-    public List<? extends Image> getImagesByAlbum(String album) {
-        return persistenceService.getImagesByAlbum(album, -1, -1, null);
-    }
-
-    @Override
-    public List<? extends Image> getImagesByAlbum(String album, int firstResult, int maxResults) {
-        return persistenceService.getImagesByAlbum(album, firstResult, maxResults, null);
-    }
-
-    @Override
-    public List<? extends Image> getImagesByAlbum(String album, int firstResult, int maxResults, Map<String, String> sorts) {
-        return persistenceService.getImagesByAlbum(album, firstResult, maxResults, sorts);
-    }
-
-    @Override
     public long getImagesCountByAlbum(String album) {
         return persistenceService.getImagesCountByAlbum(album);
+    }
+
+    @Override
+    public ImageFile getImageFileById(String id) {
+        return persistenceService.getImageFileById(id);
     }
 
     /**

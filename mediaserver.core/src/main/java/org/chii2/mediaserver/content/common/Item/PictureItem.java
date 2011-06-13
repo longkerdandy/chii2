@@ -1,11 +1,12 @@
 package org.chii2.mediaserver.content.common.Item;
 
-import org.chii2.mediaserver.api.content.item.VisualPhotoItem;
+import org.chii2.mediaserver.api.content.item.VisualPictureItem;
 
 /**
- * Photo Item
+ * Picture Item
  */
-public class PhotoItem extends VisualPhotoItem {
+public class PictureItem extends VisualPictureItem {
+
     // Filter
     private String filter;
 
@@ -16,9 +17,9 @@ public class PhotoItem extends VisualPhotoItem {
      * @param id       Item ID
      * @param parentId Item Parent ID
      * @param title    Item Title
-     * @param album    Album
+     * @param album Album
      */
-    public PhotoItem(String filter, String id, String parentId, String title, String album) {
+    public PictureItem(String filter, String id, String parentId, String title, String album) {
         super();
 
         this.filter = filter;
