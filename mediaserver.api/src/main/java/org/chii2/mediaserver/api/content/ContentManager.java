@@ -3,6 +3,7 @@ package org.chii2.mediaserver.api.content;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
 import org.chii2.mediaserver.api.content.item.VisualPictureItem;
 import org.chii2.mediaserver.api.content.item.VisualVideoItem;
+import org.chii2.mediaserver.api.upnp.SearchCriterion;
 import org.teleal.cling.model.message.UpnpHeaders;
 import org.teleal.cling.support.contentdirectory.DIDLParser;
 import org.teleal.cling.support.model.DIDLObject;
@@ -49,7 +50,7 @@ public interface ContentManager {
     public boolean isMatch(UpnpHeaders headers);
 
     /**
-     * Find Object (Container or Item) based on ID
+     * Browse Object (Container or Item) based on ID
      *
      * @param objectId     Object ID
      * @param filter       Filter
@@ -58,7 +59,33 @@ public interface ContentManager {
      * @param orderBy      Sort Method
      * @return Object (Container or Item), null if not found
      */
-    public DIDLObject findObject(String objectId, String filter, long startIndex, long requestCount, SortCriterion[] orderBy);
+    public DIDLObject browseObject(String objectId, String filter, long startIndex, long requestCount, SortCriterion[] orderBy);
+
+    /**
+     * Search Object
+     *
+     * @param containerId    Container ID
+     * @param searchCriteria Search Criterion
+     * @param filter         Filter
+     * @param startIndex     Start Index
+     * @param requestCount   Request (Max) Count
+     * @param orderBy        Sort Method
+     * @return Objects
+     */
+    public List<? extends DIDLObject> searchObject(String containerId, SearchCriterion searchCriteria, String filter, long startIndex, long requestCount, SortCriterion[] orderBy);
+
+    /**
+     * Search Total Count
+     *
+     * @param containerId    Container ID
+     * @param searchCriteria Search Criterion
+     * @param filter         Filter
+     * @param startIndex     Start Index
+     * @param requestCount   Request (Max) Count
+     * @param orderBy        Sort Method
+     * @return Total Count
+     */
+    public long searchCount(String containerId, SearchCriterion searchCriteria, String filter, long startIndex, long requestCount, SortCriterion[] orderBy);
 
     /**
      * Get all Pictures Storage Folder Containers in library

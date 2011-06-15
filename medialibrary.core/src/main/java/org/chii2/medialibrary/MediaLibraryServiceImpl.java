@@ -141,6 +141,11 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     }
 
     @Override
+    public long getImagesCount() {
+        return persistenceService.getImagesCount();
+    }
+
+    @Override
     public long getImageAlbumsCount() {
         return persistenceService.getImageAlbumsCount();
     }

@@ -359,8 +359,13 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     @Override
-    public long getImageAlbumsCount() {
+    public long getImagesCount() {
         return entityManager.createQuery("SELECT COUNT(i) FROM IMAGE i", Long.class).getSingleResult();
+    }
+
+    @Override
+    public long getImageAlbumsCount() {
+        return entityManager.createQuery("SELECT COUNT(DISTINCT i.album) FROM IMAGE i", Long.class).getSingleResult();
     }
 
     @Override

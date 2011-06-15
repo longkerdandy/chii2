@@ -1,11 +1,14 @@
 package org.chii2.mediaserver.upnp;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
 import org.chii2.mediaserver.api.http.HttpServerService;
 import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
+import org.chii2.mediaserver.api.upnp.SearchCriterion;
 import org.chii2.mediaserver.content.common.CommonContentManager;
+import org.chii2.mediaserver.content.wmp.WMPContentManager;
 import org.chii2.mediaserver.content.xbox.XBoxContentManager;
 import org.chii2.transcoder.api.core.TranscoderService;
 import org.slf4j.Logger;
@@ -56,6 +59,7 @@ public class ContentDirectory extends AbstractContentDirectoryService {
         this.onlineVideos = onlineVideos;
         this.contentManagers = new LinkedList<ContentManager>();
         contentManagers.add(new XBoxContentManager(this.mediaLibrary, this.httpServer, this.transcoder, this.onlineVideos));
+        contentManagers.add(new WMPContentManager(this.mediaLibrary, this.httpServer, this.transcoder, this.onlineVideos));
         contentManagers.add(new CommonContentManager(this.mediaLibrary, this.httpServer, this.transcoder, this.onlineVideos));
     }
 
@@ -71,7 +75,7 @@ public class ContentDirectory extends AbstractContentDirectoryService {
         // Result
         DIDLContent didlContent = new DIDLContent();
         // Search and get the object from the given id
-        DIDLObject didlObject = contentManager.findObject(objectID, filter, startIndex, requestCount, orderBy);
+        DIDLObject didlObject = contentManager.browseObject(objectID, filter, startIndex, requestCount, orderBy);
 
         // Not found, return empty result
         if (didlObject == null) {
@@ -80,7 +84,7 @@ public class ContentDirectory extends AbstractContentDirectoryService {
             try {
                 return new BrowseResult(parser.generate(didlContent), 0, 0);
             } catch (Exception e) {
-                throw new ContentDirectoryException(ContentDirectoryErrorCode.CANNOT_PROCESS, e.getMessage());
+                throw new ContentDirectoryException(ContentDirectoryErrorCode.CANNOT_PROCESS, ExceptionUtils.getMessage(e));
             }
         }
 
@@ -127,14 +131,52 @@ public class ContentDirectory extends AbstractContentDirectoryService {
         try {
             return new BrowseResult(parser.generate(didlContent), numReturned, totalMatches);
         } catch (Exception e) {
-            throw new ContentDirectoryException(ContentDirectoryErrorCode.CANNOT_PROCESS, e.getMessage());
+            throw new ContentDirectoryException(ContentDirectoryErrorCode.CANNOT_PROCESS, ExceptionUtils.getMessage(e));
         }
     }
 
     @Override
     public BrowseResult search(String containerId, String searchCriteria, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) throws ContentDirectoryException {
         logger.debug(String.format("ContentDirectory receive search request with ContainerID:%s, SearchCriteria:%s, Filter:%s, FirstResult:%s, MaxResults:%s, SortCriterion:%s.", containerId, searchCriteria, filter, startIndex, requestCount, getSortCriterionString(orderBy)));
-        return super.search(containerId, searchCriteria, filter, startIndex, requestCount, orderBy);
+        // Client Headers
+        UpnpHeaders headers = ReceivingAction.getRequestMessage().getHeaders();
+        // Content Manager based on client
+        ContentManager contentManager = getContentManager(headers);
+        // Search Criterion
+        SearchCriterion searchCriterion = SearchCriterion.parseSearchCriterion(searchCriteria);
+        // DIDL Parser
+        DIDLParser parser = contentManager.getParser();
+        // Result
+        DIDLContent didlContent = new DIDLContent();
+        // Search
+        List<? extends DIDLObject> didlObjects = contentManager.searchObject(containerId, searchCriterion, filter, startIndex, requestCount, orderBy);
+
+        // Number of count returned
+        long numReturned = 0;
+        // Total matches
+        long totalMatches = 0;
+
+        // Add to results
+        if (didlObjects != null && didlObjects.size() > 0) {
+            for (DIDLObject didlObject :didlObjects) {
+                if (didlObject instanceof Container) {
+                    didlContent.addContainer((Container) didlObject);
+                } else if (didlObject instanceof Item) {
+                    didlContent.addItem((Item) didlObject);
+                }
+            }
+
+            numReturned = didlObjects.size();
+            totalMatches = contentManager.searchCount(containerId, searchCriterion, filter, startIndex, requestCount, orderBy);
+        }
+
+        // Return result
+        logger.info("Search result numReturned: <{}> and total matches: <{}>", numReturned, totalMatches);
+        try {
+            return new BrowseResult(parser.generate(didlContent), numReturned, totalMatches);
+        } catch (Exception e) {
+            throw new ContentDirectoryException(ContentDirectoryErrorCode.CANNOT_PROCESS, ExceptionUtils.getMessage(e));
+        }
     }
 
     /**

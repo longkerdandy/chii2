@@ -113,11 +113,12 @@ public class MediaServerServiceImpl implements MediaServerService {
         // Device Type
         DeviceType type =
                 new UDADeviceType("MediaServer", 1);
-        // XBox360 Device Details
-        DeviceDetails xboxDetails = new DeviceDetails(
+
+        // Windows Media Player Device Details
+        DeviceDetails wmpDetails = new DeviceDetails(
                 "Chii2 : " + serverPrefix,
                 new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
-                new ModelDetails("Windows Media Player Sharing", "Windows Media Player Sharing", "12"),
+                new ModelDetails("Windows Media Player Sharing", "Windows Media Player Sharing", "12.0"),
                 "000da201238c",
                 "100000000001",
                 "http://www.chii2.org/some_user_interface/",
@@ -129,8 +130,8 @@ public class MediaServerServiceImpl implements MediaServerService {
                 })
         );
 
-        DeviceDetails psDetails = new DeviceDetails(
-                "Chii2 : " + serverPrefix,
+        DeviceDetails chii2Details = new DeviceDetails(
+                "Chii2",
                 new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
                 new ModelDetails("Chii2 Home Server", "Chii2 Home Server", "1"),
                 "000da201238c",
@@ -146,9 +147,10 @@ public class MediaServerServiceImpl implements MediaServerService {
 
         // Device Details Provider
         Map<HeaderDeviceDetailsProvider.Key, DeviceDetails> headerDetails = new HashMap<HeaderDeviceDetailsProvider.Key, DeviceDetails>();
-        headerDetails.put(new HeaderDeviceDetailsProvider.Key("User-Agent", "Xbox.*"), xboxDetails);
-        headerDetails.put(new HeaderDeviceDetailsProvider.Key("X-AV-Client-Info", ".*PLAYSTATION 3.*"), psDetails);
-        HeaderDeviceDetailsProvider provider = new HeaderDeviceDetailsProvider(psDetails, headerDetails);
+        //headerDetails.put(new HeaderDeviceDetailsProvider.Key("User-Agent", "FDSSDP"), wmpDetails);
+        headerDetails.put(new HeaderDeviceDetailsProvider.Key("User-Agent", "Xbox.*"), wmpDetails);
+        headerDetails.put(new HeaderDeviceDetailsProvider.Key("X-AV-Client-Info", ".*PLAYSTATION 3.*"), chii2Details);
+        HeaderDeviceDetailsProvider provider = new HeaderDeviceDetailsProvider(chii2Details, headerDetails);
 
         // Content Directory Service
         @SuppressWarnings("unchecked")

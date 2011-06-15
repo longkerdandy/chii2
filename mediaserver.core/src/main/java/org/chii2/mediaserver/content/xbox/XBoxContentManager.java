@@ -70,7 +70,7 @@ public class XBoxContentManager extends CommonContentManager {
     }
 
     @Override
-    public DIDLObject findObject(String objectId, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
+    public DIDLObject browseObject(String objectId, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
         // Root Container
         if (isRootContainer(objectId)) {
             VisualContainer container = new RootContainer(filter);

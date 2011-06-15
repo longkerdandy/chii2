@@ -9,6 +9,7 @@ import org.chii2.mediaserver.api.content.item.VisualPictureItem;
 import org.chii2.mediaserver.api.content.item.VisualVideoItem;
 import org.chii2.mediaserver.api.http.HttpServerService;
 import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
+import org.chii2.mediaserver.api.upnp.SearchCriterion;
 import org.chii2.mediaserver.content.common.Item.PhotoItem;
 import org.chii2.mediaserver.content.common.Item.PictureItem;
 import org.chii2.mediaserver.content.common.container.*;
@@ -98,7 +99,7 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
-    public DIDLObject findObject(String objectId, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
+    public DIDLObject browseObject(String objectId, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
         // Root Container
         if (isRootContainer(objectId)) {
             VisualContainer container = new RootContainer(filter);
@@ -151,6 +152,155 @@ public class CommonContentManager implements ContentManager {
             // TODO Maybe should throw a NO_SUCH_OBJECT exception, instead of null result
             return null;
         }
+    }
+
+    @Override
+    public List<? extends DIDLObject> searchObject(String containerId, SearchCriterion searchCriteria, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
+        List<? extends DIDLObject> results = null;
+        switch (searchCriteria.getSearchType()) {
+            case SEARCH_IMAGE:
+                results = this.searchImage(containerId, searchCriteria, filter, startIndex, requestCount, orderBy);
+                break;
+        }
+        return results;
+    }
+
+    @Override
+    public long searchCount(String containerId, SearchCriterion searchCriteria, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
+        long result = 0;
+        switch (searchCriteria.getSearchType()) {
+            case SEARCH_IMAGE:
+                result = this.searchImageCount(containerId, searchCriteria, filter, startIndex, requestCount, orderBy);
+                break;
+        }
+        return result;
+    }
+
+    // Search Image
+    private List<? extends DIDLObject> searchImage(String containerId, SearchCriterion searchCriteria, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
+        // Forge sort
+        Map<String, String> sorts = new HashMap<String, String>();
+        for (SortCriterion sort : orderBy) {
+            String field = null;
+            if ("dc:title".equalsIgnoreCase(sort.getPropertyName())) {
+                field = "title";
+            } else if ("dc:date".equalsIgnoreCase(sort.getPropertyName())) {
+                field = "file.date_taken";
+            }
+            if (field != null) {
+                if (sort.isAscending()) {
+                    sorts.put(field, "asc");
+                } else {
+                    sorts.put(field, "desc");
+                }
+            }
+        }
+        // Get images from library
+        List<? extends Image> images;
+
+        int start = -1;
+        int max = -1;
+        try {
+            start = (int) startIndex;
+            max = (int) maxCount;
+        } catch (Exception ignore) {
+        }
+        images = this.mediaLibrary.getImages(start, max, sorts);
+
+        // Results
+        List<VisualPictureItem> pictures = new ArrayList<VisualPictureItem>();
+        // Create picture item and add to results
+        for (Image image : images) {
+            // Item
+            VisualPictureItem pictureItem;
+            // Parent ID
+            // TODO: We use PICTURES_STORAGE_FOLDER_PREFIX here, maybe not correct
+            String parentId = this.forgeContainerId(image.getAlbum(), PICTURES_STORAGE_FOLDER_PREFIX);
+            // ID from library
+            String libraryId = image.getId();
+            // ID
+            String id;
+            // Title
+            String title = image.getTitle();
+            // Photo?
+            if (image.isPhoto()) {
+                id = forgeItemId(libraryId, parentId, PHOTO_ITEM_PREFIX);
+                pictureItem = new PhotoItem(filter, id, parentId, title, image.getAlbum());
+            } else {
+                id = forgeItemId(libraryId, parentId, PICTURE_ITEM_PREFIX);
+                pictureItem = new PictureItem(filter, id, parentId, title, image.getAlbum());
+            }
+
+            //Picture Date
+            Date date = image.getDateTaken();
+            if (filter.contains("dc:date") && date != null) {
+                pictureItem.setDate(new SimpleDateFormat("yyyy-MM-dd").format(date));
+            }
+            String comment = image.getUserComment();
+            // Description
+            if (filter.contains("dc:description") && StringUtils.isNotBlank(comment)) {
+                pictureItem.setDescription(comment);
+            }
+            // Long Description
+            if (filter.contains("upnp:longDescription") && StringUtils.isNotBlank(comment)) {
+                pictureItem.setLongDescription(comment);
+            }
+            // Rating
+            float rating = image.getRating();
+            if (filter.contains("upnp:rating") && rating > 0) {
+                pictureItem.setRating(Float.toString(rating));
+            }
+
+            // Resource
+            if (this.transcoder.isValidImage(this.getClientProfile(), image.getType(), image.getWidth(), image.getHeight())) {
+                // Resource
+                Res originalResource = this.getResource();
+                // URL
+                URI originalUri = this.httpServer.forgeUrl("image", getClientProfile(), false, libraryId);
+                originalResource.setValue(originalUri.toString());
+                // Profile
+                DLNAProfiles originalProfile = this.transcoder.getImageTranscodedProfile(this.getClientProfile(), image.getType(), image.getWidth(), image.getHeight());
+                // MIME
+                String mime = this.transcoder.getImageTranscodedMime(this.getClientProfile(), image.getType(), image.getWidth(), image.getHeight());
+                // This should not happens
+                if (StringUtils.isBlank(mime)) {
+                    mime = image.getMimeType();
+                    logger.warn("Can't determine image MIME type, use {} from file information.", mime);
+                }
+                // DLNA Attribute
+                EnumMap<DLNAAttribute.Type, DLNAAttribute> dlnaAttributes = new EnumMap<DLNAAttribute.Type, DLNAAttribute>(DLNAAttribute.Type.class);
+                if (originalProfile != null && originalProfile != DLNAProfiles.NONE) {
+                    dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_PN, new DLNAProfileAttribute(originalProfile));
+                }
+                dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_OP, new DLNAOperationsAttribute(DLNAOperations.RANGE));
+                dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_FLAGS, new DLNAFlagsAttribute(DLNAFlags.STREAMING_TRANSFER_MODE, DLNAFlags.BACKGROUND_TRANSFERT_MODE, DLNAFlags.DLNA_V15));
+                originalResource.setProtocolInfo(new DLNAProtocolInfo(Protocol.HTTP_GET, ProtocolInfo.WILDCARD, mime, dlnaAttributes));
+                // Resolution
+                if (filter.contains("res@resolution")) {
+                    originalResource.setResolution(image.getWidth(), image.getHeight());
+                }
+                // Color Depth
+                if (filter.contains("res@colorDepth")) {
+                    originalResource.setColorDepth((long) image.getColorDepth());
+                }
+                // Size
+                if (filter.contains("res@size")) {
+                    originalResource.setSize(image.getSize());
+                }
+                // Add Resource to item
+                pictureItem.addResource(originalResource);
+            } else {
+                // TODO: Transcoded Image Handling
+            }
+            // Add to results
+            pictures.add(pictureItem);
+        }
+        return pictures;
+    }
+
+    // Search Image Count
+    public long searchImageCount(String containerId, SearchCriterion searchCriteria, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
+        return this.mediaLibrary.getImagesCount();
     }
 
     @Override

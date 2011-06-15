@@ -144,6 +144,13 @@ public interface PersistenceService {
     public List<String> getImageAlbums(int firstResult, int maxResults, Map<String, String> sorts);
 
     /**
+     * Get the count of total images
+     *
+     * @return Count
+     */
+    public long getImagesCount();
+
+    /**
      * Get the count of total image albums
      *
      * @return Count

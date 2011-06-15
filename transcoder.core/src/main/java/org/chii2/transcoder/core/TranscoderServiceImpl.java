@@ -337,6 +337,8 @@ public class TranscoderServiceImpl implements TranscoderService {
     public boolean isValidImage(String client, String imageType, int imageWidth, int imageHeight) {
         if (PROFILE_COMMON.equalsIgnoreCase(client)) {
             return ImageType.match(imageType, ImageType.JPEG) || ImageType.match(imageType, ImageType.PNG);
+        } else if (PROFILE_WMP.equalsIgnoreCase(client)) {
+            return ImageType.match(imageType, ImageType.JPEG) || ImageType.match(imageType, ImageType.PNG);
         } else if (PROFILE_XBOX.equalsIgnoreCase(client)) {
             return ImageType.match(imageType, ImageType.JPEG);
         } else {
@@ -352,6 +354,12 @@ public class TranscoderServiceImpl implements TranscoderService {
             } else {
                 return this.getImageProfile("JPEG", imageWidth, imageHeight);
             }
+        } else if (PROFILE_WMP.equalsIgnoreCase(client)) {
+            if (ImageType.match(imageType, ImageType.JPEG) || ImageType.match(imageType, ImageType.PNG)) {
+                return this.getImageProfile(imageType, imageWidth, imageHeight);
+            } else {
+                return this.getImageProfile("JPEG", imageWidth, imageHeight);
+            }
         } else if (PROFILE_XBOX.equalsIgnoreCase(client)) {
             return this.getImageProfile("JPEG", imageWidth, imageHeight);
         } else {
@@ -362,6 +370,12 @@ public class TranscoderServiceImpl implements TranscoderService {
     @Override
     public String getImageTranscodedMime(String client, String imageType, int imageWidth, int imageHeight) {
         if (PROFILE_COMMON.equalsIgnoreCase(client)) {
+            if (ImageType.match(imageType, ImageType.JPEG) || ImageType.match(imageType, ImageType.PNG)) {
+                return MIME.getImageMime(imageType, imageWidth, imageHeight);
+            } else {
+                return MIME.getImageMime("JPEG", imageWidth, imageHeight);
+            }
+        } else if (PROFILE_WMP.equalsIgnoreCase(client)) {
             if (ImageType.match(imageType, ImageType.JPEG) || ImageType.match(imageType, ImageType.PNG)) {
                 return MIME.getImageMime(imageType, imageWidth, imageHeight);
             } else {

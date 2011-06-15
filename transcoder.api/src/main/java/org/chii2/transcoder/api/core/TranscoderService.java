@@ -14,6 +14,8 @@ public interface TranscoderService {
     public final static String PROFILE_COMMON = "common";
     // XBox Profile
     public final static String PROFILE_XBOX = "xbox";
+    // WMP Profile
+    public final static String PROFILE_WMP = "wmp";
 
     /**
      * Get Client Profile based on user agent information
