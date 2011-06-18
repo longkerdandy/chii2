@@ -3,7 +3,6 @@ package org.chii2.mediaserver.upnp;
 import org.apache.commons.lang.StringUtils;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.mediaserver.api.http.HttpServerService;
-import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
 import org.chii2.mediaserver.api.upnp.MediaServerService;
 import org.chii2.transcoder.api.core.TranscoderService;
 import org.slf4j.Logger;
@@ -47,8 +46,6 @@ public class MediaServerServiceImpl implements MediaServerService {
     private HttpServerService httpService;
     // Transcoder
     private TranscoderService transcoder;
-    // Online Videos
-    private List<OnlineVideoProviderService> onlineVideos;
     // Logger
     private Logger logger = LoggerFactory.getLogger("org.chii2.mediaserver.upnp");
 
@@ -116,7 +113,7 @@ public class MediaServerServiceImpl implements MediaServerService {
 
         // Windows Media Player Device Details
         DeviceDetails wmpDetails = new DeviceDetails(
-                "Chii2 : " + serverPrefix,
+                serverPrefix + ": Chii2",
                 new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
                 new ModelDetails("Windows Media Player Sharing", "Windows Media Player Sharing", "12.0"),
                 "000da201238c",
@@ -130,8 +127,9 @@ public class MediaServerServiceImpl implements MediaServerService {
                 })
         );
 
+        // Common Details
         DeviceDetails chii2Details = new DeviceDetails(
-                "Chii2",
+                serverPrefix + ": Chii2",
                 new ManufacturerDetails("Chii2", "http://www.chii2.org/"),
                 new ModelDetails("Chii2 Home Server", "Chii2 Home Server", "1"),
                 "000da201238c",
@@ -147,7 +145,7 @@ public class MediaServerServiceImpl implements MediaServerService {
 
         // Device Details Provider
         Map<HeaderDeviceDetailsProvider.Key, DeviceDetails> headerDetails = new HashMap<HeaderDeviceDetailsProvider.Key, DeviceDetails>();
-        //headerDetails.put(new HeaderDeviceDetailsProvider.Key("User-Agent", "FDSSDP"), wmpDetails);
+        headerDetails.put(new HeaderDeviceDetailsProvider.Key("User-Agent", "FDSSDP"), wmpDetails);
         headerDetails.put(new HeaderDeviceDetailsProvider.Key("User-Agent", "Xbox.*"), wmpDetails);
         headerDetails.put(new HeaderDeviceDetailsProvider.Key("X-AV-Client-Info", ".*PLAYSTATION 3.*"), chii2Details);
         HeaderDeviceDetailsProvider provider = new HeaderDeviceDetailsProvider(chii2Details, headerDetails);
@@ -160,7 +158,7 @@ public class MediaServerServiceImpl implements MediaServerService {
                 new DefaultServiceManager<ContentDirectory>(contentDirectory, null) {
                     @Override
                     protected ContentDirectory createServiceInstance() throws Exception {
-                        return new ContentDirectory(mediaLibrary, httpService, transcoder, onlineVideos);
+                        return new ContentDirectory(mediaLibrary, httpService, transcoder);
                     }
                 }
         );
@@ -321,15 +319,5 @@ public class MediaServerServiceImpl implements MediaServerService {
     @SuppressWarnings("unused")
     public void setTranscoder(TranscoderService transcoder) {
         this.transcoder = transcoder;
-    }
-
-    /**
-     * Inject Online Video Providers
-     *
-     * @param onlineVideos Online Video Providers
-     */
-    @SuppressWarnings("unused")
-    public void setOnlineVideos(List<OnlineVideoProviderService> onlineVideos) {
-        this.onlineVideos = onlineVideos;
     }
 }

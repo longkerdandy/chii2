@@ -3,16 +3,18 @@ package org.chii2.mediaserver.content.xbox;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
+import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
 import org.chii2.mediaserver.api.content.item.VisualPictureItem;
 import org.chii2.mediaserver.api.content.item.VisualVideoItem;
 import org.chii2.mediaserver.api.http.HttpServerService;
-import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
+import org.chii2.mediaserver.api.upnp.Filter;
 import org.chii2.mediaserver.content.common.CommonContentManager;
 import org.chii2.mediaserver.content.common.Item.MovieItem;
+import org.chii2.mediaserver.content.common.Item.PhotoItem;
+import org.chii2.mediaserver.content.common.Item.PictureItem;
 import org.chii2.mediaserver.content.common.container.*;
-import org.chii2.mediaserver.content.xbox.container.XBoxVideoFoldersContainer;
 import org.chii2.transcoder.api.core.TranscoderService;
 import org.chii2.util.EncodingUtils;
 import org.teleal.cling.model.message.UpnpHeaders;
@@ -23,6 +25,7 @@ import org.teleal.cling.support.model.dlna.*;
 import org.teleal.cling.support.model.item.Item;
 
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -36,10 +39,9 @@ public class XBoxContentManager extends CommonContentManager {
      * @param mediaLibrary Media Library
      * @param httpServer   Http Server
      * @param transcoder   Transcoder
-     * @param onlineVideos Online Video Providers
      */
-    public XBoxContentManager(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder, List<OnlineVideoProviderService> onlineVideos) {
-        super(mediaLibrary, httpServer, transcoder, onlineVideos);
+    public XBoxContentManager(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder) {
+        super(mediaLibrary, httpServer, transcoder);
     }
 
     @Override
@@ -70,7 +72,7 @@ public class XBoxContentManager extends CommonContentManager {
     }
 
     @Override
-    public DIDLObject browseObject(String objectId, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
+    public DIDLObject browseObject(String objectId, Filter filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
         // Root Container
         if (isRootContainer(objectId)) {
             VisualContainer container = new RootContainer(filter);
@@ -111,7 +113,7 @@ public class XBoxContentManager extends CommonContentManager {
         // Video Folders Container
         // For XBox360, this is the root video folder in dashboard
         else if (isVideoFoldersContainer(objectId)) {
-            VisualContainer container = new XBoxVideoFoldersContainer(filter, this.onlineVideos);
+            VisualContainer container = new VideoFoldersContainer(filter);
             container.loadContents(startIndex, requestCount, orderBy, this);
             convertVideoContainerS2T(container);
             return container;
@@ -123,19 +125,6 @@ public class XBoxContentManager extends CommonContentManager {
             convertVideoContainerS2T(container);
             return container;
         }
-        // Online Video Container
-        else if (isOnlineVideoContainer(objectId)) {
-            VisualContainer container = getOnlineVideoContainer(filter, objectId);
-            if (container != null) {
-                container.loadContents(startIndex, requestCount, orderBy, this);
-                // If container is online video provider's Root Container, set its parent to Video Folders Container
-                convertVideoContainerS2T(container);
-                if (container.getParentID().equalsIgnoreCase("-1")) {
-                    container.setParentID("15");
-                }
-            }
-            return container;
-        }
         // Invalid
         else {
             // TODO Maybe should throw a NO_SUCH_OBJECT exception, instead of null result
@@ -144,7 +133,153 @@ public class XBoxContentManager extends CommonContentManager {
     }
 
     @Override
-    public List<? extends VisualVideoItem> getMovies(String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
+    public List<VisualPictureItem> getPicturesByAlbum(String album, String parentId, Filter filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
+        // Forge sort
+        Map<String, String> sorts = new HashMap<String, String>();
+        for (SortCriterion sort : orderBy) {
+            String field = null;
+            if ("dc:title".equalsIgnoreCase(sort.getPropertyName())) {
+                field = "title";
+            } else if ("dc:date".equalsIgnoreCase(sort.getPropertyName())) {
+                field = "file.date_taken";
+            }
+            if (field != null) {
+                if (sort.isAscending()) {
+                    sorts.put(field, "asc");
+                } else {
+                    sorts.put(field, "desc");
+                }
+            }
+        }
+        // Get images from library
+        List<? extends Image> images;
+
+        int start = -1;
+        int max = -1;
+        try {
+            start = (int) startIndex;
+            max = (int) maxCount;
+        } catch (Exception ignore) {
+        }
+        images = this.mediaLibrary.getImagesByField("album", album, true, start, max, sorts);
+
+        // Results
+        List<VisualPictureItem> pictures = new ArrayList<VisualPictureItem>();
+        // Create picture item and add to results
+        for (Image image : images) {
+            // Item
+            VisualPictureItem pictureItem;
+            // ID from library
+            String libraryId = image.getId();
+            // ID
+            String id;
+            // Title
+            String title = image.getTitle();
+            // For XBox360, it must be Photo Item
+            id = forgeItemId(libraryId, parentId, PHOTO_ITEM_PREFIX);
+            pictureItem = new PhotoItem(filter, id, parentId, title, image.getAlbum());
+
+
+            //Picture Date
+            Date date = image.getDateTaken();
+            if (filter.contains("dc:date") && date != null) {
+                pictureItem.setDate(new SimpleDateFormat("yyyy-MM-dd").format(date));
+            }
+            String comment = image.getUserComment();
+            // Description
+            if (filter.contains("dc:description") && StringUtils.isNotBlank(comment)) {
+                pictureItem.setDescription(comment);
+            }
+            // Long Description
+            if (filter.contains("upnp:longDescription") && StringUtils.isNotBlank(comment)) {
+                pictureItem.setLongDescription(comment);
+            }
+            // Rating
+            float rating = image.getRating();
+            if (filter.contains("upnp:rating") && rating > 0) {
+                pictureItem.setRating(Float.toString(rating));
+            }
+
+            // Resource
+            if (this.transcoder.isValidImage(this.getClientProfile(), image.getType(), image.getWidth(), image.getHeight())) {
+                // Resource
+                Res originalResource = this.getResource();
+                // URL
+                URI originalUri = this.httpServer.forgeUrl("image", getClientProfile(), false, libraryId);
+                originalResource.setValue(originalUri.toString());
+                // Profile
+                DLNAProfiles originalProfile = this.transcoder.getImageTranscodedProfile(this.getClientProfile(), image.getType(), image.getWidth(), image.getHeight());
+                // MIME
+                String mime = this.transcoder.getImageTranscodedMime(this.getClientProfile(), image.getType(), image.getWidth(), image.getHeight());
+                // This should not happens
+                if (StringUtils.isBlank(mime)) {
+                    mime = image.getMimeType();
+                    logger.warn("Can't determine image MIME type, use {} from file information.", mime);
+                }
+                // DLNA Attribute
+                EnumMap<DLNAAttribute.Type, DLNAAttribute> dlnaAttributes = new EnumMap<DLNAAttribute.Type, DLNAAttribute>(DLNAAttribute.Type.class);
+                if (originalProfile != null && originalProfile != DLNAProfiles.NONE) {
+                    dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_PN, new DLNAProfileAttribute(originalProfile));
+                }
+                dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_OP, new DLNAOperationsAttribute(DLNAOperations.NONE));
+                dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_FLAGS, new DLNAFlagsAttribute(DLNAFlags.STREAMING_TRANSFER_MODE, DLNAFlags.BACKGROUND_TRANSFERT_MODE, DLNAFlags.DLNA_V15));
+                originalResource.setProtocolInfo(new DLNAProtocolInfo(Protocol.HTTP_GET, ProtocolInfo.WILDCARD, mime, dlnaAttributes));
+                // Resolution
+                if (filter.contains("res@resolution")) {
+                    originalResource.setResolution(image.getWidth(), image.getHeight());
+                }
+                // Color Depth
+                if (filter.contains("res@colorDepth")) {
+                    originalResource.setColorDepth((long) image.getColorDepth());
+                }
+                // Size
+                if (filter.contains("res@size")) {
+                    originalResource.setSize(image.getSize());
+                }
+                // Add Resource to item
+                pictureItem.addResource(originalResource);
+            } else {
+                // Resource
+                Res transcodedResource = this.getResource();
+                // URL
+                URI transcodedUri = this.httpServer.forgeUrl("image", getClientProfile(), true, libraryId);
+                transcodedResource.setValue(transcodedUri.toString());
+                // Profile
+                DLNAProfiles transcodedProfile = this.transcoder.getImageTranscodedProfile(this.getClientProfile(), image.getType(), image.getWidth(), image.getHeight());
+                // MIME
+                String mime = this.transcoder.getImageTranscodedMime(this.getClientProfile(), image.getType(), image.getWidth(), image.getHeight());
+                // This should not happens
+                if (StringUtils.isBlank(mime)) {
+                    mime = image.getMimeType();
+                    logger.warn("Can't determine image MIME type, use {} from file information.", mime);
+                }
+                // DLNA Attribute
+                EnumMap<DLNAAttribute.Type, DLNAAttribute> dlnaAttributes = new EnumMap<DLNAAttribute.Type, DLNAAttribute>(DLNAAttribute.Type.class);
+                if (transcodedProfile != null && transcodedProfile != DLNAProfiles.NONE) {
+                    dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_PN, new DLNAProfileAttribute(transcodedProfile));
+                }
+                dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_OP, new DLNAOperationsAttribute(DLNAOperations.NONE));
+                dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_FLAGS, new DLNAFlagsAttribute(DLNAFlags.STREAMING_TRANSFER_MODE, DLNAFlags.BACKGROUND_TRANSFERT_MODE, DLNAFlags.DLNA_V15));
+                transcodedResource.setProtocolInfo(new DLNAProtocolInfo(Protocol.HTTP_GET, ProtocolInfo.WILDCARD, mime, dlnaAttributes));
+                // Resolution
+                if (filter.contains("res@resolution")) {
+                    transcodedResource.setResolution(image.getWidth(), image.getHeight());
+                }
+                // Color Depth
+                if (filter.contains("res@colorDepth")) {
+                    transcodedResource.setColorDepth((long) image.getColorDepth());
+                }
+                // Add Resource to item
+                pictureItem.addResource(transcodedResource);
+            }
+            // Add to results
+            pictures.add(pictureItem);
+        }
+        return pictures;
+    }
+
+    @Override
+    public List<? extends VisualVideoItem> getMovies(String parentId, Filter filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
         // Forge sort TODO: May need more filed in the future
         Map<String, String> sorts = new HashMap<String, String>();
         for (SortCriterion sort : orderBy) {

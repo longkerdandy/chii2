@@ -2,7 +2,6 @@ package org.chii2.mediaserver.content.wmp;
 
 import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.mediaserver.api.http.HttpServerService;
-import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
 import org.chii2.mediaserver.content.common.CommonContentManager;
 import org.chii2.transcoder.api.core.TranscoderService;
 import org.teleal.cling.model.message.UpnpHeaders;
@@ -19,10 +18,9 @@ public class WMPContentManager extends CommonContentManager {
      * @param mediaLibrary Media Library
      * @param httpServer   Http Server
      * @param transcoder   Transcoder
-     * @param onlineVideos Online Video Providers
      */
-    public WMPContentManager(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder, List<OnlineVideoProviderService> onlineVideos) {
-        super(mediaLibrary, httpServer, transcoder, onlineVideos);
+    public WMPContentManager(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder) {
+        super(mediaLibrary, httpServer, transcoder);
     }
 
     @Override

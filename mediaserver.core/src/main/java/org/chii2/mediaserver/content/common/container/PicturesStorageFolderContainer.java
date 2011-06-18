@@ -3,6 +3,7 @@ package org.chii2.mediaserver.content.common.container;
 import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
 import org.chii2.mediaserver.api.content.item.VisualPictureItem;
+import org.chii2.mediaserver.api.upnp.Filter;
 import org.chii2.mediaserver.content.common.CommonContentManager;
 import org.teleal.cling.support.model.DIDLObject;
 import org.teleal.cling.support.model.SortCriterion;
@@ -22,7 +23,7 @@ public class PicturesStorageFolderContainer extends VisualContainer {
      * @param id Container ID
      * @param title Container Title
      */
-    public PicturesStorageFolderContainer(String filter, String id, String title) {
+    public PicturesStorageFolderContainer(Filter filter, String id, String title) {
         this(filter, id, CommonContentManager.PICTURES_FOLDERS_ID, title);
     }
 
@@ -33,7 +34,7 @@ public class PicturesStorageFolderContainer extends VisualContainer {
      * @param parentId Container Parent ID
      * @param title Container Title
      */
-    public PicturesStorageFolderContainer(String filter, String id, String parentId, String title) {
+    public PicturesStorageFolderContainer(Filter filter, String id, String parentId, String title) {
         super();
 
         this.filter = filter;

@@ -2,6 +2,7 @@ package org.chii2.mediaserver.content.common.container;
 
 import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
+import org.chii2.mediaserver.api.upnp.Filter;
 import org.chii2.mediaserver.content.common.CommonContentManager;
 import org.teleal.cling.support.model.DIDLObject;
 import org.teleal.cling.support.model.SortCriterion;
@@ -18,7 +19,7 @@ public class PicturesContainer extends VisualContainer {
      *
      * @param filter Content Filter
      */
-    public PicturesContainer(String filter) {
+    public PicturesContainer(Filter filter) {
         this(filter, CommonContentManager.PICTURES_ID, CommonContentManager.ROOT_ID);
     }
 
@@ -29,7 +30,7 @@ public class PicturesContainer extends VisualContainer {
      * @param id       Container ID
      * @param parentId Parent ID
      */
-    public PicturesContainer(String filter, String id, String parentId) {
+    public PicturesContainer(Filter filter, String id, String parentId) {
         super();
 
         this.filter = filter;

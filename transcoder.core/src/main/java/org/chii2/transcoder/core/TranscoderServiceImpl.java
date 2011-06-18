@@ -2,7 +2,7 @@ package org.chii2.transcoder.core;
 
 import org.apache.commons.io.FileUtils;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
-import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
+import org.chii2.transcoder.api.core.ImageTranscoderProcess;
 import org.chii2.transcoder.api.core.TranscoderProcess;
 import org.chii2.transcoder.api.core.TranscoderService;
 import org.chii2.transcoder.core.cache.TranscodedCache;
@@ -10,6 +10,7 @@ import org.chii2.transcoder.core.dlna.catalog.*;
 import org.chii2.transcoder.core.dlna.codec.*;
 import org.chii2.transcoder.core.ffmpeg.FFmpegConverterParameter;
 import org.chii2.transcoder.core.ffmpeg.FFmpegProcess;
+import org.chii2.transcoder.core.im4java.IM4JImageTranscoderProcess;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +28,6 @@ import java.util.UUID;
 public class TranscoderServiceImpl implements TranscoderService {
     // Injected ConfigAdmin Service
     private ConfigurationAdmin configAdmin;
-    // Online Videos
-    private List<OnlineVideoProviderService> onlineVideos;
     // Audio Catalogs
     private List<AudioCatalog> audioCatalogs = new ArrayList<AudioCatalog>();
     // Video Catalogs
@@ -389,6 +388,13 @@ public class TranscoderServiceImpl implements TranscoderService {
     }
 
     @Override
+    public ImageTranscoderProcess getImageTranscodedProcess(String client, File imageFile, String imageType, int imageWidth, int imageHeight) {
+        // For now, transcoding every image to jpg
+        File outputFile = new File(tempDirectory, UUID.randomUUID().toString() + ".jpg");
+        return new IM4JImageTranscoderProcess(imageFile, outputFile);
+    }
+
+    @Override
     public DLNAProfiles getVideoTranscodedProfile(String client, String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps, String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels) {
         if (client.equals(PROFILE_XBOX)) {
             if (VideoCodec.match(videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, VideoCodec.MPEG4_P2) &&
@@ -429,143 +435,6 @@ public class TranscoderServiceImpl implements TranscoderService {
         }
     }
 
-    @Override
-    public String getOnlineVideoTranscodedMime(String providerName, String client, String url) {
-        String mime = null;
-        // Online Video Provider
-        OnlineVideoProviderService provider = getOnlineVideoProvider(providerName);
-
-        if (provider != null) {
-            // URL
-            if (!url.startsWith("/")) {
-                url = "/" + url;
-            }
-            url = provider.getVideoHostUrl() + url;
-            // Basic Information
-            String container = provider.getContainer(url);
-            String videoFormat = provider.getVideoFormat(url);
-            String videoFormatProfile = provider.getVideoFormatProfile(url);
-            int videoFormatVersion = provider.getVideoFormatVersion(url);
-            String videoCodec = provider.getVideoCodec(url);
-            long videoBitRate = provider.getVideoBitRate(url);
-            int videoWidth = provider.getVideoWidth(url);
-            int videoHeight = provider.getVideoHeight(url);
-            float fps = provider.getVideoFps(url);
-            String audioFormat = provider.getAudioFormat(url);
-            String audioFormatProfile = provider.getAudioFormatProfile(url);
-            int audioFormatVersion = provider.getAudioFormatVersion(url);
-            String audioCodec = provider.getAudioCodec(url);
-            long audioBitRate = provider.getAudioBitRate(url);
-            long audioSampleBitRate = provider.getAudioSampleBitRate(url);
-            int audioChannels = provider.getAudioChannels(url);
-            // MIME
-            mime = this.getVideoTranscodedMime(client, container, videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, videoBitRate, videoWidth, videoHeight, fps, audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, audioBitRate, audioSampleBitRate, audioChannels);
-        }
-
-        return mime;
-    }
-
-    @Override
-    public List<TranscoderProcess> getOnlineVideoTranscodedProcesses(String providerName, String client, String url) {
-        List<TranscoderProcess> processes = new ArrayList<TranscoderProcess>();
-        // Online Video Provider
-        OnlineVideoProviderService provider = getOnlineVideoProvider(providerName);
-
-        if (provider != null) {
-            // URL
-            if (!url.startsWith("/")) {
-                url = "/" + url;
-            }
-            url = provider.getVideoHostUrl() + url;
-            // Basic Information
-            String container = provider.getContainer(url);
-            String videoFormat = provider.getVideoFormat(url);
-            String videoFormatProfile = provider.getVideoFormatProfile(url);
-            int videoFormatVersion = provider.getVideoFormatVersion(url);
-            String videoCodec = provider.getVideoCodec(url);
-            long videoBitRate = provider.getVideoBitRate(url);
-            int videoWidth = provider.getVideoWidth(url);
-            int videoHeight = provider.getVideoHeight(url);
-            float fps = provider.getVideoFps(url);
-            String audioFormat = provider.getAudioFormat(url);
-            String audioFormatProfile = provider.getAudioFormatProfile(url);
-            int audioFormatVersion = provider.getAudioFormatVersion(url);
-            String audioCodec = provider.getAudioCodec(url);
-            long audioBitRate = provider.getAudioBitRate(url);
-            long audioSampleBitRate = provider.getAudioSampleBitRate(url);
-            int audioChannels = provider.getAudioChannels(url);
-            // Real URL
-            for (String realURL : provider.getRealAddress(url)) {
-                TranscoderProcess process = null;
-                // Pipe
-                List<String> pipe = provider.getPipe(realURL);
-                // Cache
-                TranscodedCache cache = TranscodedCache.getInstance();
-                if (cache.containProcess(realURL)) {
-                    process = cache.retrieveProcess(realURL);
-                } else if (cache.containFile(realURL)) {
-                    File file = cache.retrieveFile(realURL);
-                    // Fake parameter, since we already have the output file
-                    FFmpegConverterParameter ffmpegParameter = new FFmpegConverterParameter(pipe, file, "copy", "copy");
-                    process = new FFmpegProcess(realURL, ffmpegParameter);
-                    process.setStarted(true);
-                    process.setFinished(true);
-                    process.setStopped(true);
-                } else {
-                    FFmpegConverterParameter ffmpegParameter = null;
-                    // TODO: Client Not Completed
-                    if (client.equals(PROFILE_XBOX)) {
-                        if (VideoCodec.match(videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, VideoCodec.MPEG4_P2) &&
-                                videoBitRate <= 5000000 && videoWidth <= 1280 && videoHeight <= 720 && fps <= 30) {
-                            if (AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.AC3) && audioChannels <= 6) {
-                                ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".avi"), "copy", "copy");
-                            } else if (AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.MP3)
-                                    || AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.MP3X)) {
-                                ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".avi"), "copy", "copy");
-                            } else if (AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.AAC_LC) && audioChannels <= 2) {
-                                ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".mp4"), "copy", "copy");
-                            } else {
-                                ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".mp4"), "copy", "libfaac");
-                                ffmpegParameter.setAudioChannels(2);
-                            }
-                        } else if (VideoCodec.match(videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, VideoCodec.MPEG4_P10) &&
-                                videoBitRate <= 10000000 && videoWidth <= 1920 && videoHeight <= 1080 && fps <= 30) {
-                            if (AudioCodec.match(audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, AudioCodec.AAC_LC) && audioChannels <= 2) {
-                                ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".mp4"), "copy", "copy");
-                            } else {
-                                ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".mp4"), "copy", "libfaac");
-                                ffmpegParameter.setAudioChannels(2);
-                            }
-                        } else {
-                            // TODO: Parameters Not Completed
-                            ffmpegParameter = new FFmpegConverterParameter(pipe, new File(this.tempDirectory, UUID.randomUUID().toString() + ".mp4"), "libx264", "libfaac");
-                            ffmpegParameter.setAudioChannels(2);
-                        }
-                    }
-                    process = new FFmpegProcess(realURL, ffmpegParameter);
-                }
-                processes.add(process);
-            }
-        }
-
-        return processes;
-    }
-
-    /**
-     * Get Online Video Provider by Name
-     *
-     * @param providerName Provider Name
-     * @return Online Video Provider
-     */
-    private OnlineVideoProviderService getOnlineVideoProvider(String providerName) {
-        for (OnlineVideoProviderService onlineVideo : onlineVideos) {
-            if (onlineVideo.getProviderName().equalsIgnoreCase(providerName)) {
-                return onlineVideo;
-            }
-        }
-        return null;
-    }
-
     /**
      * Inject Config Admin
      *
@@ -574,15 +443,5 @@ public class TranscoderServiceImpl implements TranscoderService {
     @SuppressWarnings("unused")
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
-    }
-
-    /**
-     * Inject Online Video Providers
-     *
-     * @param onlineVideos Online Video Providers
-     */
-    @SuppressWarnings("unused")
-    public void setOnlineVideos(List<OnlineVideoProviderService> onlineVideos) {
-        this.onlineVideos = onlineVideos;
     }
 }

@@ -5,7 +5,7 @@ import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.mediaserver.api.content.ContentManager;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
 import org.chii2.mediaserver.api.http.HttpServerService;
-import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
+import org.chii2.mediaserver.api.upnp.Filter;
 import org.chii2.mediaserver.api.upnp.SearchCriterion;
 import org.chii2.mediaserver.content.common.CommonContentManager;
 import org.chii2.mediaserver.content.wmp.WMPContentManager;
@@ -36,8 +36,6 @@ public class ContentDirectory extends AbstractContentDirectoryService {
     private HttpServerService httpServer;
     // Transcoder
     private TranscoderService transcoder;
-    // Online Videos
-    private List<OnlineVideoProviderService> onlineVideos;
     // Content Manger List
     private LinkedList<ContentManager> contentManagers;
     // Logger
@@ -49,25 +47,25 @@ public class ContentDirectory extends AbstractContentDirectoryService {
      * @param mediaLibrary Media Library
      * @param httpServer   Http Server
      * @param transcoder   Transcoder
-     * @param onlineVideos Online Video Providers
      */
-    public ContentDirectory(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder, List<OnlineVideoProviderService> onlineVideos) {
+    public ContentDirectory(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder) {
         super();
         this.mediaLibrary = mediaLibrary;
         this.httpServer = httpServer;
         this.transcoder = transcoder;
-        this.onlineVideos = onlineVideos;
         this.contentManagers = new LinkedList<ContentManager>();
-        contentManagers.add(new XBoxContentManager(this.mediaLibrary, this.httpServer, this.transcoder, this.onlineVideos));
-        contentManagers.add(new WMPContentManager(this.mediaLibrary, this.httpServer, this.transcoder, this.onlineVideos));
-        contentManagers.add(new CommonContentManager(this.mediaLibrary, this.httpServer, this.transcoder, this.onlineVideos));
+        contentManagers.add(new XBoxContentManager(this.mediaLibrary, this.httpServer, this.transcoder));
+        contentManagers.add(new WMPContentManager(this.mediaLibrary, this.httpServer, this.transcoder));
+        contentManagers.add(new CommonContentManager(this.mediaLibrary, this.httpServer, this.transcoder));
     }
 
     @Override
-    public BrowseResult browse(String objectID, BrowseFlag browseFlag, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) throws ContentDirectoryException {
-        logger.debug(String.format("ContentDirectory receive browse request with ObjectID:%s, BrowseFlag:%s, Filter:%s, FirstResult:%s, MaxResults:%s, SortCriterion:%s.", objectID, browseFlag, filter, startIndex, requestCount, getSortCriterionString(orderBy)));
+    public BrowseResult browse(String objectID, BrowseFlag browseFlag, String filterString, long startIndex, long requestCount, SortCriterion[] orderBy) throws ContentDirectoryException {
+        logger.debug(String.format("ContentDirectory receive browse request with ObjectID:%s, BrowseFlag:%s, Filter:%s, FirstResult:%s, MaxResults:%s, SortCriterion:%s.", objectID, browseFlag, filterString, startIndex, requestCount, getSortCriterionString(orderBy)));
         // Client Headers
         UpnpHeaders headers = ReceivingAction.getRequestMessage().getHeaders();
+        // Filter
+        Filter filter = new Filter(filterString);
         // Content Manager based on client
         ContentManager contentManager = getContentManager(headers);
         // DIDL Parser
@@ -136,10 +134,12 @@ public class ContentDirectory extends AbstractContentDirectoryService {
     }
 
     @Override
-    public BrowseResult search(String containerId, String searchCriteria, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) throws ContentDirectoryException {
-        logger.debug(String.format("ContentDirectory receive search request with ContainerID:%s, SearchCriteria:%s, Filter:%s, FirstResult:%s, MaxResults:%s, SortCriterion:%s.", containerId, searchCriteria, filter, startIndex, requestCount, getSortCriterionString(orderBy)));
+    public BrowseResult search(String containerId, String searchCriteria, String filterString, long startIndex, long requestCount, SortCriterion[] orderBy) throws ContentDirectoryException {
+        logger.debug(String.format("ContentDirectory receive search request with ContainerID:%s, SearchCriteria:%s, Filter:%s, FirstResult:%s, MaxResults:%s, SortCriterion:%s.", containerId, searchCriteria, filterString, startIndex, requestCount, getSortCriterionString(orderBy)));
         // Client Headers
         UpnpHeaders headers = ReceivingAction.getRequestMessage().getHeaders();
+        // Filter
+        Filter filter = new Filter(filterString);
         // Content Manager based on client
         ContentManager contentManager = getContentManager(headers);
         // Search Criterion
@@ -207,6 +207,6 @@ public class ContentDirectory extends AbstractContentDirectoryService {
                 return contentManager;
             }
         }
-        return new CommonContentManager(this.mediaLibrary, this.httpServer, this.transcoder, this.onlineVideos);
+        return new CommonContentManager(this.mediaLibrary, this.httpServer, this.transcoder);
     }
 }

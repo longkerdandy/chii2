@@ -3,6 +3,7 @@ package org.chii2.transcoder.api.core;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.teleal.cling.support.model.dlna.DLNAProfiles;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -173,6 +174,18 @@ public interface TranscoderService {
     public String getImageTranscodedMime(String client, String imageType, int imageWidth, int imageHeight);
 
     /**
+     * Get Image Transcoded Process
+     *
+     * @param client      Client Profile
+     * @param imageFile   Image File
+     * @param imageType   Original Image Type
+     * @param imageWidth  Image Width
+     * @param imageHeight Image Height
+     * @return Image Transcoded Process
+     */
+    public ImageTranscoderProcess getImageTranscodedProcess(String client, File imageFile, String imageType, int imageWidth, int imageHeight);
+
+    /**
      * Get Transcoded Video DLNA Profile
      *
      * @param client             Client
@@ -219,24 +232,4 @@ public interface TranscoderService {
      * @return Video MIME
      */
     public String getVideoTranscodedMime(String client, String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps, String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels);
-
-    /**
-     * Get Transcoded MIME for Online Video
-     *
-     * @param providerName Online Video Provider Name
-     * @param client       Client
-     * @param url          Video URL
-     * @return Transcoded MIME
-     */
-    public String getOnlineVideoTranscodedMime(String providerName, String client, String url);
-
-    /**
-     * Get Transcoded Processes for Online Video
-     *
-     * @param providerName Online Video Provider Name
-     * @param client       Client
-     * @param url          Video URL
-     * @return Transcoded Processes
-     */
-    public List<TranscoderProcess> getOnlineVideoTranscodedProcesses(String providerName, String client, String url);
 }

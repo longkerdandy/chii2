@@ -87,11 +87,6 @@
         </dependency>
         <dependency>
             <groupId>org.chii2</groupId>
-            <artifactId>chii2.mediaserver.provider.sohu</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.chii2</groupId>
             <artifactId>chii2.transcoder.api</artifactId>
             <scope>provided</scope>
         </dependency>

@@ -3,15 +3,14 @@ package org.chii2.mediaserver.api.content;
 import org.chii2.mediaserver.api.content.container.VisualContainer;
 import org.chii2.mediaserver.api.content.item.VisualPictureItem;
 import org.chii2.mediaserver.api.content.item.VisualVideoItem;
+import org.chii2.mediaserver.api.upnp.Filter;
 import org.chii2.mediaserver.api.upnp.SearchCriterion;
 import org.teleal.cling.model.message.UpnpHeaders;
 import org.teleal.cling.support.contentdirectory.DIDLParser;
 import org.teleal.cling.support.model.DIDLObject;
 import org.teleal.cling.support.model.Res;
 import org.teleal.cling.support.model.SortCriterion;
-import org.teleal.cling.support.model.dlna.DLNAProfiles;
 
-import java.net.URI;
 import java.util.List;
 
 /**
@@ -59,7 +58,7 @@ public interface ContentManager {
      * @param orderBy      Sort Method
      * @return Object (Container or Item), null if not found
      */
-    public DIDLObject browseObject(String objectId, String filter, long startIndex, long requestCount, SortCriterion[] orderBy);
+    public DIDLObject browseObject(String objectId, Filter filter, long startIndex, long requestCount, SortCriterion[] orderBy);
 
     /**
      * Search Object
@@ -72,7 +71,7 @@ public interface ContentManager {
      * @param orderBy        Sort Method
      * @return Objects
      */
-    public List<? extends DIDLObject> searchObject(String containerId, SearchCriterion searchCriteria, String filter, long startIndex, long requestCount, SortCriterion[] orderBy);
+    public List<? extends DIDLObject> searchObject(String containerId, SearchCriterion searchCriteria, Filter filter, long startIndex, long requestCount, SortCriterion[] orderBy);
 
     /**
      * Search Total Count
@@ -85,7 +84,7 @@ public interface ContentManager {
      * @param orderBy        Sort Method
      * @return Total Count
      */
-    public long searchCount(String containerId, SearchCriterion searchCriteria, String filter, long startIndex, long requestCount, SortCriterion[] orderBy);
+    public long searchCount(String containerId, SearchCriterion searchCriteria, Filter filter, long startIndex, long requestCount, SortCriterion[] orderBy);
 
     /**
      * Get all Pictures Storage Folder Containers in library
@@ -96,7 +95,7 @@ public interface ContentManager {
      * @param orderBy    Sort Criterion
      * @return List of Pictures Storage Folder Container
      */
-    public List<? extends VisualContainer> getPicturesStorageFolders(String filter, long startIndex, long maxCount, SortCriterion[] orderBy);
+    public List<? extends VisualContainer> getPicturesStorageFolders(Filter filter, long startIndex, long maxCount, SortCriterion[] orderBy);
 
     /**
      * Get the total Pictures Storage Folder Containers count in library
@@ -116,7 +115,7 @@ public interface ContentManager {
      * @param orderBy    Sort Criterion
      * @return List of Photo Item
      */
-    public List<? extends VisualPictureItem> getPicturesByAlbum(String album, String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy);
+    public List<? extends VisualPictureItem> getPicturesByAlbum(String album, String parentId, Filter filter, long startIndex, long maxCount, SortCriterion[] orderBy);
 
     /**
      * Get total pictures count by album
@@ -136,7 +135,7 @@ public interface ContentManager {
      * @param orderBy    Sort Criterion
      * @return List of Movie Item
      */
-    public List<? extends VisualVideoItem> getMovies(String filter, String parentId, long startIndex, long maxCount, SortCriterion[] orderBy);
+    public List<? extends VisualVideoItem> getMovies(String parentId, Filter filter, long startIndex, long maxCount, SortCriterion[] orderBy);
 
     /**
      * Get movies count
@@ -243,70 +242,4 @@ public interface ContentManager {
      * @return True if ID is Movie Base Storage Folder Container
      */
     public boolean isMovieBaseStorageFolderContainer(String id);
-
-    /**
-     * ID is Online Video related Container
-     *
-     * @param id ID
-     * @return True if ID is Online Video related Container
-     */
-    public boolean isOnlineVideoContainer(String id);
-
-    /**
-     * Forge Online Video URL
-     * This likely to be a replacement for http host, and thus will use HTTP Server as proxy
-     *
-     * @param providerName Online Video Provider Name
-     * @param url          Real Online Video URL
-     * @return Proxy Online Video URL
-     */
-    public URI forgetOnlineVideoUrl(String providerName, String url);
-
-    /**
-     * Get Video DLNA Profile
-     *
-     * @param container          Container
-     * @param videoFormat        Video Format
-     * @param videoFormatProfile Video Format Profile
-     * @param videoFormatVersion Video Format Version
-     * @param videoCodec         Video Codec
-     * @param videoBitRate       BitRate
-     * @param videoWidth         Video Width
-     * @param videoHeight        Video Height
-     * @param fps                Video FPS
-     * @param audioFormat        Audio Format
-     * @param audioFormatProfile Audio Format Profile
-     * @param audioFormatVersion Audio Format Version
-     * @param audioCodec         Audio Codec
-     * @param audioBitRate       Audio BitRate
-     * @param audioSampleBitRate Audio SampleBitRate
-     * @param audioChannels      Audio Channels
-     * @return Video DLNA Profile
-     */
-    public DLNAProfiles getVideoTranscodedProfile(String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps,
-                                                  String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels);
-
-    /**
-     * Get Video MIME
-     *
-     * @param container          Container
-     * @param videoFormat        Video Format
-     * @param videoFormatProfile Video Format Profile
-     * @param videoFormatVersion Video Format Version
-     * @param videoCodec         Video Codec
-     * @param videoBitRate       BitRate
-     * @param videoWidth         Video Width
-     * @param videoHeight        Video Height
-     * @param fps                Video FPS
-     * @param audioFormat        Audio Format
-     * @param audioFormatProfile Audio Format Profile
-     * @param audioFormatVersion Audio Format Version
-     * @param audioCodec         Audio Codec
-     * @param audioBitRate       Audio BitRate
-     * @param audioSampleBitRate Audio SampleBitRate
-     * @param audioChannels      Audio Channels
-     * @return MIME
-     */
-    public String getVideoTranscodedMime(String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps,
-                                         String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels);
 }

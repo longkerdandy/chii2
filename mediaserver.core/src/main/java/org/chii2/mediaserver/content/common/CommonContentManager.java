@@ -8,7 +8,7 @@ import org.chii2.mediaserver.api.content.container.VisualContainer;
 import org.chii2.mediaserver.api.content.item.VisualPictureItem;
 import org.chii2.mediaserver.api.content.item.VisualVideoItem;
 import org.chii2.mediaserver.api.http.HttpServerService;
-import org.chii2.mediaserver.api.provider.OnlineVideoProviderService;
+import org.chii2.mediaserver.api.upnp.Filter;
 import org.chii2.mediaserver.api.upnp.SearchCriterion;
 import org.chii2.mediaserver.content.common.Item.PhotoItem;
 import org.chii2.mediaserver.content.common.Item.PictureItem;
@@ -55,8 +55,6 @@ public class CommonContentManager implements ContentManager {
     protected HttpServerService httpServer;
     // Transcoder
     protected TranscoderService transcoder;
-    // Online Videos
-    protected List<OnlineVideoProviderService> onlineVideos;
     // Logger
     protected Logger logger = LoggerFactory.getLogger("org.chii2.mediaserver.content");
     // UUID Length
@@ -68,13 +66,11 @@ public class CommonContentManager implements ContentManager {
      * @param mediaLibrary Media Library
      * @param httpServer   Http Server
      * @param transcoder   Transcoder
-     * @param onlineVideos Online Video Providers
      */
-    public CommonContentManager(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder, List<OnlineVideoProviderService> onlineVideos) {
+    public CommonContentManager(MediaLibraryService mediaLibrary, HttpServerService httpServer, TranscoderService transcoder) {
         this.mediaLibrary = mediaLibrary;
         this.httpServer = httpServer;
         this.transcoder = transcoder;
-        this.onlineVideos = onlineVideos;
     }
 
     @Override
@@ -99,7 +95,7 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
-    public DIDLObject browseObject(String objectId, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
+    public DIDLObject browseObject(String objectId, Filter filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
         // Root Container
         if (isRootContainer(objectId)) {
             VisualContainer container = new RootContainer(filter);
@@ -155,7 +151,7 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
-    public List<? extends DIDLObject> searchObject(String containerId, SearchCriterion searchCriteria, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
+    public List<? extends DIDLObject> searchObject(String containerId, SearchCriterion searchCriteria, Filter filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
         List<? extends DIDLObject> results = null;
         switch (searchCriteria.getSearchType()) {
             case SEARCH_IMAGE:
@@ -166,7 +162,7 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
-    public long searchCount(String containerId, SearchCriterion searchCriteria, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
+    public long searchCount(String containerId, SearchCriterion searchCriteria, Filter filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
         long result = 0;
         switch (searchCriteria.getSearchType()) {
             case SEARCH_IMAGE:
@@ -177,7 +173,7 @@ public class CommonContentManager implements ContentManager {
     }
 
     // Search Image
-    private List<? extends DIDLObject> searchImage(String containerId, SearchCriterion searchCriteria, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
+    private List<? extends DIDLObject> searchImage(String containerId, SearchCriterion searchCriteria, Filter filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
         // Forge sort
         Map<String, String> sorts = new HashMap<String, String>();
         for (SortCriterion sort : orderBy) {
@@ -299,12 +295,12 @@ public class CommonContentManager implements ContentManager {
     }
 
     // Search Image Count
-    public long searchImageCount(String containerId, SearchCriterion searchCriteria, String filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
+    public long searchImageCount(String containerId, SearchCriterion searchCriteria, Filter filter, long startIndex, long requestCount, SortCriterion[] orderBy) {
         return this.mediaLibrary.getImagesCount();
     }
 
     @Override
-    public List<PicturesStorageFolderContainer> getPicturesStorageFolders(String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
+    public List<PicturesStorageFolderContainer> getPicturesStorageFolders(Filter filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
         // Forge sort
         Map<String, String> sorts = new HashMap<String, String>();
         for (SortCriterion sort : orderBy) {
@@ -350,7 +346,7 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
-    public List<VisualPictureItem> getPicturesByAlbum(String album, String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
+    public List<VisualPictureItem> getPicturesByAlbum(String album, String parentId, Filter filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
         // Forge sort
         Map<String, String> sorts = new HashMap<String, String>();
         for (SortCriterion sort : orderBy) {
@@ -442,7 +438,7 @@ public class CommonContentManager implements ContentManager {
                 if (originalProfile != null && originalProfile != DLNAProfiles.NONE) {
                     dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_PN, new DLNAProfileAttribute(originalProfile));
                 }
-                dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_OP, new DLNAOperationsAttribute(DLNAOperations.RANGE));
+                dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_OP, new DLNAOperationsAttribute(DLNAOperations.NONE));
                 dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_FLAGS, new DLNAFlagsAttribute(DLNAFlags.STREAMING_TRANSFER_MODE, DLNAFlags.BACKGROUND_TRANSFERT_MODE, DLNAFlags.DLNA_V15));
                 originalResource.setProtocolInfo(new DLNAProtocolInfo(Protocol.HTTP_GET, ProtocolInfo.WILDCARD, mime, dlnaAttributes));
                 // Resolution
@@ -460,7 +456,39 @@ public class CommonContentManager implements ContentManager {
                 // Add Resource to item
                 pictureItem.addResource(originalResource);
             } else {
-                // TODO: Transcoded Image Handling
+                // Resource
+                Res transcodedResource = this.getResource();
+                // URL
+                URI transcodedUri = this.httpServer.forgeUrl("image", getClientProfile(), true, libraryId);
+                transcodedResource.setValue(transcodedUri.toString());
+                // Profile
+                DLNAProfiles transcodedProfile = this.transcoder.getImageTranscodedProfile(this.getClientProfile(), image.getType(), image.getWidth(), image.getHeight());
+                // MIME
+                String mime = this.transcoder.getImageTranscodedMime(this.getClientProfile(), image.getType(), image.getWidth(), image.getHeight());
+                // This should not happens
+                if (StringUtils.isBlank(mime)) {
+                    mime = image.getMimeType();
+                    logger.warn("Can't determine image MIME type, use {} from file information.", mime);
+                }
+                // DLNA Attribute
+                EnumMap<DLNAAttribute.Type, DLNAAttribute> dlnaAttributes = new EnumMap<DLNAAttribute.Type, DLNAAttribute>(DLNAAttribute.Type.class);
+                if (transcodedProfile != null && transcodedProfile != DLNAProfiles.NONE) {
+                    dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_PN, new DLNAProfileAttribute(transcodedProfile));
+                }
+                dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_CI, new DLNAConversionIndicatorAttribute(DLNAConversionIndicator.TRANSCODED));
+                dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_OP, new DLNAOperationsAttribute(DLNAOperations.NONE));
+                dlnaAttributes.put(DLNAAttribute.Type.DLNA_ORG_FLAGS, new DLNAFlagsAttribute(DLNAFlags.STREAMING_TRANSFER_MODE, DLNAFlags.BACKGROUND_TRANSFERT_MODE, DLNAFlags.DLNA_V15));
+                transcodedResource.setProtocolInfo(new DLNAProtocolInfo(Protocol.HTTP_GET, ProtocolInfo.WILDCARD, mime, dlnaAttributes));
+                // Resolution
+                if (filter.contains("res@resolution")) {
+                    transcodedResource.setResolution(image.getWidth(), image.getHeight());
+                }
+                // Color Depth
+                if (filter.contains("res@colorDepth")) {
+                    transcodedResource.setColorDepth((long) image.getColorDepth());
+                }
+                // Add Resource to item
+                pictureItem.addResource(transcodedResource);
             }
             // Add to results
             pictures.add(pictureItem);
@@ -474,7 +502,7 @@ public class CommonContentManager implements ContentManager {
     }
 
     @Override
-    public List<? extends VisualVideoItem> getMovies(String parentId, String filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
+    public List<? extends VisualVideoItem> getMovies(String parentId, Filter filter, long startIndex, long maxCount, SortCriterion[] orderBy) {
         // TODO: finished this later
         return null;
     }
@@ -565,62 +593,5 @@ public class CommonContentManager implements ContentManager {
     @Override
     public boolean isMovieBaseStorageFolderContainer(String id) {
         return MOVIE_BASE_STORAGE_FOLDER_ID.equalsIgnoreCase(id);
-    }
-
-    @Override
-    public boolean isOnlineVideoContainer(String id) {
-        return id != null && id.length() > 4 && id.substring(0, 4).equalsIgnoreCase(OnlineVideoProviderService.ONLINE_VIDEO_CONTAINER_PREFIX);
-    }
-
-    @Override
-    public URI forgetOnlineVideoUrl(String providerName, String url) {
-        OnlineVideoProviderService onlineVideo = this.getOnlineVideoProvider(providerName);
-        if (onlineVideo != null) {
-            url = url.replace(onlineVideo.getVideoHostUrl(), "");
-            return httpServer.forgeUrl("onlinevideo", providerName, this.getClientProfile(), true, url);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public DLNAProfiles getVideoTranscodedProfile(String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps, String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels) {
-        return transcoder.getVideoTranscodedProfile(getClientProfile(), container, videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, videoBitRate, videoWidth, videoHeight, fps, audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, audioBitRate, audioSampleBitRate, audioChannels);
-    }
-
-    @Override
-    public String getVideoTranscodedMime(String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps, String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels) {
-        return transcoder.getVideoTranscodedMime(getClientProfile(), container, videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, videoBitRate, videoWidth, videoHeight, fps, audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, audioBitRate, audioSampleBitRate, audioChannels);
-    }
-
-    /**
-     * Get Online Video Provider by Name
-     *
-     * @param providerName Provider Name
-     * @return Online Video Provider
-     */
-    protected OnlineVideoProviderService getOnlineVideoProvider(String providerName) {
-        for (OnlineVideoProviderService onlineVideo : onlineVideos) {
-            if (onlineVideo.getProviderName().equalsIgnoreCase(providerName)) {
-                return onlineVideo;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get Online Video Container from Provider
-     *
-     * @param filter Filter
-     * @param id     Object ID
-     * @return Online Video Container
-     */
-    protected VisualContainer getOnlineVideoContainer(String filter, String id) {
-        for (OnlineVideoProviderService onlineVideo : onlineVideos) {
-            if (onlineVideo.isMatch(id)) {
-                return onlineVideo.getContainerByID(filter, id);
-            }
-        }
-        return null;
     }
 }

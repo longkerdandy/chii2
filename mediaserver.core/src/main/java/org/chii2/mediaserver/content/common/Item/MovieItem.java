@@ -9,7 +9,6 @@ import java.util.List;
  * Especially represent a movie
  */
 public class MovieItem extends VisualVideoItem {
-
     /**
      * Constructor
      *

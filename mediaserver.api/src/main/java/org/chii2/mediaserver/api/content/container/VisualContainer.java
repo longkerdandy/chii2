@@ -1,6 +1,7 @@
 package org.chii2.mediaserver.api.content.container;
 
 import org.chii2.mediaserver.api.content.ContentManager;
+import org.chii2.mediaserver.api.upnp.Filter;
 import org.teleal.cling.support.model.SortCriterion;
 import org.teleal.cling.support.model.container.Container;
 
@@ -10,7 +11,7 @@ import org.teleal.cling.support.model.container.Container;
 public abstract class VisualContainer extends Container {
 
     // Filter
-    protected String filter;
+    protected Filter filter;
     // Total Child Count
     protected long totalChildCount;
 

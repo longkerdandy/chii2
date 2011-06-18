@@ -1,10 +1,8 @@
 package org.chii2.mediaserver.http.bio;
 
 import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.*;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.FileEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.util.EntityUtils;
@@ -14,6 +12,8 @@ import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.persistence.entity.MovieFile;
 import org.chii2.mediaserver.api.dlna.DLNATransport;
 import org.chii2.mediaserver.api.http.HttpUrl;
+import org.chii2.mediaserver.http.bio.entity.ImageEntity;
+import org.chii2.transcoder.api.core.ImageTranscoderProcess;
 import org.chii2.transcoder.api.core.TranscoderProcess;
 import org.chii2.transcoder.api.core.TranscoderService;
 import org.slf4j.Logger;
@@ -78,11 +78,9 @@ public class HttpHandler implements HttpRequestHandler {
             logger.debug("Chii2 Media Server Http Server requested url parse error.");
         } else {
             String type = map.get("type");
-            String provider = map.get("provider");
             String clientProfile = map.get("client");
             boolean transcoded = BooleanUtils.toBoolean(map.get("transcoded"), "1", "0");
             String id = map.get("id");
-            String url = map.get("url");
 
             // Query the library and get the entity
             HttpEntity entity = null;
@@ -90,21 +88,19 @@ public class HttpHandler implements HttpRequestHandler {
                 // Image
                 Image image = this.mediaLibrary.getImageById(id);
                 if (image != null) {
+                    // Image File
+                    File imageFile = new File(image.getAbsolutePath());
+                    // MIME
+                    String mime = this.transcoder.getImageTranscodedMime(clientProfile, image.getType(), image.getWidth(), image.getHeight());
+                    // Transcoding
                     if (!transcoded) {
-                        // Image File
-                        List<File> files = new ArrayList<File>();
-                        File imageFile = new File(image.getAbsolutePath());
-                        files.add(imageFile);
-                        // MIME
-                        String mime = this.transcoder.getImageTranscodedMime(clientProfile, image.getType(), image.getWidth(), image.getHeight());
-                        // HTTP Entity
-                        entity = new RangeFileEntity(files, mime, range);
-                        if (range != null) {
-                            response.setStatusCode(HttpStatus.SC_PARTIAL_CONTENT);
-                        } else {
-                            response.setStatusCode(HttpStatus.SC_OK);
-                        }
+                        entity = new ImageEntity(imageFile, mime);
+                    } else {
+                        ImageTranscoderProcess process = this.transcoder.getImageTranscodedProcess(clientProfile, imageFile, image.getType(), image.getWidth(), image.getHeight());
+                        entity = new ImageEntity(process, mime);
                     }
+                    // Response
+                    response.setStatusCode(HttpStatus.SC_OK);
                 }
             } else if ("movie".equalsIgnoreCase(type)) {
                 Movie movie = mediaLibrary.getMovieById(id);
@@ -136,19 +132,6 @@ public class HttpHandler implements HttpRequestHandler {
                     entity = new ByteArrayEntity(thumb);
                     response.setStatusCode(HttpStatus.SC_OK);
                 }
-            } else if ("onlinevideo".equalsIgnoreCase(type)) {
-                String mime = transcoder.getOnlineVideoTranscodedMime(provider, clientProfile, url);
-                if (StringUtils.isBlank(mime)) {
-                    logger.error("Can't determine Online Video {} for client {} 's MIME, this could result a error.", url, clientProfile);
-                }
-                List<TranscoderProcess> processes = transcoder.getOnlineVideoTranscodedProcesses(provider, clientProfile, url);
-                entity = new RangeTranscodedEntity(processes, mime, range);
-                if (range != null) {
-                    response.setStatusCode(HttpStatus.SC_PARTIAL_CONTENT);
-                } else {
-                    response.setStatusCode(HttpStatus.SC_OK);
-                }
-
             }
 
             if (entity == null) {

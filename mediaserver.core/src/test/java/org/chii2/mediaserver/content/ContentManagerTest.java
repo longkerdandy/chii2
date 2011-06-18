@@ -15,7 +15,7 @@ public class ContentManagerTest {
      * Constructor
      */
     public ContentManagerTest() {
-        contentManger = new CommonContentManager(null, null, null, null);
+        contentManger = new CommonContentManager(null, null, null);
     }
 
     @Test

@@ -144,11 +144,6 @@ public class HttpServerServiceImpl implements HttpServerService {
         return HttpUrl.forgeURL(getHost().getHostAddress(), getPort(), mediaType, clientProfile, transcoded, mediaId);
     }
 
-    @Override
-    public URI forgeUrl(String mediaType, String provider, String clientProfile,  boolean transcoded, String url) {
-        return HttpUrl.forgeURL(getHost().getHostAddress(), getPort(), mediaType, provider, clientProfile, transcoded, url);
-    }
-
     /**
      * Get host IP address
      *

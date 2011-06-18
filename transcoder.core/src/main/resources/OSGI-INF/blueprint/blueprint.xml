@@ -4,17 +4,11 @@
     <!-- OSGi Configuration Admin Service -->
     <reference id="configAdminService" interface="org.osgi.service.cm.ConfigurationAdmin"/>
 
-    <!-- Online Video Provider Service List -->
-    <reference-list id="onlineVideoProviders" interface="org.chii2.mediaserver.api.provider.OnlineVideoProviderService"
-                    availability="optional">
-    </reference-list>
-
     <!-- Chii2 Media Server Core Bean -->
     <bean id="transcoderService" class="org.chii2.transcoder.core.TranscoderServiceImpl"
           init-method="init"
           destroy-method="destroy">
         <property name="configAdmin" ref="configAdminService"/>
-        <property name="onlineVideos" ref="onlineVideoProviders"/>
     </bean>
 
     <!-- Chii2 Media Library Core Service -->
