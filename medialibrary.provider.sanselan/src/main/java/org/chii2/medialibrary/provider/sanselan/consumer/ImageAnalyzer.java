@@ -3,7 +3,6 @@ package org.chii2.medialibrary.provider.sanselan.consumer;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.sanselan.ImageFormat;
 import org.apache.sanselan.ImageInfo;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
@@ -133,6 +132,8 @@ public class ImageAnalyzer implements Runnable {
                     imageFile.setFocalLength(this.parseRationalNumber(this.getTiffMetadataValue(tiffMetadata, TiffConstants.EXIF_TAG_FOCAL_LENGTH)));
                     imageFile.setShutterSpeed(this.parseRationalNumber(this.getTiffMetadataValue(tiffMetadata, TiffConstants.EXIF_TAG_SHUTTER_SPEED_VALUE)));
                     imageFile.setDateTaken(this.parseDateTimeString(this.getTiffMetadataStringValue(tiffMetadata, TiffConstants.EXIF_TAG_DATE_TIME_ORIGINAL)));
+                } else {
+                    imageFile.setDateTaken(new Date(file.lastModified()));
                 }
 
                 // Add to results
