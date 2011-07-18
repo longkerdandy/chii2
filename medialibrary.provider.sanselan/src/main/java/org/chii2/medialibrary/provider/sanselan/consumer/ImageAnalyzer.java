@@ -113,7 +113,7 @@ public class ImageAnalyzer implements Runnable {
                 if (metadata instanceof JpegImageMetadata) {
                     JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
                     imageFile.setCameraMaker(this.getJPEGMetadataStringValue(jpegMetadata, TiffConstants.EXIF_TAG_MAKE));
-                    imageFile.setCameraMaker(this.getJPEGMetadataStringValue(jpegMetadata, TiffConstants.EXIF_TAG_MODEL));
+                    imageFile.setCameraModel(this.getJPEGMetadataStringValue(jpegMetadata, TiffConstants.EXIF_TAG_MODEL));
                     imageFile.setISO(this.getJPEGMetadataIntValue(jpegMetadata, TiffConstants.EXIF_TAG_ISO));
                     imageFile.setExposureTime(this.parseRationalNumber(this.getJPEGMetadataValue(jpegMetadata, TiffConstants.EXIF_TAG_EXPOSURE_TIME)));
                     imageFile.setFlash(this.getJPEGMetadataIntValue(jpegMetadata, TiffConstants.EXIF_TAG_FLASH));
@@ -124,7 +124,7 @@ public class ImageAnalyzer implements Runnable {
                 } else if (metadata instanceof TiffImageMetadata) {
                     TiffImageMetadata tiffMetadata = (TiffImageMetadata) metadata;
                     imageFile.setCameraMaker(this.getTiffMetadataStringValue(tiffMetadata, TiffConstants.EXIF_TAG_MAKE));
-                    imageFile.setCameraMaker(this.getTiffMetadataStringValue(tiffMetadata, TiffConstants.EXIF_TAG_MODEL));
+                    imageFile.setCameraModel(this.getTiffMetadataStringValue(tiffMetadata, TiffConstants.EXIF_TAG_MODEL));
                     imageFile.setISO(this.getTiffMetadataIntValue(tiffMetadata, TiffConstants.EXIF_TAG_ISO));
                     imageFile.setExposureTime(this.parseRationalNumber(this.getTiffMetadataValue(tiffMetadata, TiffConstants.EXIF_TAG_EXPOSURE_TIME)));
                     imageFile.setFlash(this.getTiffMetadataIntValue(tiffMetadata, TiffConstants.EXIF_TAG_FLASH));
