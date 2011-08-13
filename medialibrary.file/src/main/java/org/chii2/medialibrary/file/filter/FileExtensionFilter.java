@@ -1,4 +1,4 @@
-package org.chii2.medialibrary.file.consumer;
+package org.chii2.medialibrary.file.filter;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ public class FileExtensionFilter implements FileFilter {
     // Acceptable File Extensions
     private List<String> acceptableExtensions;
     // Logger
-    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file");
+    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file.filter");
 
     public FileExtensionFilter(List<String> acceptableExtensions) {
         this.acceptableExtensions = acceptableExtensions;

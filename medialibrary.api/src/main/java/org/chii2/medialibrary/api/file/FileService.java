@@ -14,6 +14,12 @@ public interface FileService {
     public final static String MOVIE_SCAN_PROVIDED_TOPIC = "org/chii2/medialibrary/file/movie/SCAN_PROVIDED";
     // Event Topic for image scan
     public final static String IMAGE_SCAN_PROVIDED_TOPIC = "org/chii2/medialibrary/file/image/SCAN_PROVIDED";
+    // Event Topic for image watch create
+    public final static String IMAGE_WATCH_CREATE_TOPIC = "org/chii2/medialibrary/file/image/WATCH_CREATE";
+    // Event Topic for image watch modify
+    public final static String IMAGE_WATCH_MODIFY_TOPIC = "org/chii2/medialibrary/file/image/WATCH_MODIFY";
+    // Event Topic for image watch delete
+    public final static String IMAGE_WATCH_DELETE_TOPIC = "org/chii2/medialibrary/file/image/WATCH_DELETE";
     // Directory property in the request event
     public final static String DIRECTORY_PROPERTY = "directories";
     // Filter property in the internal event

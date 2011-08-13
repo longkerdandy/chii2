@@ -1,9 +1,11 @@
 package org.chii2.medialibrary.file;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.chii2.medialibrary.api.file.FileService;
-import org.chii2.medialibrary.file.consumer.FileExtensionFilter;
-import org.chii2.medialibrary.file.consumer.FileScanner;
+import org.chii2.medialibrary.file.filter.FileExtensionFilter;
+import org.chii2.medialibrary.file.scanner.FileScanner;
+import org.chii2.medialibrary.file.watcher.FileWatcher;
 import org.chii2.util.ConfigUtils;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -47,6 +49,8 @@ public class FileServiceImpl implements FileService, EventHandler {
     private List<String> imageDirectories = Arrays.asList(System.getProperty("user.home") + "/Pictures");
     // Image file extension filter
     private List<String> imageExtFilters = Arrays.asList(".jpg", ".jpeg", ".tiff", ".tif", ".png", ".gif", ".bmp");
+    // Image Watcher
+    private FileWatcher imageWatcher;
     // Logger
     private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file");
 
@@ -58,7 +62,7 @@ public class FileServiceImpl implements FileService, EventHandler {
         logger.debug("Chii2 Media Library File Service init.");
         Dictionary props = null;
         try {
-            Configuration config = configAdmin.getConfiguration(CONFIG_FILE);
+            Configuration config = this.configAdmin.getConfiguration(CONFIG_FILE);
             props = config.getProperties();
         } catch (IOException e) {
             logger.error("FileService fail to load configuration with exception: {}.", e.getMessage());
@@ -107,8 +111,12 @@ public class FileServiceImpl implements FileService, EventHandler {
         // Init queue
         this.queue = new LinkedBlockingQueue<Map<String, Object>>();
 
-        // Start Request Consumer
+        // Start File Scanner
         new Thread(new FileScanner(queue, eventAdmin)).start();
+
+        // New Image Watcher
+        this.imageWatcher = new FileWatcher(this.imageDirectories, this.createFilter(this.imageExtFilters), FileService.IMAGE_WATCH_CREATE_TOPIC, FileService.IMAGE_WATCH_MODIFY_TOPIC, FileService.IMAGE_WATCH_DELETE_TOPIC, this.eventAdmin);
+        new Thread(this.imageWatcher).start();
     }
 
     /**
@@ -116,6 +124,8 @@ public class FileServiceImpl implements FileService, EventHandler {
      */
     @SuppressWarnings("unused")
     public void destroy() {
+        // Stop Threads
+        this.imageWatcher.shouldStop = true;
         logger.debug("Chii2 Media Library File Service destroy.");
     }
 
@@ -136,7 +146,7 @@ public class FileServiceImpl implements FileService, EventHandler {
             try {
                 this.queue.put(properties);
             } catch (InterruptedException e) {
-                logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
+                logger.error("Provider producer has been interrupted with error: {}.", ExceptionUtils.getMessage(e));
             }
         } else if (FileService.IMAGE_SCAN_REQUEST_TOPIC.equals(event.getTopic())) {
             List<File> directoryList = new ArrayList<File>();
@@ -153,7 +163,7 @@ public class FileServiceImpl implements FileService, EventHandler {
             try {
                 this.queue.put(properties);
             } catch (InterruptedException e) {
-                logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
+                logger.error("Provider producer has been interrupted with error: {}.", ExceptionUtils.getMessage(e));
             }
         }
     }

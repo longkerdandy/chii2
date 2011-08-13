@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.chii2.medialibrary.file.consumer.FileExtensionFilter;
+import org.chii2.medialibrary.file.filter.FileExtensionFilter;
 import org.testng.annotations.Test;
 
 /**

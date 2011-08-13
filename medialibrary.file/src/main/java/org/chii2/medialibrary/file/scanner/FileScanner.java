@@ -1,5 +1,6 @@
-package org.chii2.medialibrary.file.consumer;
+package org.chii2.medialibrary.file.scanner;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.chii2.medialibrary.api.file.FileService;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -20,7 +21,7 @@ public class FileScanner implements Runnable {
     // EventAdmin
     private EventAdmin eventAdmin;
     // Logger
-    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file");
+    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file.scanner");
 
     /**
      * Constructor
@@ -56,7 +57,7 @@ public class FileScanner implements Runnable {
                             }
                         }
                     } catch (SecurityException e) {
-                        logger.warn("File access failed with exception: {}", e.getMessage());
+                        logger.warn("File access failed with exception: {}", ExceptionUtils.getMessage(e));
                     }
                     if (files != null && !files.isEmpty()) {
                         postEvent(files, topic);
@@ -65,7 +66,7 @@ public class FileScanner implements Runnable {
                 logger.debug("File Scanner stop.");
             }
         } catch (InterruptedException e) {
-            logger.error("Provider consumer has been interrupted with error: {}.", e.getMessage());
+            logger.error("Provider consumer has been interrupted with error: {}.", ExceptionUtils.getMessage(e));
         }
     }
 
