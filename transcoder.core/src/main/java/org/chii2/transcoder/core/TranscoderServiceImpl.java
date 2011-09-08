@@ -172,10 +172,10 @@ public class TranscoderServiceImpl implements TranscoderService {
 
     @Override
     public DLNAProfiles getAudioProfile(String container, String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels) {
-        DLNAProfiles profile = null;
+        DLNAProfiles profile = DLNAProfiles.NONE;
         for (AudioCatalog audioCatalog : audioCatalogs) {
             profile = audioCatalog.resolve(container, audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, audioBitRate, audioSampleBitRate, audioChannels);
-            if (profile != null) break;
+            if (profile != DLNAProfiles.NONE) break;
         }
         return profile;
     }
@@ -184,21 +184,21 @@ public class TranscoderServiceImpl implements TranscoderService {
     public DLNAProfiles getVideoProfile(String container, String videoFormat, String videoFormatProfile, int videoFormatVersion, String videoCodec, long videoBitRate, int videoWidth, int videoHeight, float fps,
                                         String audioFormat, String audioFormatProfile, int audioFormatVersion, String audioCodec, long audioBitRate, long audioSampleBitRate, int audioChannels) {
         DLNAProfiles audioProfile = this.getAudioProfile(container, audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, audioBitRate, audioSampleBitRate, audioChannels);
-        DLNAProfiles profile = null;
+        DLNAProfiles profile = DLNAProfiles.NONE;
         for (VideoCatalog videoCatalog : videoCatalogs) {
             profile = videoCatalog.resolve(container, videoFormat, videoFormatProfile, videoFormatVersion, videoCodec, videoBitRate, videoWidth, videoHeight, fps,
                     audioFormat, audioFormatProfile, audioFormatVersion, audioCodec, audioBitRate, audioSampleBitRate, audioChannels, audioProfile);
-            if (profile != null) break;
+            if (profile != DLNAProfiles.NONE) break;
         }
         return profile;
     }
 
     @Override
     public DLNAProfiles getImageProfile(String imageType, int imageWidth, int imageHeight) {
-        DLNAProfiles profile = null;
+        DLNAProfiles profile = DLNAProfiles.NONE;
         for (ImageCatalog imageCatalog : imageCatalogs) {
             profile = imageCatalog.resolve(imageType, imageWidth, imageHeight);
-            if (profile != null) break;
+            if (profile != DLNAProfiles.NONE) break;
         }
         return profile;
     }

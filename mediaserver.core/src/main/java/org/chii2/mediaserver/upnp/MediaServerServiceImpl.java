@@ -20,13 +20,16 @@ import org.teleal.cling.model.types.*;
 import org.teleal.cling.support.connectionmanager.ConnectionManagerService;
 import org.teleal.cling.transport.impl.apache.StreamClientConfigurationImpl;
 import org.teleal.cling.transport.impl.apache.StreamClientImpl;
+import org.teleal.cling.transport.spi.NetworkAddressFactory;
 import org.teleal.cling.transport.spi.StreamClient;
+import org.teleal.cling.transport.impl.apache.StreamServerConfigurationImpl;
+import org.teleal.cling.transport.impl.apache.StreamServerImpl;
+import org.teleal.cling.transport.spi.StreamServer;
 
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -68,11 +71,19 @@ public class MediaServerServiceImpl implements MediaServerService {
         try {
             // Init UPnP stack
             upnpService = new UpnpServiceImpl(new DefaultUpnpServiceConfiguration(8895) {
+                // Override using Apache Http instead of sun http
                 @Override
                 public StreamClient<StreamClientConfigurationImpl> createStreamClient() {
                     return new StreamClientImpl(new StreamClientConfigurationImpl());
                 }
-
+                @Override
+                public StreamServer createStreamServer(NetworkAddressFactory networkAddressFactory) {
+                    return new StreamServerImpl(
+                            new StreamServerConfigurationImpl(
+                                    networkAddressFactory.getStreamListenPort()
+                            )
+                    );
+                }
             });
             // Attach service and device
             upnpService.getRegistry().addDevice(createUPnPDevice());

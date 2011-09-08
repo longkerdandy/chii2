@@ -40,7 +40,7 @@ public class AudioCatalog {
             }
             return entry.getKey();
         }
-        return null;
+        return DLNAProfiles.NONE;
     }
 
     /**

@@ -31,7 +31,7 @@ public class ImageCatalog {
             }
             return entry.getKey();
         }
-        return null;
+        return DLNAProfiles.NONE;
     }
 
     /**

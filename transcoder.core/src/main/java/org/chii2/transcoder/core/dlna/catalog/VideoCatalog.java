@@ -51,7 +51,7 @@ public class VideoCatalog {
             }
             return entry.getKey();
         }
-        return null;
+        return DLNAProfiles.NONE;
     }
 
     // FPS 30
