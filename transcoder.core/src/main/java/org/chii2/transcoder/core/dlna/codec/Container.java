@@ -4,7 +4,7 @@ package org.chii2.transcoder.core.dlna.codec;
  * Container
  */
 public enum Container {
-    AVI(new String[] {"Windows Media"}),
+    AVI(new String[] {"AVI"}),
     MKV(new String[] {"Matroska"}),
     WM(new String[] {"Windows Media"}),
     ADTS(new String[] {"ADTS"}),

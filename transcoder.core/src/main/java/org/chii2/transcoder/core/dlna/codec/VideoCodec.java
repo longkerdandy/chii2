@@ -36,10 +36,10 @@ public enum VideoCodec {
     /**
      * Given fields match audio codec condition
      *
-     * @param format  Audio Format
-     * @param profile Audio Format Profile
-     * @param version Audio Format Version
-     * @param codec   Audio Codec
+     * @param format  Video Format
+     * @param profile Video Format Profile
+     * @param version Video Format Version
+     * @param codec   Video Codec
      * @param target  Target Codec Type
      * @return True if match
      */

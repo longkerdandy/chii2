@@ -207,7 +207,7 @@ public class RequestConsumer implements Runnable {
                                             // Comment this because I found this is not reliable
                                             // movieFiles.get(movieFileIndex).setMovieName(event.asCharacters().getData());
                                         }
-                                    } else if ("InternetMediaType".equalsIgnoreCase(event.asStartElement().getName().toString())) {
+                                    } else if ("Internet_media_type".equalsIgnoreCase(event.asStartElement().getName().toString())) {
                                         event = reader.peek();
                                         if (event.isCharacters() && movieFiles.get(movieFileIndex).getMime() == null) {
                                             movieFiles.get(movieFileIndex).setMime(event.asCharacters().getData());
