@@ -31,7 +31,7 @@ public class FileServiceImpl implements FileService, EventHandler {
     private ConfigurationAdmin configAdmin;
     // Injected EventAdmin Service
     private EventAdmin eventAdmin;
-    //Configuration FIle
+    //Configuration File
     private final static String CONFIG_FILE = "org.chii2.medialibrary.file";
     // Movie Directory Configuration Key
     private static final String MOVIE_DIRECTORY = "movie.directory";
@@ -42,7 +42,7 @@ public class FileServiceImpl implements FileService, EventHandler {
     // Image File Extension Configuration Key
     private static final String IMAGE_EXTENSION = "image.extension";
     // Movie directories
-    private List<String> movieDirectories = Arrays.asList(System.getProperty("user.home") + "/Videos");
+    private List<String> movieDirectories = Arrays.asList(System.getProperty("user.home") + "/Videos/Movies");
     // Movie file extension filter
     private List<String> movieExtFilters = Arrays.asList(".avi", ".mkv", ".mpeg", ".rm", ".rmvb", ".wmv");
     // Image directories

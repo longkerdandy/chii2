@@ -1,7 +1,6 @@
 package org.chii2.util;
 
 import org.testng.annotations.Test;
-import zhcode.Encoding;
 
 /**
  * Utils Test

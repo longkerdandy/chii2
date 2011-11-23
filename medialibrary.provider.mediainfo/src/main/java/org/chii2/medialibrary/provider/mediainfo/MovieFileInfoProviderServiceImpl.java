@@ -47,7 +47,7 @@ public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderSe
     private Pattern movieResolutionPattern = Pattern.compile("(?<resolution>\\d+p)", Pattern.CASE_INSENSITIVE);
     // Extract Disk Number Pattern
     private Pattern diskNumPattern = Pattern.compile("\\w*(?<number>\\d+)");
-    //Configuration FIle
+    //Configuration File
     private final static String CONFIG_FILE = "org.chii2.medialibrary.provider.mediainfo";
     // Movie file name extract filter key from configuration file
     private final static String MOVIE_FILE_PATTERN = "movie.file.pattern";

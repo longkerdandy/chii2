@@ -3,7 +3,6 @@ package org.chii2.util;
 import org.apache.commons.lang.StringUtils;
 import regex2.Pattern;
 import regex2.PatternSyntaxException;
-import zhcode.Zhcode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
