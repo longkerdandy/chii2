@@ -1,128 +1,138 @@
 package org.chii2.medialibrary.shell.command;
 
+import org.apache.commons.cli.*;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.chii2.medialibrary.api.core.MediaLibraryService;
 import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.shell.command.MediaLibraryCommand;
+import org.chii2.medialibrary.shell.command.parser.OptException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Media Library Shell Command
  */
 public class MediaLibraryCommandImpl implements MediaLibraryCommand {
-
     // Injected Media Library Service
     private MediaLibraryService mediaLibrary;
+    // Command Line Parser
+    protected final CommandLineParser parser;
+    // Scan Command
+    protected final Options scanOptions;
+    // Scan Command
+    protected final Options showOptions;
+    // Help
+    protected final HelpFormatter helpFormatter;
+    // Logger
+    private final Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.shell.command");
 
-    @Override
-    public void scan(String media) {
-        if ("movie".equalsIgnoreCase(media) || "movies".equalsIgnoreCase(media)) {
-            // Scan movies
-            mediaLibrary.scanMovies();
-        } else if ("image".equalsIgnoreCase(media) || "images".equalsIgnoreCase(media)) {
-            // Scan images
-            mediaLibrary.scanImages();
-        } else {
-            System.out.println("Bad parameter for <scan> command, the correct usage is: \"scan <movies|images>\".");
-        }
+    public MediaLibraryCommandImpl() {
+        this.parser = new GnuParser();
+        this.scanOptions = new Options();
+        this.scanOptions.addOption("movie", false, "type option: movie.  scan movie from directories");
+        this.scanOptions.addOption("image", false, "type option: image.  scan image from directories");
+        this.scanOptions.addOption("all", false, "type option: all.  scan all support media from directories");
+        this.scanOptions.addOption("help", false, "show this message");
+        this.showOptions = new Options();
+        this.showOptions.addOption("movie", false, "type option: movie.  show movies in the media library");
+        this.showOptions.addOption("image", false, "type option: image.  show images in the media library");
+        this.showOptions.addOption("help", false, "show this message");
+        this.showOptions.addOption(OptionBuilder.withArgName("uuid")
+                .hasArg()
+                .withDescription("restrict option: uuid.  show media with specific uuid \n CAN NOT BE USED WITH OTHER RESTRICT OPTION")
+                .create("id"));
+        this.showOptions.addOption(OptionBuilder.withArgName("name")
+                .hasArg()
+                .withDescription("restrict option: name.  show media which name contains specific string")
+                .create("name"));
+        this.helpFormatter = new HelpFormatter();
+    }
+
+    /**
+     * Life Cycle Init
+     */
+    @SuppressWarnings("unused")
+    public void init() {
+        logger.debug("Chii2 Media Library Shell Command init.");
+    }
+
+    /**
+     * Life Cycle Destroy
+     */
+    @SuppressWarnings("unused")
+    public void destroy() {
+        logger.debug("Chii2 Media Library Shell Command destroy.");
     }
 
     @Override
-    public void show(String[] arguments) {
-        if (arguments.length > 0) {
-            // Show Movies
-            if ("movie".equalsIgnoreCase(arguments[0]) || "movies".equalsIgnoreCase(arguments[0])) {
-                // Show all the movies
-                if (arguments.length == 1) {
-                    List<? extends Movie> movies = mediaLibrary.getMovies();
-                    printMovieTable(movies);
+    public void scan(String[] options) {
+        try {
+            CommandLine line = this.parser.parse(this.scanOptions, options);
+            if (line.getOptions().length == 1) {
+                if (line.hasOption("movie")) {
+                    this.mediaLibrary.scanMovies();
+                } else if (line.hasOption("image")) {
+                    this.mediaLibrary.scanImages();
+                } else if (line.hasOption("all")) {
+                    this.mediaLibrary.scanAll();
+                } else if (line.hasOption("help")) {
+                    this.helpFormatter.printHelp("scan -type_option", this.scanOptions);
                 } else {
-                    if (isUUID(getSubArray(arguments))) {
-                        Movie movie = mediaLibrary.getMovieById(getName(getSubArray(arguments)));
-                        printMovieTable(movie);
-                    } else {
-                        List<? extends Movie> movies = mediaLibrary.getMoviesByName(getName(getSubArray(arguments)));
-                        printMovieTable(movies);
-                    }
-                }
-            } else if ("image".equalsIgnoreCase(arguments[0]) || "images".equalsIgnoreCase(arguments[0])) {
-                // Show all the movies
-                if (arguments.length == 1) {
-                    List<? extends Image> images = mediaLibrary.getImages(-1, -1, null);
-                    printImageTable(images);
-                } else {
-                    if (isUUID(getSubArray(arguments))) {
-                        Image image = mediaLibrary.getImageById(getName(getSubArray(arguments)));
-                        printImageTable(image);
-                    } else {
-                        List<? extends Image> images = mediaLibrary.getImagesByField("file.file_name", getName(getSubArray(arguments)), false, -1, -1, null);
-                        printImageTable(images);
-                    }
+                    throw new OptException("Invalid option count.");
                 }
             } else {
-                System.out.println("Bad parameter for <show> command, the correct usage is: \"show <movies|images>\".");
+                throw new OptException("Invalid option count.");
             }
-        } else {
-            System.out.println("Bad parameter for <show> command, the correct usage is: \"show <movies|images>\".");
+        } catch (Exception e) {
+            System.out.println(String.format("%s, use 'scan -help' for more information.", ExceptionUtils.getMessage(e)));
         }
     }
 
-    /**
-     * Whether argument is UUID
-     *
-     * @param arguments Arguments
-     * @return True if UUID
-     */
-    private boolean isUUID(String[] arguments) {
-        if (arguments.length == 1) {
-            try {
-                @SuppressWarnings("unused")
-                UUID id = UUID.fromString(arguments[0]);
-                return true;
-            } catch (IllegalArgumentException e) {
-                return false;
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public void show(String[] options) {
+        try {
+            CommandLine line = this.parser.parse(this.showOptions, options);
+            if (line.getOptions().length == 1) {
+                if (line.hasOption("movie")) {
+                    List<? extends Movie> movies = this.mediaLibrary.getMovies();
+                    this.printMovieTable(movies);
+                } else if (line.hasOption("image")) {
+                    List<? extends Image> images = this.mediaLibrary.getImages();
+                    this.printImageTable(images);
+                } else if (line.hasOption("help")) {
+                    this.helpFormatter.printHelp("show -type_option [-restrict_option]", this.showOptions);
+                } else {
+                    throw new OptException("Invalid option count.");
+                }
+            } else if (line.getOptions().length == 2) {
+                if (line.hasOption("movie") && line.hasOption("id") && StringUtils.isNotEmpty(line.getOptionValue("id"))) {
+                    Movie movie = this.mediaLibrary.getMovieById(line.getOptionValue("id"));
+                    this.printMovieTable(movie);
+                } else if (line.hasOption("movie") && line.hasOption("name") && StringUtils.isNotEmpty(line.getOptionValue("name"))) {
+                    List<? extends Movie> movies = this.mediaLibrary.getMoviesByName(line.getOptionValue("name"));
+                    this.printMovieTable(movies);
+                } else if (line.hasOption("image") && line.hasOption("id") && StringUtils.isNotEmpty(line.getOptionValue("id"))) {
+                    Image image = this.mediaLibrary.getImageById(line.getOptionValue("id"));
+                    this.printImageTable(image);
+                } else if (line.hasOption("image") && line.hasOption("name") && StringUtils.isNotEmpty(line.getOptionValue("name"))) {
+                    List<? extends Image> images = mediaLibrary.getImagesByField("title", line.getOptionValue("name"), false);
+                    this.printImageTable(images);
+                } else {
+                    throw new OptException("Invalid option count.");
+                }
+            } else {
+                throw new OptException("Invalid option count.");
             }
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Parse arguments and return name or UUID
-     *
-     * @param arguments Arguments
-     * @return UUID or Name
-     */
-    private String getName(String[] arguments) {
-        if (arguments.length == 1) {
-            UUID id = null;
-            try {
-                id = UUID.fromString(arguments[0]);
-            } catch (IllegalArgumentException e) {
-                // Do nothing
-            }
-            // return id
-            if (id != null) {
-                return id.toString();
-            }
-            // return name
-            else {
-                return arguments[0];
-            }
-        } else {
-            // return name with space
-            StringBuffer name = new StringBuffer(StringUtils.trim(arguments[0]));
-            for (int i = 1; i < arguments.length; i++) {
-                name.append(" ");
-                name.append(StringUtils.trim(arguments[i]));
-            }
-            return name.toString();
+        } catch (Exception e) {
+            System.out.println(String.format("%s, use 'show -help' for more information.", ExceptionUtils.getMessage(e)));
         }
     }
 
@@ -132,8 +142,10 @@ public class MediaLibraryCommandImpl implements MediaLibraryCommand {
      * @param movie Movie Object
      */
     private void printMovieTable(Movie movie) {
-        List<Movie> movieList = new ArrayList<Movie>();
-        movieList.add(movie);
+        List<Movie> movieList = new ArrayList<>();
+        if (movie != null) {
+            movieList.add(movie);
+        }
         printMovieTable(movieList);
     }
 
@@ -174,8 +186,10 @@ public class MediaLibraryCommandImpl implements MediaLibraryCommand {
      * @param image Image
      */
     private void printImageTable(Image image) {
-        List<Image> imageList = new ArrayList<Image>();
-        imageList.add(image);
+        List<Image> imageList = new ArrayList<>();
+        if (image != null) {
+            imageList.add(image);
+        }
         printImageTable(imageList);
     }
 
@@ -272,18 +286,6 @@ public class MediaLibraryCommandImpl implements MediaLibraryCommand {
             System.out.print("-");
         }
         System.out.print("\n");
-    }
-
-    /**
-     * Get the sub string array
-     *
-     * @param array Source Array
-     * @return Sub String Array
-     */
-    private String[] getSubArray(String[] array) {
-        String[] result = new String[array.length - 1];
-        System.arraycopy(array, 1, result, 0, result.length);
-        return result;
     }
 
     /**

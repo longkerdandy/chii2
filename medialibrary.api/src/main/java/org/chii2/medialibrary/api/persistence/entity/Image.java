@@ -68,14 +68,14 @@ public interface Image {
      *
      * @return Image File
      */
-    public ImageFile getFile();
+    public ImageFile getOriginalFile();
 
     /**
      * Set the Image File
      *
      * @param imageFile Image File
      */
-    public void setFile(ImageFile imageFile);
+    public void setOriginalFile(ImageFile imageFile);
 
     /**
      * Image is photo

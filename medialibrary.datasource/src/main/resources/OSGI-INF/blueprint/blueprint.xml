@@ -5,27 +5,27 @@
 
     <!-- JDBC JTA Data Source Bean -->
     <bean id="derbyXADataSource" class="org.apache.derby.jdbc.EmbeddedXADataSource">
-        <property name="databaseName" value="data/Chii2DB"/>
+        <property name="databaseName" value="data/MediaLibrary"/>
         <property name="createDatabase" value="create"/>
     </bean>
 
     <!-- JDBC JTA Data Source Service -->
     <service id="xaDataSource" ref="derbyXADataSource" interface="javax.sql.XADataSource">
         <service-properties>
-            <entry key="osgi.jndi.service.name" value="jdbc/chii2db"/>
+            <entry key="osgi.jndi.service.name" value="jdbc/medialibrary"/>
         </service-properties>
     </service>
 
     <!-- JDBC Data Source Bean -->
     <bean id="derbyDataSource" class="org.apache.derby.jdbc.EmbeddedDataSource">
-        <property name="databaseName" value="data/Chii2DB"/>
+        <property name="databaseName" value="data/MediaLibrary"/>
         <property name="createDatabase" value="create"/>
     </bean>
 
     <!-- JDBC Data Source Service -->
     <service ref="derbyDataSource" interface="javax.sql.DataSource">
         <service-properties>
-            <entry key="osgi.jndi.service.name" value="jdbc/chii2dbnojta"/>
+            <entry key="osgi.jndi.service.name" value="jdbc/medialibrarynojta"/>
         </service-properties>
     </service>
 

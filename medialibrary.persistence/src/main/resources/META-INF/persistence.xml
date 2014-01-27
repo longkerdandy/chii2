@@ -6,9 +6,9 @@
     <persistence-unit name="MediaLibraryUnit" transaction-type="JTA">
         <description>Persistence Unit for Chii2 Media Library</description>
         <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
-        <jta-data-source>osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/chii2db)
+        <jta-data-source>osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/medialibrary)
         </jta-data-source>
-        <non-jta-data-source>osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/chii2dbnojta)
+        <non-jta-data-source>osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/medialibrarynojta)
         </non-jta-data-source>
 
         <!-- Mapping Classes -->

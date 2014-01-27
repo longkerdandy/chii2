@@ -1,10 +1,13 @@
 package org.chii2.medialibrary.persistence.entity;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
 import org.chii2.medialibrary.api.persistence.entity.MovieFile;
 
 import javax.persistence.*;
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.UUID;
 
@@ -26,8 +29,8 @@ public class MovieFileImpl implements MovieFile {
     private String filePath;
 
     // Absolute File Name
-    @Column(name = "ABSOLUTE_NAME")
-    private String absoluteName;
+    @Column(name = "ABSOLUTE_PATH")
+    private String absolutePath;
 
     // File Extension
     @Column(name = "FILE_EXTENSION")
@@ -181,8 +184,8 @@ public class MovieFileImpl implements MovieFile {
     }
 
     @Override
-    public File getFile() {
-        return new File(absoluteName);
+    public Path getFile() {
+        return Paths.get(absolutePath);
     }
 
     @Override
@@ -202,17 +205,20 @@ public class MovieFileImpl implements MovieFile {
 
     @Override
     public void setFilePath(String filePath) {
-        this.filePath = filePath;
+        if (!filePath.endsWith(SystemUtils.FILE_SEPARATOR)) {
+            filePath = filePath + SystemUtils.FILE_SEPARATOR;
+        }
+        this.filePath = FilenameUtils.separatorsToUnix(filePath);
     }
 
     @Override
-    public String getAbsoluteName() {
-        return absoluteName;
+    public String getAbsolutePath() {
+        return absolutePath;
     }
 
     @Override
-    public void setAbsoluteName(String absoluteName) {
-        this.absoluteName = absoluteName;
+    public void setAbsolutePath(String absolutePath) {
+        this.absolutePath = FilenameUtils.separatorsToUnix(absolutePath);
     }
 
     @Override

@@ -592,28 +592,6 @@ public class ETOps extends Operation {
   //////////////////////////////////////////////////////////////////////////////
 
   /**
-     Add option -list to the exiftool commandline
-     (see the documentation of exiftool for details).
-  */
-
-  public ETOps list(String pType) {
-
-    String       oper;                      // only used in some methods
-    StringBuffer buf = new StringBuffer();  // local buffer for option-args
-    iCmdArgs.add("-list");
-
-    if (pType != null) {
-      buf.append(pType.toString());
-    }
-    if (buf.length()>0) {
-      iCmdArgs.add(buf.toString());
-    }
-    return this;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
      Add option -listw to the exiftool commandline
      (see the documentation of exiftool for details).
   */
@@ -624,28 +602,6 @@ public class ETOps extends Operation {
     StringBuffer buf = new StringBuffer();  // local buffer for option-args
     iCmdArgs.add("-listw");
 
-    if (buf.length()>0) {
-      iCmdArgs.add(buf.toString());
-    }
-    return this;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
-     Add option -listw to the exiftool commandline
-     (see the documentation of exiftool for details).
-  */
-
-  public ETOps listw(String pType) {
-
-    String       oper;                      // only used in some methods
-    StringBuffer buf = new StringBuffer();  // local buffer for option-args
-    iCmdArgs.add("-listw");
-
-    if (pType != null) {
-      buf.append(pType.toString());
-    }
     if (buf.length()>0) {
       iCmdArgs.add(buf.toString());
     }
@@ -674,28 +630,6 @@ public class ETOps extends Operation {
   //////////////////////////////////////////////////////////////////////////////
 
   /**
-     Add option -listf to the exiftool commandline
-     (see the documentation of exiftool for details).
-  */
-
-  public ETOps listf(String pType) {
-
-    String       oper;                      // only used in some methods
-    StringBuffer buf = new StringBuffer();  // local buffer for option-args
-    iCmdArgs.add("-listf");
-
-    if (pType != null) {
-      buf.append(pType.toString());
-    }
-    if (buf.length()>0) {
-      iCmdArgs.add(buf.toString());
-    }
-    return this;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
      Add option -listwf to the exiftool commandline
      (see the documentation of exiftool for details).
   */
@@ -715,28 +649,6 @@ public class ETOps extends Operation {
   //////////////////////////////////////////////////////////////////////////////
 
   /**
-     Add option -listwf to the exiftool commandline
-     (see the documentation of exiftool for details).
-  */
-
-  public ETOps listwf(String pType) {
-
-    String       oper;                      // only used in some methods
-    StringBuffer buf = new StringBuffer();  // local buffer for option-args
-    iCmdArgs.add("-listwf");
-
-    if (pType != null) {
-      buf.append(pType.toString());
-    }
-    if (buf.length()>0) {
-      iCmdArgs.add(buf.toString());
-    }
-    return this;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
      Add option -listg to the exiftool commandline
      (see the documentation of exiftool for details).
   */
@@ -747,55 +659,6 @@ public class ETOps extends Operation {
     StringBuffer buf = new StringBuffer();  // local buffer for option-args
     iCmdArgs.add("-listg");
 
-    if (buf.length()>0) {
-      iCmdArgs.add(buf.toString());
-    }
-    return this;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
-     Add option -listg to the exiftool commandline
-     (see the documentation of exiftool for details).
-  */
-
-  public ETOps listg(String pType) {
-
-    String       oper;                      // only used in some methods
-    StringBuffer buf = new StringBuffer();  // local buffer for option-args
-    iCmdArgs.add("-listg");
-
-    if (pType != null) {
-      buf.append(pType.toString());
-    }
-    if (buf.length()>0) {
-      iCmdArgs.add(buf.toString());
-    }
-    return this;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
-     Add option -listg to the exiftool commandline
-     (see the documentation of exiftool for details).
-  */
-
-  public ETOps listg(String pGroupSpec, String pType) {
-
-    String       oper;                      // only used in some methods
-    StringBuffer buf = new StringBuffer();  // local buffer for option-args
-    buf.append("-listg");
-
-    if (pGroupSpec != null) {
-      buf.append(pGroupSpec.toString());
-    }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
-    if (pType != null) {
-      buf.append(pType.toString());
-    }
     if (buf.length()>0) {
       iCmdArgs.add(buf.toString());
     }
@@ -1219,19 +1082,16 @@ public class ETOps extends Operation {
   //////////////////////////////////////////////////////////////////////////////
 
   /**
-     Add option -verbose to the exiftool commandline
+     Add option -ver to the exiftool commandline
      (see the documentation of exiftool for details).
   */
 
-  public ETOps verbose(Integer pLevel) {
+  public ETOps ver() {
 
     String       oper;                      // only used in some methods
     StringBuffer buf = new StringBuffer();  // local buffer for option-args
-    buf.append("-verbose");
+    iCmdArgs.add("-ver");
 
-    if (pLevel != null) {
-      buf.append(pLevel.toString());
-    }
     if (buf.length()>0) {
       iCmdArgs.add(buf.toString());
     }

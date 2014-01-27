@@ -25,6 +25,8 @@ public interface MovieInfoProviderService {
     public final static String BACKDROP_COUNT_PROPERTY = "backdrop_count";
     // Movie information property key in the movie info provided events
     public final static String MOVIE_INFO_PROPERTY = "movie_info";
+    // Fail reason property key in the movie info failed events
+    public final static String FAIL_MESSAGE_PROPERTY = "fail_msg";
 
     /**
      * Get the provider name

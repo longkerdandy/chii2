@@ -1,6 +1,7 @@
 package org.chii2.medialibrary.event;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.chii2.medialibrary.api.file.FileService;
 import org.chii2.medialibrary.api.persistence.PersistenceService;
 import org.chii2.medialibrary.api.persistence.entity.Movie;
@@ -18,8 +19,8 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -50,7 +51,7 @@ public class MovieHandler implements EventHandler {
     // Backdrop Fetch Count Config Key
     private final static String MOVIE_BACKDROP_COUNT = "movie.backdrop.count";
     // Logger
-    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.event");
+    private final Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.event");
 
     /**
      * Life Cycle Init
@@ -64,7 +65,7 @@ public class MovieHandler implements EventHandler {
             Configuration config = configAdmin.getConfiguration(CONFIG_FILE);
             props = config.getProperties();
         } catch (IOException e) {
-            logger.error("MovieHandler fail to load configuration with exception: {}.", e.getMessage());
+            logger.error("MovieHandler fail to load configuration with exception: {}.", ExceptionUtils.getMessage(e));
         }
         // Load each configuration
         if (props == null || props.isEmpty()) {
@@ -108,54 +109,67 @@ public class MovieHandler implements EventHandler {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void handleEvent(Event event) {
         // Movie Scan Event
         if (FileService.MOVIE_SCAN_PROVIDED_TOPIC.equals(event.getTopic())) {
-            // Get list of File from event, this should be fine
-            @SuppressWarnings("unchecked")
-            List<File> files = (List<File>) event.getProperty(FileService.FILE_PROPERTY);
+            List<Path> files = (List<Path>) event.getProperty(FileService.SCAN_PATH_PROPERTY);
             logger.debug("Receive a movie scan event with {} records.", files.size());
-            postMovieFileInfoRequestEvent(files);
+            this.postMovieFileInfoRequestEvent(files);
         }
-        // Movie FIle Information Provided Event
+        // Movie Watch Create Event
+        else if (FileService.MOVIE_WATCH_CREATE_TOPIC.equals(event.getTopic())) {
+            Path path = (Path) event.getProperty(FileService.WATCH_PATH_PROPERTY);
+            List<Path> files = new ArrayList<>();
+            files.add(path);
+            logger.debug("Receive a movie watch create event for: {}.", path);
+            this.postMovieFileInfoRequestEvent(files);
+        }
+        // Movie Watch Delete Event
+        else if (FileService.MOVIE_WATCH_DELETE_TOPIC.equals(event.getTopic())) {
+            Path path = (Path) event.getProperty(FileService.WATCH_PATH_PROPERTY);
+            logger.debug("Receive a movie watch delete event for: {}.", path);
+            this.persistenceService.deleteMovie(path.toString());
+        }
+        // Movie Watch Modify Event
+        else if (FileService.MOVIE_WATCH_MODIFY_TOPIC.equals(event.getTopic())) {
+            Path path = (Path) event.getProperty(FileService.WATCH_PATH_PROPERTY);
+            List<Path> files = new ArrayList<>();
+            files.add(path);
+            logger.debug("Receive a movie watch modify event for: {}.", path);
+            this.postMovieFileInfoRequestEvent(files);
+        }
+        // Movie File Information Provided Event
         else if (MovieFileInfoProviderService.MOVIE_FILE_INFO_PROVIDED_TOPIC.equals(event.getTopic())) {
-            // Get list of Movie from event, this should be fine
-            @SuppressWarnings("unchecked")
-            List<MovieFile> movieFiles = (List<MovieFile>) event.getProperty(MovieFileInfoProviderService.MOVIE_FILE_INFO_PROPERTY);
-            logger.debug("Receive a movie file information provided event with {} records.", movieFiles.size());
+            Path path = (Path) event.getProperty(MovieFileInfoProviderService.MOVIE_PATH_PROPERTY);
+            MovieFile movieFile = (MovieFile) event.getProperty(MovieFileInfoProviderService.MOVIE_FILE_INFO_PROPERTY);
+            logger.debug("Receive a movie file information provided event for: {}.", path);
             // Synchronize
-            persistenceService.synchronize(movieFiles);
-            // Delete old movie information
-            if (forceInfoUpdate) {
-                persistenceService.deleteMovieInfo();
-            }
-            // Notify providers fetch movie info (online information)
-            List<? extends Movie> movies = persistenceService.getMovies(-1, -1, null);
-            for (Movie movie : movies) {
-                if (movie.getFilesCount() > 0 && (forceInfoUpdate || movie.getInfoCount() == 0)) {
-                    MovieFile movieFile = movie.getFiles().get(0);
-                    postMovieInfoRequestEvent(movie.getId(), movieFile.getMovieName(), movieFile.getYear(), 1, posterCount, backdropCount);
-                }
+            this.persistenceService.synchronizeMovie(movieFile);
+            // Get Movie (since it is lazy loading)
+            Movie movie = this.persistenceService.getMovieByMovieFile(movieFile);
+            // Request movie information
+            if (forceInfoUpdate || movie.getInfoCount() == 0) {
+                this.postMovieInfoRequestEvent(movie.getId(), movieFile.getMovieName(), movieFile.getYear(), 1, this.posterCount, this.backdropCount);
             }
         }
-        // Movie FIle Information Failed Event
+        // Movie File Information Failed Event
         else if (MovieFileInfoProviderService.MOVIE_FILE_INFO_FAILED_TOPIC.equals(event.getTopic())) {
-            // Currently, do nothing here
-            logger.debug("Receive a movie file information failed event.");
+            Path path = (Path) event.getProperty(MovieFileInfoProviderService.MOVIE_PATH_PROPERTY);
+            logger.debug("Receive a movie file information failed event for: {}.", path);
         }
         // Movie Information Provided Event
         else if (MovieInfoProviderService.MOVIE_INFO_PROVIDED_TOPIC.equals(event.getTopic())) {
             String movieId = (String) event.getProperty(MovieInfoProviderService.MOVIE_ID_PROPERTY);
-            @SuppressWarnings("unchecked")
             List<MovieInfo> info = (List<MovieInfo>) event.getProperty(MovieInfoProviderService.MOVIE_INFO_PROPERTY);
             logger.debug("Receive a movie information provided event with {} information.", info.size());
             // Synchronize
-            persistenceService.synchronize(movieId, info);
+            this.persistenceService.synchronizeMovie(movieId, info);
         }
         // Movie Information provided Failed Event
         else if (MovieInfoProviderService.MOVIE_INFO_FAILED_TOPIC.equals(event.getTopic())) {
-            // Currently, do nothing here
-            logger.debug("Receive a movie information failed event.");
+            String movieId = (String) event.getProperty(MovieInfoProviderService.MOVIE_ID_PROPERTY);
+            logger.debug("Receive a movie information failed event for: {}.", movieId);
         }
     }
 
@@ -164,14 +178,14 @@ public class MovieHandler implements EventHandler {
      *
      * @param files Files to be parsed
      */
-    private void postMovieFileInfoRequestEvent(List<File> files) {
+    private void postMovieFileInfoRequestEvent(List<Path> files) {
         // Prepare properties
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        properties.put(MovieFileInfoProviderService.MOVIE_FILE_PROPERTY, files);
+        Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put(MovieFileInfoProviderService.MOVIE_PATH_PROPERTY, files);
         // Send a event
         Event event = new Event(MovieFileInfoProviderService.MOVIE_FILE_INFO_REQUEST_TOPIC, properties);
         logger.debug("Send a movie file information request event with {} files.", files.size());
-        eventAdmin.postEvent(event);
+        this.eventAdmin.postEvent(event);
     }
 
     /**
@@ -186,7 +200,7 @@ public class MovieHandler implements EventHandler {
      */
     private void postMovieInfoRequestEvent(String movieId, String movieName, int movieYear, int resultCount, int posterCount, int backdropCount) {
         // Prepare properties
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        Dictionary<String, Object> properties = new Hashtable<>();
         properties.put(MovieInfoProviderService.MOVIE_ID_PROPERTY, movieId);
         properties.put(MovieInfoProviderService.MOVIE_NAME_PROPERTY, movieName);
         properties.put(MovieInfoProviderService.MOVIE_YEAR_PROPERTY, movieYear);
@@ -196,7 +210,7 @@ public class MovieHandler implements EventHandler {
         // Send a event
         Event event = new Event(MovieInfoProviderService.MOVIE_INFO_REQUEST_TOPIC, properties);
         logger.debug("Send a movie <{}> information request event.", movieId);
-        eventAdmin.postEvent(event);
+        this.eventAdmin.postEvent(event);
     }
 
     /**

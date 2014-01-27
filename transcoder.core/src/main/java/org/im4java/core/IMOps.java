@@ -100,7 +100,9 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -167,7 +169,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -193,9 +197,13 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
+    }
+    if (height != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -222,9 +230,13 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
+    }
+    if (height != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -292,7 +304,9 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -397,7 +411,9 @@ public class IMOps extends Operation {
     if (sx != null) {
       buf.append(sx.toString());
     }
-    buf.append(",");
+    if (sx != null || rx != null) {
+      buf.append(",");
+    }
     if (rx != null) {
       buf.append(rx.toString());
     }
@@ -423,11 +439,15 @@ public class IMOps extends Operation {
     if (sx != null) {
       buf.append(sx.toString());
     }
-    buf.append(",");
+    if (sx != null || rx != null) {
+      buf.append(",");
+    }
     if (rx != null) {
       buf.append(rx.toString());
     }
-    buf.append(",");
+    if (rx != null || ry != null) {
+      buf.append(",");
+    }
     if (ry != null) {
       buf.append(ry.toString());
     }
@@ -453,15 +473,21 @@ public class IMOps extends Operation {
     if (sx != null) {
       buf.append(sx.toString());
     }
-    buf.append(",");
+    if (sx != null || rx != null) {
+      buf.append(",");
+    }
     if (rx != null) {
       buf.append(rx.toString());
     }
-    buf.append(",");
+    if (rx != null || ry != null) {
+      buf.append(",");
+    }
     if (ry != null) {
       buf.append(ry.toString());
     }
-    buf.append(",");
+    if (ry != null || sy != null) {
+      buf.append(",");
+    }
     if (sy != null) {
       buf.append(sy.toString());
     }
@@ -487,19 +513,27 @@ public class IMOps extends Operation {
     if (sx != null) {
       buf.append(sx.toString());
     }
-    buf.append(",");
+    if (sx != null || rx != null) {
+      buf.append(",");
+    }
     if (rx != null) {
       buf.append(rx.toString());
     }
-    buf.append(",");
+    if (rx != null || ry != null) {
+      buf.append(",");
+    }
     if (ry != null) {
       buf.append(ry.toString());
     }
-    buf.append(",");
+    if (ry != null || sy != null) {
+      buf.append(",");
+    }
     if (sy != null) {
       buf.append(sy.toString());
     }
-    buf.append(",");
+    if (sy != null || tx != null) {
+      buf.append(",");
+    }
     if (tx != null) {
       buf.append(tx.toString());
     }
@@ -525,23 +559,33 @@ public class IMOps extends Operation {
     if (sx != null) {
       buf.append(sx.toString());
     }
-    buf.append(",");
+    if (sx != null || rx != null) {
+      buf.append(",");
+    }
     if (rx != null) {
       buf.append(rx.toString());
     }
-    buf.append(",");
+    if (rx != null || ry != null) {
+      buf.append(",");
+    }
     if (ry != null) {
       buf.append(ry.toString());
     }
-    buf.append(",");
+    if (ry != null || sy != null) {
+      buf.append(",");
+    }
     if (sy != null) {
       buf.append(sy.toString());
     }
-    buf.append(",");
+    if (sy != null || tx != null) {
+      buf.append(",");
+    }
     if (tx != null) {
       buf.append(tx.toString());
     }
-    buf.append(",");
+    if (tx != null || ty != null) {
+      buf.append(",");
+    }
     if (ty != null) {
       buf.append(ty.toString());
     }
@@ -649,7 +693,9 @@ public class IMOps extends Operation {
     if (xr != null) {
       buf.append(xr.toString());
     }
-    buf.append("x");
+    if (xr != null || yr != null) {
+      buf.append("x");
+    }
     if (yr != null) {
       buf.append(yr.toString());
     }
@@ -675,14 +721,18 @@ public class IMOps extends Operation {
     if (xr != null) {
       buf.append(xr.toString());
     }
-    buf.append("x");
+    if (xr != null || yr != null) {
+      buf.append("x");
+    }
     if (yr != null) {
       buf.append(yr.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (yr != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -708,21 +758,27 @@ public class IMOps extends Operation {
     if (xr != null) {
       buf.append(xr.toString());
     }
-    buf.append("x");
+    if (xr != null || yr != null) {
+      buf.append("x");
+    }
     if (yr != null) {
       buf.append(yr.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (yr != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -748,26 +804,34 @@ public class IMOps extends Operation {
     if (xr != null) {
       buf.append(xr.toString());
     }
-    buf.append("x");
+    if (xr != null || yr != null) {
+      buf.append("x");
+    }
     if (yr != null) {
       buf.append(yr.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (yr != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (y != null || text != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (text != null) {
       buf.append(text.toString());
     }
@@ -1153,7 +1217,9 @@ public class IMOps extends Operation {
     if (srcPercent != null) {
       buf.append(srcPercent.toString());
     }
-    buf.append("x");
+    if (srcPercent != null || dstPercent != null) {
+      buf.append("x");
+    }
     if (dstPercent != null) {
       buf.append(dstPercent.toString());
     }
@@ -1219,6 +1285,8 @@ public class IMOps extends Operation {
 
     if (value != null) {
       buf.append(value.toString());
+    }
+    if (value != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -1306,6 +1374,8 @@ public class IMOps extends Operation {
     if (threshold != null) {
       buf.append(threshold.toString());
     }
+    if (threshold != null || percent != null) {
+    }
     if (percent != null) {
       if (percent.booleanValue())
         buf.append("%");
@@ -1373,7 +1443,9 @@ public class IMOps extends Operation {
     if (x != null) {
       buf.append(x.toString());
     }
-    buf.append(",");
+    if (x != null || y != null) {
+      buf.append(",");
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -1440,7 +1512,9 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -1498,6 +1572,25 @@ public class IMOps extends Operation {
      (see the documentation of ImageMagick for details).
   */
 
+  public IMOps border() {
+
+    String       oper;                      // only used in some methods
+    StringBuffer buf = new StringBuffer();  // local buffer for option-args
+    iCmdArgs.add("-border");
+
+    if (buf.length()>0) {
+      iCmdArgs.add(buf.toString());
+    }
+    return this;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Add option -border to the ImageMagick commandline
+     (see the documentation of ImageMagick for details).
+  */
+
   public IMOps border(Integer width) {
 
     String       oper;                      // only used in some methods
@@ -1529,7 +1622,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -1596,7 +1691,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -1622,14 +1719,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
@@ -1655,21 +1756,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
-    oper="+";
-    if (yOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (xOffset != null || yOffset != null) {
+      oper="+";
+      if (yOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (yOffset != null) {
       buf.append(yOffset.toString());
     }
@@ -1919,7 +2026,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -1945,14 +2054,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -1978,21 +2091,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -2018,23 +2137,31 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
+    }
+    if (y != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -2242,7 +2369,9 @@ public class IMOps extends Operation {
     if (index1 != null) {
       buf.append(index1.toString());
     }
-    buf.append(",");
+    if (index1 != null || index2 != null) {
+      buf.append(",");
+    }
     if (index2 != null) {
       buf.append(index2.toString());
     }
@@ -2268,11 +2397,15 @@ public class IMOps extends Operation {
     if (index1 != null) {
       buf.append(index1.toString());
     }
-    buf.append(",");
+    if (index1 != null || index2 != null) {
+      buf.append(",");
+    }
     if (index2 != null) {
       buf.append(index2.toString());
     }
-    buf.append(",");
+    if (index2 != null || index3 != null) {
+      buf.append(",");
+    }
     if (index3 != null) {
       buf.append(index3.toString());
     }
@@ -2399,7 +2532,9 @@ public class IMOps extends Operation {
     if (red != null) {
       buf.append(red.toString());
     }
-    buf.append(",");
+    if (red != null || blue != null) {
+      buf.append(",");
+    }
     if (blue != null) {
       buf.append(blue.toString());
     }
@@ -2425,11 +2560,15 @@ public class IMOps extends Operation {
     if (red != null) {
       buf.append(red.toString());
     }
-    buf.append(",");
+    if (red != null || blue != null) {
+      buf.append(",");
+    }
     if (blue != null) {
       buf.append(blue.toString());
     }
-    buf.append(",");
+    if (blue != null || green != null) {
+      buf.append(",");
+    }
     if (green != null) {
       buf.append(green.toString());
     }
@@ -2837,7 +2976,9 @@ public class IMOps extends Operation {
     if (blackPoint != null) {
       buf.append(blackPoint.toString());
     }
-    buf.append("x");
+    if (blackPoint != null || whitePoint != null) {
+      buf.append("x");
+    }
     if (whitePoint != null) {
       buf.append(whitePoint.toString());
     }
@@ -2863,9 +3004,13 @@ public class IMOps extends Operation {
     if (blackPoint != null) {
       buf.append(blackPoint.toString());
     }
-    buf.append("x");
+    if (blackPoint != null || whitePoint != null) {
+      buf.append("x");
+    }
     if (whitePoint != null) {
       buf.append(whitePoint.toString());
+    }
+    if (whitePoint != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -2934,7 +3079,9 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
@@ -2960,11 +3107,15 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
@@ -2990,15 +3141,21 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
@@ -3024,19 +3181,27 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
@@ -3062,23 +3227,33 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
@@ -3104,27 +3279,39 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
@@ -3150,31 +3337,45 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
@@ -3200,35 +3401,51 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
@@ -3254,39 +3471,57 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
@@ -3312,43 +3547,63 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
-    buf.append(",");
+    if (k10 != null || k11 != null) {
+      buf.append(",");
+    }
     if (k11 != null) {
       buf.append(k11.toString());
     }
@@ -3374,47 +3629,69 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
-    buf.append(",");
+    if (k10 != null || k11 != null) {
+      buf.append(",");
+    }
     if (k11 != null) {
       buf.append(k11.toString());
     }
-    buf.append(",");
+    if (k11 != null || k12 != null) {
+      buf.append(",");
+    }
     if (k12 != null) {
       buf.append(k12.toString());
     }
@@ -3440,51 +3717,75 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
-    buf.append(",");
+    if (k10 != null || k11 != null) {
+      buf.append(",");
+    }
     if (k11 != null) {
       buf.append(k11.toString());
     }
-    buf.append(",");
+    if (k11 != null || k12 != null) {
+      buf.append(",");
+    }
     if (k12 != null) {
       buf.append(k12.toString());
     }
-    buf.append(",");
+    if (k12 != null || k13 != null) {
+      buf.append(",");
+    }
     if (k13 != null) {
       buf.append(k13.toString());
     }
@@ -3510,55 +3811,81 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
-    buf.append(",");
+    if (k10 != null || k11 != null) {
+      buf.append(",");
+    }
     if (k11 != null) {
       buf.append(k11.toString());
     }
-    buf.append(",");
+    if (k11 != null || k12 != null) {
+      buf.append(",");
+    }
     if (k12 != null) {
       buf.append(k12.toString());
     }
-    buf.append(",");
+    if (k12 != null || k13 != null) {
+      buf.append(",");
+    }
     if (k13 != null) {
       buf.append(k13.toString());
     }
-    buf.append(",");
+    if (k13 != null || k14 != null) {
+      buf.append(",");
+    }
     if (k14 != null) {
       buf.append(k14.toString());
     }
@@ -3584,59 +3911,87 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
-    buf.append(",");
+    if (k10 != null || k11 != null) {
+      buf.append(",");
+    }
     if (k11 != null) {
       buf.append(k11.toString());
     }
-    buf.append(",");
+    if (k11 != null || k12 != null) {
+      buf.append(",");
+    }
     if (k12 != null) {
       buf.append(k12.toString());
     }
-    buf.append(",");
+    if (k12 != null || k13 != null) {
+      buf.append(",");
+    }
     if (k13 != null) {
       buf.append(k13.toString());
     }
-    buf.append(",");
+    if (k13 != null || k14 != null) {
+      buf.append(",");
+    }
     if (k14 != null) {
       buf.append(k14.toString());
     }
-    buf.append(",");
+    if (k14 != null || k15 != null) {
+      buf.append(",");
+    }
     if (k15 != null) {
       buf.append(k15.toString());
     }
@@ -3662,63 +4017,93 @@ public class IMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
-    buf.append(",");
+    if (k10 != null || k11 != null) {
+      buf.append(",");
+    }
     if (k11 != null) {
       buf.append(k11.toString());
     }
-    buf.append(",");
+    if (k11 != null || k12 != null) {
+      buf.append(",");
+    }
     if (k12 != null) {
       buf.append(k12.toString());
     }
-    buf.append(",");
+    if (k12 != null || k13 != null) {
+      buf.append(",");
+    }
     if (k13 != null) {
       buf.append(k13.toString());
     }
-    buf.append(",");
+    if (k13 != null || k14 != null) {
+      buf.append(",");
+    }
     if (k14 != null) {
       buf.append(k14.toString());
     }
-    buf.append(",");
+    if (k14 != null || k15 != null) {
+      buf.append(",");
+    }
     if (k15 != null) {
       buf.append(k15.toString());
     }
-    buf.append(",");
+    if (k15 != null || k16 != null) {
+      buf.append(",");
+    }
     if (k16 != null) {
       buf.append(k16.toString());
     }
@@ -3785,7 +4170,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -3811,14 +4198,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -3844,21 +4235,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -3884,23 +4281,31 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
+    }
+    if (y != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -3927,23 +4332,31 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
+    }
+    if (y != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -4254,7 +4667,9 @@ public class IMOps extends Operation {
     if (ticks != null) {
       buf.append(ticks.toString());
     }
-    buf.append("x");
+    if (ticks != null || ticksPerSecond != null) {
+      buf.append("x");
+    }
     if (ticksPerSecond != null) {
       buf.append(ticksPerSecond.toString());
     }
@@ -4280,9 +4695,13 @@ public class IMOps extends Operation {
     if (ticks != null) {
       buf.append(ticks.toString());
     }
-    buf.append("x");
+    if (ticks != null || ticksPerSecond != null) {
+      buf.append("x");
+    }
     if (ticksPerSecond != null) {
       buf.append(ticksPerSecond.toString());
+    }
+    if (ticksPerSecond != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -4369,7 +4788,9 @@ public class IMOps extends Operation {
     if (index1 != null) {
       buf.append(index1.toString());
     }
-    buf.append(",");
+    if (index1 != null || index2 != null) {
+      buf.append(",");
+    }
     if (index2 != null) {
       buf.append(index2.toString());
     }
@@ -4395,11 +4816,15 @@ public class IMOps extends Operation {
     if (index1 != null) {
       buf.append(index1.toString());
     }
-    buf.append(",");
+    if (index1 != null || index2 != null) {
+      buf.append(",");
+    }
     if (index2 != null) {
       buf.append(index2.toString());
     }
-    buf.append(",");
+    if (index2 != null || index3 != null) {
+      buf.append(",");
+    }
     if (index3 != null) {
       buf.append(index3.toString());
     }
@@ -4488,7 +4913,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -4675,7 +5102,9 @@ public class IMOps extends Operation {
     if (horizontalScale != null) {
       buf.append(horizontalScale.toString());
     }
-    buf.append("x");
+    if (horizontalScale != null || verticalScale != null) {
+      buf.append("x");
+    }
     if (verticalScale != null) {
       buf.append(verticalScale.toString());
     }
@@ -4742,7 +5171,9 @@ public class IMOps extends Operation {
     if (host != null) {
       buf.append(host.toString());
     }
-    buf.append(":");
+    if (host != null || display != null) {
+      buf.append(":");
+    }
     if (display != null) {
       buf.append(display.toString());
     }
@@ -4768,11 +5199,15 @@ public class IMOps extends Operation {
     if (host != null) {
       buf.append(host.toString());
     }
-    buf.append(":");
+    if (host != null || display != null) {
+      buf.append(":");
+    }
     if (display != null) {
       buf.append(display.toString());
     }
-    buf.append(".");
+    if (display != null || screen != null) {
+      buf.append(".");
+    }
     if (screen != null) {
       buf.append(screen.toString());
     }
@@ -4940,8 +5375,10 @@ public class IMOps extends Operation {
     if (method != null) {
       buf.append(method.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (method != null || arguments != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (arguments != null) {
       buf.append(arguments.toString());
     }
@@ -5008,8 +5445,10 @@ public class IMOps extends Operation {
     if (method != null) {
       buf.append(method.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (method != null || arguments != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (arguments != null) {
       buf.append(arguments.toString());
     }
@@ -5439,8 +5878,10 @@ public class IMOps extends Operation {
     if (operator != null) {
       buf.append(operator.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (operator != null || constant != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (constant != null) {
       buf.append(constant.toString());
     }
@@ -5507,7 +5948,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -5533,14 +5976,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
@@ -5566,21 +6013,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
-    oper="+";
-    if (yOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (xOffset != null || yOffset != null) {
+      oper="+";
+      if (yOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (yOffset != null) {
       buf.append(yOffset.toString());
     }
@@ -5647,7 +6100,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -5673,14 +6128,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
@@ -5706,21 +6165,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
-    oper="+";
-    if (yOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (xOffset != null || yOffset != null) {
+      oper="+";
+      if (yOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (yOffset != null) {
       buf.append(yOffset.toString());
     }
@@ -5882,6 +6347,10 @@ public class IMOps extends Operation {
     StringBuffer buf = new StringBuffer();  // local buffer for option-args
     iCmdArgs.add("-floodfill");
 
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
     if (x != null) {
       buf.append(x.toString());
     }
@@ -5904,11 +6373,19 @@ public class IMOps extends Operation {
     StringBuffer buf = new StringBuffer();  // local buffer for option-args
     iCmdArgs.add("-floodfill");
 
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
     if (x != null) {
       buf.append(x.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -5931,16 +6408,26 @@ public class IMOps extends Operation {
     StringBuffer buf = new StringBuffer();  // local buffer for option-args
     iCmdArgs.add("-floodfill");
 
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
     if (x != null) {
       buf.append(x.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (y != null || color != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (color != null) {
       buf.append(color.toString());
     }
@@ -6149,7 +6636,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -6175,14 +6664,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (outerBevelWidth.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || outerBevelWidth != null) {
+      oper="+";
+      if (outerBevelWidth.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (outerBevelWidth != null) {
       buf.append(outerBevelWidth.toString());
     }
@@ -6208,21 +6701,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (outerBevelWidth.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || outerBevelWidth != null) {
+      oper="+";
+      if (outerBevelWidth.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (outerBevelWidth != null) {
       buf.append(outerBevelWidth.toString());
     }
-    oper="+";
-    if (innerBevelWidth.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (outerBevelWidth != null || innerBevelWidth != null) {
+      oper="+";
+      if (innerBevelWidth.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (innerBevelWidth != null) {
       buf.append(innerBevelWidth.toString());
     }
@@ -6288,6 +6787,8 @@ public class IMOps extends Operation {
 
     if (distance != null) {
       buf.append(distance.toString());
+    }
+    if (distance != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -6479,7 +6980,9 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -6546,7 +7049,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -6572,14 +7077,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -6605,21 +7114,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -6727,7 +7242,9 @@ public class IMOps extends Operation {
     if (x != null) {
       buf.append(x.toString());
     }
-    buf.append(",");
+    if (x != null || y != null) {
+      buf.append(",");
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -6873,7 +7390,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -6899,14 +7418,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
@@ -6932,21 +7455,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
-    oper="+";
-    if (yOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (xOffset != null || yOffset != null) {
+      oper="+";
+      if (yOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (yOffset != null) {
       buf.append(yOffset.toString());
     }
@@ -7417,7 +7946,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -7443,14 +7974,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (offset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || offset != null) {
+      oper="+";
+      if (offset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (offset != null) {
       buf.append(offset.toString());
     }
@@ -7476,16 +8011,22 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (offset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || offset != null) {
+      oper="+";
+      if (offset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (offset != null) {
       buf.append(offset.toString());
+    }
+    if (offset != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -7595,7 +8136,9 @@ public class IMOps extends Operation {
     if (black_color != null) {
       buf.append(black_color.toString());
     }
-    buf.append(",");
+    if (black_color != null || white_color != null) {
+      buf.append(",");
+    }
     if (white_color != null) {
       buf.append(white_color.toString());
     }
@@ -7662,10 +8205,31 @@ public class IMOps extends Operation {
     if (black_color != null) {
       buf.append(black_color.toString());
     }
-    buf.append(",");
+    if (black_color != null || white_color != null) {
+      buf.append(",");
+    }
     if (white_color != null) {
       buf.append(white_color.toString());
     }
+    if (buf.length()>0) {
+      iCmdArgs.add(buf.toString());
+    }
+    return this;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Add option -level to the ImageMagick commandline
+     (see the documentation of ImageMagick for details).
+  */
+
+  public IMOps level() {
+
+    String       oper;                      // only used in some methods
+    StringBuffer buf = new StringBuffer();  // local buffer for option-args
+    iCmdArgs.add("-level");
+
     if (buf.length()>0) {
       iCmdArgs.add(buf.toString());
     }
@@ -7710,7 +8274,9 @@ public class IMOps extends Operation {
     if (black_point != null) {
       buf.append(black_point.toString());
     }
-    buf.append(",");
+    if (black_point != null || white_point != null) {
+      buf.append(",");
+    }
     if (white_point != null) {
       buf.append(white_point.toString());
     }
@@ -7736,9 +8302,13 @@ public class IMOps extends Operation {
     if (black_point != null) {
       buf.append(black_point.toString());
     }
-    buf.append(",");
+    if (black_point != null || white_point != null) {
+      buf.append(",");
+    }
     if (white_point != null) {
       buf.append(white_point.toString());
+    }
+    if (white_point != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -7766,18 +8336,43 @@ public class IMOps extends Operation {
     if (black_point != null) {
       buf.append(black_point.toString());
     }
-    buf.append(",");
+    if (black_point != null || white_point != null) {
+      buf.append(",");
+    }
     if (white_point != null) {
       buf.append(white_point.toString());
+    }
+    if (white_point != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
         buf.append("%");
     }
-    buf.append(",");
+    if (percent != null || gamma != null) {
+      buf.append(",");
+    }
     if (gamma != null) {
       buf.append(gamma.toString());
     }
+    if (buf.length()>0) {
+      iCmdArgs.add(buf.toString());
+    }
+    return this;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Add option +level to the ImageMagick commandline
+     (see the documentation of ImageMagick for details).
+  */
+
+  public IMOps p_level() {
+
+    String       oper;                      // only used in some methods
+    StringBuffer buf = new StringBuffer();  // local buffer for option-args
+    iCmdArgs.add("+level");
+
     if (buf.length()>0) {
       iCmdArgs.add(buf.toString());
     }
@@ -7822,7 +8417,9 @@ public class IMOps extends Operation {
     if (black_point != null) {
       buf.append(black_point.toString());
     }
-    buf.append(",");
+    if (black_point != null || white_point != null) {
+      buf.append(",");
+    }
     if (white_point != null) {
       buf.append(white_point.toString());
     }
@@ -7848,9 +8445,13 @@ public class IMOps extends Operation {
     if (black_point != null) {
       buf.append(black_point.toString());
     }
-    buf.append(",");
+    if (black_point != null || white_point != null) {
+      buf.append(",");
+    }
     if (white_point != null) {
       buf.append(white_point.toString());
+    }
+    if (white_point != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -7878,15 +8479,21 @@ public class IMOps extends Operation {
     if (black_point != null) {
       buf.append(black_point.toString());
     }
-    buf.append(",");
+    if (black_point != null || white_point != null) {
+      buf.append(",");
+    }
     if (white_point != null) {
       buf.append(white_point.toString());
+    }
+    if (white_point != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
         buf.append("%");
     }
-    buf.append(",");
+    if (percent != null || gamma != null) {
+      buf.append(",");
+    }
     if (gamma != null) {
       buf.append(gamma.toString());
     }
@@ -7994,7 +8601,9 @@ public class IMOps extends Operation {
     if (blackPoint != null) {
       buf.append(blackPoint.toString());
     }
-    buf.append("x");
+    if (blackPoint != null || whitePoint != null) {
+      buf.append("x");
+    }
     if (whitePoint != null) {
       buf.append(whitePoint.toString());
     }
@@ -8020,9 +8629,13 @@ public class IMOps extends Operation {
     if (blackPoint != null) {
       buf.append(blackPoint.toString());
     }
-    buf.append("x");
+    if (blackPoint != null || whitePoint != null) {
+      buf.append("x");
+    }
     if (whitePoint != null) {
       buf.append(whitePoint.toString());
+    }
+    if (whitePoint != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -8110,7 +8723,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -8136,14 +8751,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
@@ -8169,21 +8788,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
-    oper="+";
-    if (yOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (xOffset != null || yOffset != null) {
+      oper="+";
+      if (yOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (yOffset != null) {
       buf.append(yOffset.toString());
     }
@@ -8739,7 +9364,9 @@ public class IMOps extends Operation {
     if (brightness != null) {
       buf.append(brightness.toString());
     }
-    buf.append(",");
+    if (brightness != null || saturation != null) {
+      buf.append(",");
+    }
     if (saturation != null) {
       buf.append(saturation.toString());
     }
@@ -8765,11 +9392,15 @@ public class IMOps extends Operation {
     if (brightness != null) {
       buf.append(brightness.toString());
     }
-    buf.append(",");
+    if (brightness != null || saturation != null) {
+      buf.append(",");
+    }
     if (saturation != null) {
       buf.append(saturation.toString());
     }
-    buf.append(",");
+    if (saturation != null || hue != null) {
+      buf.append(",");
+    }
     if (hue != null) {
       buf.append(hue.toString());
     }
@@ -8934,7 +9565,9 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -8960,14 +9593,18 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
-    oper="+";
-    if (angle.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (sigma != null || angle != null) {
+      oper="+";
+      if (angle.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (angle != null) {
       buf.append(angle.toString());
     }
@@ -9274,7 +9911,9 @@ public class IMOps extends Operation {
     if (threshold_map != null) {
       buf.append(threshold_map.toString());
     }
-    buf.append(",");
+    if (threshold_map != null || level != null) {
+      buf.append(",");
+    }
     if (level != null) {
       buf.append(level.toString());
     }
@@ -9401,7 +10040,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -9427,14 +10068,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -9460,21 +10105,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -9500,23 +10151,31 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
+    }
+    if (y != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -9543,23 +10202,31 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
+    }
+    if (y != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -10258,7 +10925,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -10325,7 +10994,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -10392,7 +11063,9 @@ public class IMOps extends Operation {
     if (low != null) {
       buf.append(low.toString());
     }
-    buf.append("x");
+    if (low != null || high != null) {
+      buf.append("x");
+    }
     if (high != null) {
       buf.append(high.toString());
     }
@@ -10418,9 +11091,13 @@ public class IMOps extends Operation {
     if (low != null) {
       buf.append(low.toString());
     }
-    buf.append("x");
+    if (low != null || high != null) {
+      buf.append("x");
+    }
     if (high != null) {
       buf.append(high.toString());
+    }
+    if (high != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -10530,7 +11207,9 @@ public class IMOps extends Operation {
     if (x != null) {
       buf.append(x.toString());
     }
-    buf.append(",");
+    if (x != null || y != null) {
+      buf.append(",");
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -10616,7 +11295,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -10642,14 +11323,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -10675,21 +11360,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -10892,7 +11583,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -10918,14 +11611,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
@@ -10951,21 +11648,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
-    oper="+";
-    if (yOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (xOffset != null || yOffset != null) {
+      oper="+";
+      if (yOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (yOffset != null) {
       buf.append(yOffset.toString());
     }
@@ -11032,7 +11735,9 @@ public class IMOps extends Operation {
     if (horizontal != null) {
       buf.append(horizontal.toString());
     }
-    buf.append("x");
+    if (horizontal != null || vertical != null) {
+      buf.append("x");
+    }
     if (vertical != null) {
       buf.append(vertical.toString());
     }
@@ -11099,7 +11804,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -11125,9 +11832,13 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
+    }
+    if (height != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -11154,9 +11865,13 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
+    }
+    if (height != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -11262,10 +11977,12 @@ public class IMOps extends Operation {
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -11331,6 +12048,8 @@ public class IMOps extends Operation {
 
     if (degrees != null) {
       buf.append(degrees.toString());
+    }
+    if (degrees != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -11398,7 +12117,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -11424,14 +12145,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
@@ -11457,21 +12182,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
-    oper="+";
-    if (yOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (xOffset != null || yOffset != null) {
+      oper="+";
+      if (yOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (yOffset != null) {
       buf.append(yOffset.toString());
     }
@@ -11538,7 +12269,9 @@ public class IMOps extends Operation {
     if (horizontalFactor != null) {
       buf.append(horizontalFactor.toString());
     }
-    buf.append("x");
+    if (horizontalFactor != null || verticalFactor != null) {
+      buf.append("x");
+    }
     if (verticalFactor != null) {
       buf.append(verticalFactor.toString());
     }
@@ -11605,8 +12338,10 @@ public class IMOps extends Operation {
     if (method != null) {
       buf.append(method.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (method != null || cinfo != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (cinfo != null) {
       buf.append(cinfo.toString());
     }
@@ -11673,7 +12408,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -11699,14 +12436,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
@@ -11732,21 +12473,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
-    oper="+";
-    if (yOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (xOffset != null || yOffset != null) {
+      oper="+";
+      if (yOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (yOffset != null) {
       buf.append(yOffset.toString());
     }
@@ -11892,7 +12639,9 @@ public class IMOps extends Operation {
     if (clusterThreshold != null) {
       buf.append(clusterThreshold.toString());
     }
-    buf.append("x");
+    if (clusterThreshold != null || smoothingThreshold != null) {
+      buf.append("x");
+    }
     if (smoothingThreshold != null) {
       buf.append(smoothingThreshold.toString());
     }
@@ -12019,8 +12768,10 @@ public class IMOps extends Operation {
     if (attribute != null) {
       buf.append(attribute.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (attribute != null || value != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (value != null) {
       buf.append(value.toString());
     }
@@ -12087,7 +12838,9 @@ public class IMOps extends Operation {
     if (azimuth != null) {
       buf.append(azimuth.toString());
     }
-    buf.append("x");
+    if (azimuth != null || elevation != null) {
+      buf.append("x");
+    }
     if (elevation != null) {
       buf.append(elevation.toString());
     }
@@ -12154,7 +12907,9 @@ public class IMOps extends Operation {
     if (azimuth != null) {
       buf.append(azimuth.toString());
     }
-    buf.append("x");
+    if (azimuth != null || elevation != null) {
+      buf.append("x");
+    }
     if (elevation != null) {
       buf.append(elevation.toString());
     }
@@ -12221,7 +12976,9 @@ public class IMOps extends Operation {
     if (percentOpacity != null) {
       buf.append(percentOpacity.toString());
     }
-    buf.append("x");
+    if (percentOpacity != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -12247,14 +13004,18 @@ public class IMOps extends Operation {
     if (percentOpacity != null) {
       buf.append(percentOpacity.toString());
     }
-    buf.append("x");
+    if (percentOpacity != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (sigma != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -12280,21 +13041,27 @@ public class IMOps extends Operation {
     if (percentOpacity != null) {
       buf.append(percentOpacity.toString());
     }
-    buf.append("x");
+    if (percentOpacity != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (sigma != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -12320,23 +13087,31 @@ public class IMOps extends Operation {
     if (percentOpacity != null) {
       buf.append(percentOpacity.toString());
     }
-    buf.append("x");
+    if (percentOpacity != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (sigma != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
+    }
+    if (y != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -12424,7 +13199,9 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -12491,7 +13268,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -12517,9 +13296,13 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
+    }
+    if (height != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -12588,7 +13371,9 @@ public class IMOps extends Operation {
     if (xDegrees != null) {
       buf.append(xDegrees.toString());
     }
-    buf.append("x");
+    if (xDegrees != null || yDegrees != null) {
+      buf.append("x");
+    }
     if (yDegrees != null) {
       buf.append(yDegrees.toString());
     }
@@ -12655,7 +13440,9 @@ public class IMOps extends Operation {
     if (contrast != null) {
       buf.append(contrast.toString());
     }
-    buf.append("x");
+    if (contrast != null || midPoint != null) {
+      buf.append("x");
+    }
     if (midPoint != null) {
       buf.append(midPoint.toString());
     }
@@ -12722,7 +13509,9 @@ public class IMOps extends Operation {
     if (contrast != null) {
       buf.append(contrast.toString());
     }
-    buf.append("x");
+    if (contrast != null || midPoint != null) {
+      buf.append("x");
+    }
     if (midPoint != null) {
       buf.append(midPoint.toString());
     }
@@ -12808,7 +13597,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -12834,14 +13625,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (offset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || offset != null) {
+      oper="+";
+      if (offset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (offset != null) {
       buf.append(offset.toString());
     }
@@ -12908,7 +13703,9 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -12934,14 +13731,18 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
-    oper="+";
-    if (angle.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (sigma != null || angle != null) {
+      oper="+";
+      if (angle.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (angle != null) {
       buf.append(angle.toString());
     }
@@ -13090,7 +13891,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -13116,14 +13919,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -13149,21 +13956,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -13189,23 +14002,31 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
+    }
+    if (y != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -13356,10 +14177,12 @@ public class IMOps extends Operation {
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -13587,7 +14410,9 @@ public class IMOps extends Operation {
     if (pos1 != null) {
       buf.append(pos1.toString());
     }
-    buf.append(",");
+    if (pos1 != null || pos2 != null) {
+      buf.append(",");
+    }
     if (pos2 != null) {
       buf.append(pos2.toString());
     }
@@ -13796,7 +14621,9 @@ public class IMOps extends Operation {
     if (red != null) {
       buf.append(red.toString());
     }
-    buf.append(",");
+    if (red != null || green != null) {
+      buf.append(",");
+    }
     if (green != null) {
       buf.append(green.toString());
     }
@@ -13822,11 +14649,15 @@ public class IMOps extends Operation {
     if (red != null) {
       buf.append(red.toString());
     }
-    buf.append(",");
+    if (red != null || green != null) {
+      buf.append(",");
+    }
     if (green != null) {
       buf.append(green.toString());
     }
-    buf.append(",");
+    if (green != null || blue != null) {
+      buf.append(",");
+    }
     if (blue != null) {
       buf.append(blue.toString());
     }
@@ -13852,15 +14683,21 @@ public class IMOps extends Operation {
     if (red != null) {
       buf.append(red.toString());
     }
-    buf.append(",");
+    if (red != null || green != null) {
+      buf.append(",");
+    }
     if (green != null) {
       buf.append(green.toString());
     }
-    buf.append(",");
+    if (green != null || blue != null) {
+      buf.append(",");
+    }
     if (blue != null) {
       buf.append(blue.toString());
     }
-    buf.append(",");
+    if (blue != null || opacity != null) {
+      buf.append(",");
+    }
     if (opacity != null) {
       buf.append(opacity.toString());
     }
@@ -13886,17 +14723,25 @@ public class IMOps extends Operation {
     if (red != null) {
       buf.append(red.toString());
     }
-    buf.append(",");
+    if (red != null || green != null) {
+      buf.append(",");
+    }
     if (green != null) {
       buf.append(green.toString());
     }
-    buf.append(",");
+    if (green != null || blue != null) {
+      buf.append(",");
+    }
     if (blue != null) {
       buf.append(blue.toString());
     }
-    buf.append(",");
+    if (blue != null || opacity != null) {
+      buf.append(",");
+    }
     if (opacity != null) {
       buf.append(opacity.toString());
+    }
+    if (opacity != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -13965,7 +14810,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -13991,9 +14838,13 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
+    }
+    if (height != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -14020,9 +14871,13 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
+    }
+    if (height != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -14090,7 +14945,9 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -14116,14 +14973,18 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
@@ -14149,21 +15010,27 @@ public class IMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
-    oper="+";
-    if (yOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (xOffset != null || yOffset != null) {
+      oper="+";
+      if (yOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (yOffset != null) {
       buf.append(yOffset.toString());
     }
@@ -14230,10 +15097,12 @@ public class IMOps extends Operation {
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -14401,6 +15270,25 @@ public class IMOps extends Operation {
     if (color != null) {
       buf.append(color.toString());
     }
+    if (buf.length()>0) {
+      iCmdArgs.add(buf.toString());
+    }
+    return this;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Add option -transparent to the ImageMagick commandline
+     (see the documentation of ImageMagick for details).
+  */
+
+  public IMOps transparent() {
+
+    String       oper;                      // only used in some methods
+    StringBuffer buf = new StringBuffer();  // local buffer for option-args
+    iCmdArgs.add("-transparent");
+
     if (buf.length()>0) {
       iCmdArgs.add(buf.toString());
     }
@@ -14726,7 +15614,9 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -14752,14 +15642,18 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
-    oper="+";
-    if (amount.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (sigma != null || amount != null) {
+      oper="+";
+      if (amount.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (amount != null) {
       buf.append(amount.toString());
     }
@@ -14785,21 +15679,27 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
-    oper="+";
-    if (amount.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (sigma != null || amount != null) {
+      oper="+";
+      if (amount.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (amount != null) {
       buf.append(amount.toString());
     }
-    oper="+";
-    if (threshold.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (amount != null || threshold != null) {
+      oper="+";
+      if (threshold.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (threshold != null) {
       buf.append(threshold.toString());
     }
@@ -14986,7 +15886,9 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -15012,14 +15914,18 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (sigma != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -15045,21 +15951,27 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (sigma != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -15085,23 +15997,31 @@ public class IMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (sigma != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
+    }
+    if (y != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -15293,7 +16213,9 @@ public class IMOps extends Operation {
     if (amplitude != null) {
       buf.append(amplitude.toString());
     }
-    buf.append("x");
+    if (amplitude != null || wavelength != null) {
+      buf.append("x");
+    }
     if (wavelength != null) {
       buf.append(wavelength.toString());
     }
@@ -15360,7 +16282,9 @@ public class IMOps extends Operation {
     if (x != null) {
       buf.append(x.toString());
     }
-    buf.append(",");
+    if (x != null || y != null) {
+      buf.append(",");
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -15427,6 +16351,8 @@ public class IMOps extends Operation {
     if (threshold != null) {
       buf.append(threshold.toString());
     }
+    if (threshold != null || percent != null) {
+    }
     if (percent != null) {
       if (percent.booleanValue())
         buf.append("%");
@@ -15449,6 +16375,25 @@ public class IMOps extends Operation {
     String       oper;                      // only used in some methods
     StringBuffer buf = new StringBuffer();  // local buffer for option-args
     iCmdArgs.add("-window-group");
+
+    if (buf.length()>0) {
+      iCmdArgs.add(buf.toString());
+    }
+    return this;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Add option -window to the ImageMagick commandline
+     (see the documentation of ImageMagick for details).
+  */
+
+  public IMOps window() {
+
+    String       oper;                      // only used in some methods
+    StringBuffer buf = new StringBuffer();  // local buffer for option-args
+    iCmdArgs.add("-window");
 
     if (buf.length()>0) {
       iCmdArgs.add(buf.toString());

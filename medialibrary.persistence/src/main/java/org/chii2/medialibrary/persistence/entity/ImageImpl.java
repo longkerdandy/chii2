@@ -32,9 +32,9 @@ public class ImageImpl implements Image {
     @Column(name = "Rating")
     private float rating;
 
-    // Image File
+    // Original Image File
     @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
-    private ImageFileImpl file;
+    private ImageFileImpl originalFile;
 
     /**
      * Constructor
@@ -84,14 +84,15 @@ public class ImageImpl implements Image {
     }
 
     @Override
-    public ImageFile getFile() {
-        return file;
+    public ImageFile getOriginalFile() {
+        return originalFile;
     }
 
     @Override
-    public void setFile(ImageFile imageFile) {
+    public void setOriginalFile(ImageFile imageFile) {
         if (imageFile.getClass() == ImageFileImpl.class) {
-            this.file = (ImageFileImpl) imageFile;
+            this.originalFile = (ImageFileImpl) imageFile;
+            this.originalFile.setImage(this);
         }
     }
 
@@ -102,116 +103,116 @@ public class ImageImpl implements Image {
 
     @Override
     public String getFileName() {
-        return file.getFileName();
+        return originalFile.getFileName();
     }
 
     @Override
     public String getFilePath() {
-        return file.getFilePath();
+        return originalFile.getFilePath();
     }
 
     @Override
     public String getAbsolutePath() {
-        return file.getAbsolutePath();
+        return originalFile.getAbsolutePath();
     }
 
     @Override
     public String getFileExtension() {
-        return file.getFileExtension();
+        return originalFile.getFileExtension();
     }
 
     @Override
     public String getType() {
-        return file.getType();
+        return originalFile.getType();
     }
 
     @Override
     public long getSize() {
-        return file.getSize();
+        return originalFile.getSize();
     }
 
     @Override
     public int getWidth() {
-        return file.getWidth();
+        return originalFile.getWidth();
     }
 
     @Override
     public int getHeight() {
-        return file.getHeight();
+        return originalFile.getHeight();
     }
 
     @Override
     public int getColorDepth() {
-        return file.getColorDepth();
+        return originalFile.getColorDepth();
     }
 
     @Override
     public String getColorType() {
-        return file.getColorType();
+        return originalFile.getColorType();
     }
 
     @Override
     public String getCameraModel() {
-        return file.getCameraModel();
+        return originalFile.getCameraModel();
     }
 
     @Override
     public Date getDateTaken() {
-        return file.getDateTaken();
+        return originalFile.getDateTaken();
     }
 
     @Override
     public String getExposureTime() {
-        return file.getExposureTime();
+        return originalFile.getExposureTime();
     }
 
     @Override
     public int getISO() {
-        return file.getISO();
+        return originalFile.getISO();
     }
 
     @Override
     public String getFocalLength() {
-        return file.getFocalLength();
+        return originalFile.getFocalLength();
     }
 
     @Override
     public String getUserComment() {
-        return file.getUserComment();
+        return originalFile.getUserComment();
     }
 
     @Override
     public int getWidthDPI() {
-        return file.getWidthDPI();
+        return originalFile.getWidthDPI();
     }
 
     @Override
     public int getHeightDPI() {
-        return file.getHeightDPI();
+        return originalFile.getHeightDPI();
     }
 
     @Override
     public String getMimeType() {
-        return file.getMimeType();
+        return originalFile.getMimeType();
     }
 
     @Override
     public String getCameraMaker() {
-        return file.getCameraMaker();
+        return originalFile.getCameraMaker();
     }
 
     @Override
     public String getFNumber() {
-        return file.getFNumber();
+        return originalFile.getFNumber();
     }
 
     @Override
     public String getShutterSpeed() {
-        return file.getShutterSpeed();
+        return originalFile.getShutterSpeed();
     }
 
     @Override
     public int getFlash() {
-        return file.getFlash();
+        return originalFile.getFlash();
     }
 }

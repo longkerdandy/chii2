@@ -37,7 +37,7 @@ public class MencoderTest {
         File outputFile = new File("/output.avi");
 
         MencoderXvidMP3Profile profile = new MencoderXvidMP3Profile(inputFile, outputFile);
-        assert "mencoder \"/input.avi\" -oac mp3lame -lameopts fast -ffourcc DX50 -ovc xvid -xvidencopts bitrate=3000:chromaOpt:vhq=4:quant_type=mpeg:max_bframes=1 -o \"/output.avi\"".equals(StringUtils.join(profile.getCommands(), " "));
+        assert ("mencoder " + "\"" +  inputFile.getAbsolutePath() + "\"" + " -oac mp3lame -lameopts fast -ffourcc DX50 -ovc xvid -xvidencopts bitrate=3000:chromaOpt:vhq=4:quant_type=mpeg:max_bframes=1 -o " + "\"" + outputFile.getAbsolutePath() + "\"").equals(StringUtils.join(profile.getCommands(), " "));
 
     }
 }

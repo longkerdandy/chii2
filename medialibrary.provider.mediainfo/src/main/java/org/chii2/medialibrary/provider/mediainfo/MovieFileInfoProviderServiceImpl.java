@@ -1,8 +1,9 @@
 package org.chii2.medialibrary.provider.mediainfo;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.chii2.medialibrary.api.persistence.factory.MovieFactory;
 import org.chii2.medialibrary.api.provider.MovieFileInfoProviderService;
-import org.chii2.medialibrary.provider.mediainfo.consumer.RequestConsumer;
+import org.chii2.medialibrary.provider.mediainfo.analyzer.MovieAnalyzer;
 import org.chii2.util.ConfigUtils;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -13,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import regex2.Pattern;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -24,7 +25,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderService, EventHandler {
     // Request queue
-    protected BlockingQueue<List<File>> queue;
+    private BlockingQueue<Path> queue;
     // Injected ConfigAdmin Service
     private ConfigurationAdmin configAdmin;
     // Injected EventAdmin service
@@ -43,8 +44,6 @@ public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderSe
     private Pattern movieVideoCodecPattern = Pattern.compile("(?<video_codec>XviD|DivX|DivX5|H264|X264)", Pattern.CASE_INSENSITIVE);
     // Movie Audio Codec Pattern
     private Pattern movieAudioCodecPattern = Pattern.compile("(?<audio_codec>AC3|DTS)", Pattern.CASE_INSENSITIVE);
-    // Movie Video Resolution Pattern
-    private Pattern movieResolutionPattern = Pattern.compile("(?<resolution>\\d+p)", Pattern.CASE_INSENSITIVE);
     // Extract Disk Number Pattern
     private Pattern diskNumPattern = Pattern.compile("\\w*(?<number>\\d+)");
     //Configuration File
@@ -59,12 +58,12 @@ public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderSe
     private final static String MOVIE_VIDEO_CODEC_PATTERN = "movie.file.video.codec.pattern";
     // Movie file audio codec block extract filter key from configuration file
     private final static String MOVIE_AUDIO_CODEC_PATTERN = "movie.file.audio.codec.pattern";
-    // Movie file video resolution block extract filter key from configuration file
-    private final static String MOVIE_RESOLUTION_PATTERN = "movie.file.video.resolution.pattern";
     // Movie file disk number extract filter key from configuration file
     private final static String MOVIE_DISK_NUMBER_PATTERN = "movie.file.disk.number.pattern";
+    // Movie Analyzer
+    private MovieAnalyzer movieAnalyzer;
     // Logger
-    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.provider.mediainfo");
+    private final Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.provider.mediainfo");
 
     /**
      * Life Cycle Init
@@ -129,15 +128,6 @@ public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderSe
                 logger.error("MediaInfo Provider configuration <{}> is not valid.", MOVIE_AUDIO_CODEC_PATTERN);
             }
 
-            // Load movie video resolution pattern
-            Pattern videoResolutionPattern = ConfigUtils.loadPattern(props, MOVIE_RESOLUTION_PATTERN);
-            if (videoResolutionPattern != null) {
-                movieResolutionPattern = videoResolutionPattern;
-                logger.debug("MediaInfo Provider configuration <{}> loaded.", MOVIE_RESOLUTION_PATTERN);
-            } else {
-                logger.error("MediaInfo Provider configuration <{}> is not valid.", MOVIE_RESOLUTION_PATTERN);
-            }
-
             // Load movie disk number pattern
             Pattern diskNumPattern = ConfigUtils.loadPattern(props, MOVIE_DISK_NUMBER_PATTERN);
             if (diskNumPattern != null) {
@@ -149,10 +139,13 @@ public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderSe
         }
 
         // Init queue
-        this.queue = new LinkedBlockingQueue<List<File>>();
+        this.queue = new LinkedBlockingQueue<>();
 
-        // Start Request Consumer
-        new Thread(new RequestConsumer(queue, eventAdmin, movieFactory, moviePatterns, movieSeparatorPattern, movieSourcePattern, movieVideoCodecPattern, movieAudioCodecPattern, diskNumPattern)).start();
+        // Start Analyzer
+        this.movieAnalyzer = new MovieAnalyzer(queue, eventAdmin, movieFactory, moviePatterns, movieSeparatorPattern, movieSourcePattern, movieVideoCodecPattern, movieAudioCodecPattern, diskNumPattern);
+        Thread movieAnalyzer = new Thread(this.movieAnalyzer);
+        movieAnalyzer.setDaemon(false);
+        movieAnalyzer.start();
     }
 
     /**
@@ -161,20 +154,18 @@ public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderSe
     @SuppressWarnings("unused")
     public void destroy() {
         logger.debug("MediaInfo Provider (Movie File Information) destroy.");
+        // STop Analyzer
+        this.movieAnalyzer.shouldStop = true;
     }
 
     @Override
     public void handleEvent(Event event) {
         if (MovieFileInfoProviderService.MOVIE_FILE_INFO_REQUEST_TOPIC.equals(event.getTopic())) {
             @SuppressWarnings("unchecked")
-            List<File> files = (List<File>) event.getProperty(MovieFileInfoProviderService.MOVIE_FILE_PROPERTY);
-            logger.debug("Receive a movie file information request event with {} records.", files.size());
-            // Add request to queue
-            try {
-                this.queue.put(files);
-            } catch (InterruptedException e) {
-                logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
-            }
+            List<Path> movieFiles = (List<Path>) event.getProperty(MovieFileInfoProviderService.MOVIE_PATH_PROPERTY);
+            logger.debug("Receive a movie file information request event with {} records.", movieFiles.size());
+            // Get Movie File Info
+            this.getMovieFileInformation(movieFiles);
         }
     }
 
@@ -184,18 +175,22 @@ public class MovieFileInfoProviderServiceImpl implements MovieFileInfoProviderSe
     }
 
     @Override
-    public void getMovieFileInformation(File movieFile) {
-        List<File> fileList = new ArrayList<File>();
-        fileList.add(movieFile);
-        this.getMovieFileInformation(fileList);
+    public void getMovieFileInformation(Path movieFile) {
+        try {
+            this.queue.put(movieFile);
+        } catch (InterruptedException e) {
+            logger.error("MovieFileInfoProvider Queue has been interrupted with error: {}, UNEXPECTED BEHAVIOR! PLEASE REPORT THIS BUG!", ExceptionUtils.getMessage(e));
+        }
     }
 
     @Override
-    public void getMovieFileInformation(List<File> movieFiles) {
+    public void getMovieFileInformation(List<Path> movieFiles) {
         try {
-            this.queue.put(movieFiles);
+            for (Path movieFile : movieFiles) {
+                this.queue.put(movieFile);
+            }
         } catch (InterruptedException e) {
-            logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
+            logger.error("MovieFileInfoProvider Queue has been interrupted with error: {}, UNEXPECTED BEHAVIOR! PLEASE REPORT THIS BUG!", ExceptionUtils.getMessage(e));
         }
     }
 

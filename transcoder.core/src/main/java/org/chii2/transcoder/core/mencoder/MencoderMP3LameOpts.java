@@ -66,8 +66,8 @@ public class MencoderMP3LameOpts implements MencoderAudioOption {
 
     @Override
     public List<String> getAudioOptionCommands() {
-        List<String> options = new ArrayList<String>();
-        LinkedList<String> lameOptions = new LinkedList<String>();
+        List<String> options = new ArrayList<>();
+        LinkedList<String> lameOptions = new LinkedList<>();
 
         if (this.abr) {
             lameOptions.add("abr");

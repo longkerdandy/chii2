@@ -1,9 +1,10 @@
 package org.chii2.medialibrary.event;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.chii2.medialibrary.api.file.FileService;
 import org.chii2.medialibrary.api.persistence.PersistenceService;
-import org.chii2.medialibrary.api.persistence.entity.Image;
-import org.chii2.medialibrary.api.provider.ImageInfoProviderService;
+import org.chii2.medialibrary.api.persistence.entity.ImageFile;
+import org.chii2.medialibrary.api.provider.ImageFileInfoProviderService;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.event.Event;
@@ -12,8 +13,9 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -31,7 +33,7 @@ public class ImageHandler implements EventHandler {
     //Configuration FIle
     private final static String CONFIG_FILE = "org.chii2.medialibrary.core";
     // Logger
-    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.event");
+    private final Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.event");
 
     /**
      * Life Cycle Init
@@ -45,7 +47,7 @@ public class ImageHandler implements EventHandler {
             Configuration config = configAdmin.getConfiguration(CONFIG_FILE);
             props = config.getProperties();
         } catch (IOException e) {
-            logger.error("ImageHandler fail to load configuration with exception: {}.", e.getMessage());
+            logger.error("ImageHandler fail to load configuration with exception: {}.", ExceptionUtils.getMessage(e));
         }
         // Load each configuration
         if (props == null || props.isEmpty()) {
@@ -63,33 +65,37 @@ public class ImageHandler implements EventHandler {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void handleEvent(Event event) {
-        // Image Scan Event
         if (FileService.IMAGE_SCAN_PROVIDED_TOPIC.equals(event.getTopic())) {
-            // Get List of file names from event, this should be fine
-            @SuppressWarnings("unchecked")
-            List<File> files = (List<File>) event.getProperty(FileService.FILE_PROPERTY);
+            List<Path> files = (List<Path>) event.getProperty(FileService.SCAN_PATH_PROPERTY);
             logger.debug("Receive a image scan event with {} records.", files.size());
-            this.postImageInfoRequestEvent(files);
-        } else if (ImageInfoProviderService.IMAGE_INFO_PROVIDED_TOPIC.equals(event.getTopic())) {
-            // Get List of Image Information from event, this should be fine
-            @SuppressWarnings("unchecked")
-            List<Image> images = (List<Image>) event.getProperty(ImageInfoProviderService.IMAGE_INFO_PROPERTY);
-            logger.debug("Receive a image information provided event with {} records.", images.size());
-            // Purge current images
-            persistenceService.deleteImages();
-            // Merge into DB
-            if (images != null) {
-                logger.info("Merge {} images into database", images.size());
-                for (Image image : images) {
-                    persistenceService.merge(image);
-                }
-            }
-        } else if (ImageInfoProviderService.IMAGE_INFO_FAILED_TOPIC.equals(event.getTopic())) {
-            // Get List of file names from event, this should be fine
-            @SuppressWarnings("unchecked")
-            List<File> files = (List<File>) event.getProperty(ImageInfoProviderService.IMAGE_FILE_PROPERTY);
-            logger.debug("Receive a image information failed event with {} records.", files.size());
+            this.postImageFileInfoRequestEvent(files);
+        } else if (FileService.IMAGE_WATCH_CREATE_TOPIC.equals(event.getTopic())) {
+            Path path = (Path) event.getProperty(FileService.WATCH_PATH_PROPERTY);
+            List<Path> files = new ArrayList<>();
+            files.add(path);
+            logger.debug("Receive a image watch create event for: {}.", path);
+            this.postImageFileInfoRequestEvent(files);
+        } else if (FileService.IMAGE_WATCH_DELETE_TOPIC.equals(event.getTopic())) {
+            Path path = (Path) event.getProperty(FileService.WATCH_PATH_PROPERTY);
+            logger.debug("Receive a image watch delete event for: {}.", path);
+            this.persistenceService.deleteImage(path.toString());
+        } else if (FileService.IMAGE_WATCH_MODIFY_TOPIC.equals(event.getTopic())) {
+            Path path = (Path) event.getProperty(FileService.WATCH_PATH_PROPERTY);
+            List<Path> files = new ArrayList<>();
+            files.add(path);
+            logger.debug("Receive a image watch modify event for: {}.", path);
+            this.postImageFileInfoRequestEvent(files);
+        } else if (ImageFileInfoProviderService.IMAGE_FILE_INFO_PROVIDED_TOPIC.equals(event.getTopic())) {
+            Path path = (Path) event.getProperty(ImageFileInfoProviderService.IMAGE_PATH_PROPERTY);
+            ImageFile imageFile = (ImageFile) event.getProperty(ImageFileInfoProviderService.IMAGE_FILE_INFO_PROPERTY);
+            logger.debug("Receive a image file information provided event for {}.", path);
+            // Synchronize to DB
+            this.persistenceService.synchronizeImage(imageFile);
+        } else if (ImageFileInfoProviderService.IMAGE_FILE_INFO_FAILED_TOPIC.equals(event.getTopic())) {
+            Path path = (Path) event.getProperty(ImageFileInfoProviderService.IMAGE_PATH_PROPERTY);
+            logger.debug("Receive a image file information failed event for: {}.", path);
         }
     }
 
@@ -98,14 +104,14 @@ public class ImageHandler implements EventHandler {
      *
      * @param files Files to be parsed
      */
-    private void postImageInfoRequestEvent(List<File> files) {
+    private void postImageFileInfoRequestEvent(List<Path> files) {
         // Prepare properties
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        properties.put(ImageInfoProviderService.IMAGE_FILE_PROPERTY, files);
+        Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put(ImageFileInfoProviderService.IMAGE_PATH_PROPERTY, files);
         // Send a event
-        Event event = new Event(ImageInfoProviderService.IMAGE_INFO_REQUEST_TOPIC, properties);
+        Event event = new Event(ImageFileInfoProviderService.IMAGE_FILE_INFO_REQUEST_TOPIC, properties);
         logger.debug("Send a image information request event with {} files.", files.size());
-        eventAdmin.postEvent(event);
+        this.eventAdmin.postEvent(event);
     }
 
     /**

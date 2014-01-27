@@ -138,7 +138,9 @@ public class GMOps extends Operation {
     if (sx != null) {
       buf.append(sx.toString());
     }
-    buf.append(",");
+    if (sx != null || rx != null) {
+      buf.append(",");
+    }
     if (rx != null) {
       buf.append(rx.toString());
     }
@@ -164,11 +166,15 @@ public class GMOps extends Operation {
     if (sx != null) {
       buf.append(sx.toString());
     }
-    buf.append(",");
+    if (sx != null || rx != null) {
+      buf.append(",");
+    }
     if (rx != null) {
       buf.append(rx.toString());
     }
-    buf.append(",");
+    if (rx != null || ry != null) {
+      buf.append(",");
+    }
     if (ry != null) {
       buf.append(ry.toString());
     }
@@ -194,15 +200,21 @@ public class GMOps extends Operation {
     if (sx != null) {
       buf.append(sx.toString());
     }
-    buf.append(",");
+    if (sx != null || rx != null) {
+      buf.append(",");
+    }
     if (rx != null) {
       buf.append(rx.toString());
     }
-    buf.append(",");
+    if (rx != null || ry != null) {
+      buf.append(",");
+    }
     if (ry != null) {
       buf.append(ry.toString());
     }
-    buf.append(",");
+    if (ry != null || sy != null) {
+      buf.append(",");
+    }
     if (sy != null) {
       buf.append(sy.toString());
     }
@@ -228,19 +240,27 @@ public class GMOps extends Operation {
     if (sx != null) {
       buf.append(sx.toString());
     }
-    buf.append(",");
+    if (sx != null || rx != null) {
+      buf.append(",");
+    }
     if (rx != null) {
       buf.append(rx.toString());
     }
-    buf.append(",");
+    if (rx != null || ry != null) {
+      buf.append(",");
+    }
     if (ry != null) {
       buf.append(ry.toString());
     }
-    buf.append(",");
+    if (ry != null || sy != null) {
+      buf.append(",");
+    }
     if (sy != null) {
       buf.append(sy.toString());
     }
-    buf.append(",");
+    if (sy != null || tx != null) {
+      buf.append(",");
+    }
     if (tx != null) {
       buf.append(tx.toString());
     }
@@ -266,23 +286,33 @@ public class GMOps extends Operation {
     if (sx != null) {
       buf.append(sx.toString());
     }
-    buf.append(",");
+    if (sx != null || rx != null) {
+      buf.append(",");
+    }
     if (rx != null) {
       buf.append(rx.toString());
     }
-    buf.append(",");
+    if (rx != null || ry != null) {
+      buf.append(",");
+    }
     if (ry != null) {
       buf.append(ry.toString());
     }
-    buf.append(",");
+    if (ry != null || sy != null) {
+      buf.append(",");
+    }
     if (sy != null) {
       buf.append(sy.toString());
     }
-    buf.append(",");
+    if (sy != null || tx != null) {
+      buf.append(",");
+    }
     if (tx != null) {
       buf.append(tx.toString());
     }
-    buf.append(",");
+    if (tx != null || ty != null) {
+      buf.append(",");
+    }
     if (ty != null) {
       buf.append(ty.toString());
     }
@@ -545,6 +575,8 @@ public class GMOps extends Operation {
     if (threshold != null) {
       buf.append(threshold.toString());
     }
+    if (threshold != null || percent != null) {
+    }
     if (percent != null) {
       if (percent.booleanValue())
         buf.append("%");
@@ -612,7 +644,9 @@ public class GMOps extends Operation {
     if (x != null) {
       buf.append(x.toString());
     }
-    buf.append(",");
+    if (x != null || y != null) {
+      buf.append(",");
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -679,7 +713,9 @@ public class GMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -787,7 +823,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -813,14 +851,18 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -846,21 +888,27 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -886,23 +934,31 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
+    }
+    if (y != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -926,6 +982,25 @@ public class GMOps extends Operation {
     String       oper;                      // only used in some methods
     StringBuffer buf = new StringBuffer();  // local buffer for option-args
     iCmdArgs.add("+borderwidth");
+
+    if (buf.length()>0) {
+      iCmdArgs.add(buf.toString());
+    }
+    return this;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Add option -border to the GraphicsMagick commandline
+     (see the documentation of GraphicsMagick for details).
+  */
+
+  public GMOps border() {
+
+    String       oper;                      // only used in some methods
+    StringBuffer buf = new StringBuffer();  // local buffer for option-args
+    iCmdArgs.add("-border");
 
     if (buf.length()>0) {
       iCmdArgs.add(buf.toString());
@@ -971,7 +1046,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -1161,7 +1238,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -1187,14 +1266,18 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -1220,21 +1303,27 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -1260,23 +1349,31 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
+    }
+    if (y != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -1402,7 +1499,9 @@ public class GMOps extends Operation {
     if (red != null) {
       buf.append(red.toString());
     }
-    buf.append("/");
+    if (red != null || blue != null) {
+      buf.append("/");
+    }
     if (blue != null) {
       buf.append(blue.toString());
     }
@@ -1428,11 +1527,15 @@ public class GMOps extends Operation {
     if (red != null) {
       buf.append(red.toString());
     }
-    buf.append("/");
+    if (red != null || blue != null) {
+      buf.append("/");
+    }
     if (blue != null) {
       buf.append(blue.toString());
     }
-    buf.append("/");
+    if (blue != null || green != null) {
+      buf.append("/");
+    }
     if (green != null) {
       buf.append(green.toString());
     }
@@ -1720,7 +1823,9 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
@@ -1746,11 +1851,15 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
@@ -1776,15 +1885,21 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
@@ -1810,19 +1925,27 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
@@ -1848,23 +1971,33 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
@@ -1890,27 +2023,39 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
@@ -1936,31 +2081,45 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
@@ -1986,35 +2145,51 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
@@ -2040,39 +2215,57 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
@@ -2098,43 +2291,63 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
-    buf.append(",");
+    if (k10 != null || k11 != null) {
+      buf.append(",");
+    }
     if (k11 != null) {
       buf.append(k11.toString());
     }
@@ -2160,47 +2373,69 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
-    buf.append(",");
+    if (k10 != null || k11 != null) {
+      buf.append(",");
+    }
     if (k11 != null) {
       buf.append(k11.toString());
     }
-    buf.append(",");
+    if (k11 != null || k12 != null) {
+      buf.append(",");
+    }
     if (k12 != null) {
       buf.append(k12.toString());
     }
@@ -2226,51 +2461,75 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
-    buf.append(",");
+    if (k10 != null || k11 != null) {
+      buf.append(",");
+    }
     if (k11 != null) {
       buf.append(k11.toString());
     }
-    buf.append(",");
+    if (k11 != null || k12 != null) {
+      buf.append(",");
+    }
     if (k12 != null) {
       buf.append(k12.toString());
     }
-    buf.append(",");
+    if (k12 != null || k13 != null) {
+      buf.append(",");
+    }
     if (k13 != null) {
       buf.append(k13.toString());
     }
@@ -2296,55 +2555,81 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
-    buf.append(",");
+    if (k10 != null || k11 != null) {
+      buf.append(",");
+    }
     if (k11 != null) {
       buf.append(k11.toString());
     }
-    buf.append(",");
+    if (k11 != null || k12 != null) {
+      buf.append(",");
+    }
     if (k12 != null) {
       buf.append(k12.toString());
     }
-    buf.append(",");
+    if (k12 != null || k13 != null) {
+      buf.append(",");
+    }
     if (k13 != null) {
       buf.append(k13.toString());
     }
-    buf.append(",");
+    if (k13 != null || k14 != null) {
+      buf.append(",");
+    }
     if (k14 != null) {
       buf.append(k14.toString());
     }
@@ -2370,59 +2655,87 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
-    buf.append(",");
+    if (k10 != null || k11 != null) {
+      buf.append(",");
+    }
     if (k11 != null) {
       buf.append(k11.toString());
     }
-    buf.append(",");
+    if (k11 != null || k12 != null) {
+      buf.append(",");
+    }
     if (k12 != null) {
       buf.append(k12.toString());
     }
-    buf.append(",");
+    if (k12 != null || k13 != null) {
+      buf.append(",");
+    }
     if (k13 != null) {
       buf.append(k13.toString());
     }
-    buf.append(",");
+    if (k13 != null || k14 != null) {
+      buf.append(",");
+    }
     if (k14 != null) {
       buf.append(k14.toString());
     }
-    buf.append(",");
+    if (k14 != null || k15 != null) {
+      buf.append(",");
+    }
     if (k15 != null) {
       buf.append(k15.toString());
     }
@@ -2448,63 +2761,93 @@ public class GMOps extends Operation {
     if (k1 != null) {
       buf.append(k1.toString());
     }
-    buf.append(",");
+    if (k1 != null || k2 != null) {
+      buf.append(",");
+    }
     if (k2 != null) {
       buf.append(k2.toString());
     }
-    buf.append(",");
+    if (k2 != null || k3 != null) {
+      buf.append(",");
+    }
     if (k3 != null) {
       buf.append(k3.toString());
     }
-    buf.append(",");
+    if (k3 != null || k4 != null) {
+      buf.append(",");
+    }
     if (k4 != null) {
       buf.append(k4.toString());
     }
-    buf.append(",");
+    if (k4 != null || k5 != null) {
+      buf.append(",");
+    }
     if (k5 != null) {
       buf.append(k5.toString());
     }
-    buf.append(",");
+    if (k5 != null || k6 != null) {
+      buf.append(",");
+    }
     if (k6 != null) {
       buf.append(k6.toString());
     }
-    buf.append(",");
+    if (k6 != null || k7 != null) {
+      buf.append(",");
+    }
     if (k7 != null) {
       buf.append(k7.toString());
     }
-    buf.append(",");
+    if (k7 != null || k8 != null) {
+      buf.append(",");
+    }
     if (k8 != null) {
       buf.append(k8.toString());
     }
-    buf.append(",");
+    if (k8 != null || k9 != null) {
+      buf.append(",");
+    }
     if (k9 != null) {
       buf.append(k9.toString());
     }
-    buf.append(",");
+    if (k9 != null || k10 != null) {
+      buf.append(",");
+    }
     if (k10 != null) {
       buf.append(k10.toString());
     }
-    buf.append(",");
+    if (k10 != null || k11 != null) {
+      buf.append(",");
+    }
     if (k11 != null) {
       buf.append(k11.toString());
     }
-    buf.append(",");
+    if (k11 != null || k12 != null) {
+      buf.append(",");
+    }
     if (k12 != null) {
       buf.append(k12.toString());
     }
-    buf.append(",");
+    if (k12 != null || k13 != null) {
+      buf.append(",");
+    }
     if (k13 != null) {
       buf.append(k13.toString());
     }
-    buf.append(",");
+    if (k13 != null || k14 != null) {
+      buf.append(",");
+    }
     if (k14 != null) {
       buf.append(k14.toString());
     }
-    buf.append(",");
+    if (k14 != null || k15 != null) {
+      buf.append(",");
+    }
     if (k15 != null) {
       buf.append(k15.toString());
     }
-    buf.append(",");
+    if (k15 != null || k16 != null) {
+      buf.append(",");
+    }
     if (k16 != null) {
       buf.append(k16.toString());
     }
@@ -2571,7 +2914,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -2597,14 +2942,18 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -2630,21 +2979,27 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -2670,23 +3025,31 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
+    }
+    if (y != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -2956,7 +3319,9 @@ public class GMOps extends Operation {
     if (ticks != null) {
       buf.append(ticks.toString());
     }
-    buf.append("x");
+    if (ticks != null || ticksPerSecond != null) {
+      buf.append("x");
+    }
     if (ticksPerSecond != null) {
       buf.append(ticksPerSecond.toString());
     }
@@ -2982,9 +3347,13 @@ public class GMOps extends Operation {
     if (ticks != null) {
       buf.append(ticks.toString());
     }
-    buf.append("x");
+    if (ticks != null || ticksPerSecond != null) {
+      buf.append("x");
+    }
     if (ticksPerSecond != null) {
       buf.append(ticksPerSecond.toString());
+    }
+    if (ticksPerSecond != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -3052,7 +3421,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -3179,7 +3550,9 @@ public class GMOps extends Operation {
     if (host != null) {
       buf.append(host.toString());
     }
-    buf.append(":");
+    if (host != null || display != null) {
+      buf.append(":");
+    }
     if (display != null) {
       buf.append(display.toString());
     }
@@ -3205,11 +3578,15 @@ public class GMOps extends Operation {
     if (host != null) {
       buf.append(host.toString());
     }
-    buf.append(":");
+    if (host != null || display != null) {
+      buf.append(":");
+    }
     if (display != null) {
       buf.append(display.toString());
     }
-    buf.append(".");
+    if (display != null || screen != null) {
+      buf.append(".");
+    }
     if (screen != null) {
       buf.append(screen.toString());
     }
@@ -3819,7 +4196,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -3845,14 +4224,18 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (outerBevelWidth.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || outerBevelWidth != null) {
+      oper="+";
+      if (outerBevelWidth.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (outerBevelWidth != null) {
       buf.append(outerBevelWidth.toString());
     }
@@ -3878,21 +4261,27 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (outerBevelWidth.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || outerBevelWidth != null) {
+      oper="+";
+      if (outerBevelWidth.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (outerBevelWidth != null) {
       buf.append(outerBevelWidth.toString());
     }
-    oper="+";
-    if (innerBevelWidth.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (outerBevelWidth != null || innerBevelWidth != null) {
+      oper="+";
+      if (innerBevelWidth.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (innerBevelWidth != null) {
       buf.append(innerBevelWidth.toString());
     }
@@ -3977,6 +4366,8 @@ public class GMOps extends Operation {
 
     if (distance != null) {
       buf.append(distance.toString());
+    }
+    if (distance != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -4127,7 +4518,9 @@ public class GMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -4194,7 +4587,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -4220,14 +4615,18 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -4253,21 +4652,27 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -4375,7 +4780,9 @@ public class GMOps extends Operation {
     if (x != null) {
       buf.append(x.toString());
     }
-    buf.append(",");
+    if (x != null || y != null) {
+      buf.append(",");
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -4644,7 +5051,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -4670,14 +5079,18 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (offset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || offset != null) {
+      oper="+";
+      if (offset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (offset != null) {
       buf.append(offset.toString());
     }
@@ -4703,16 +5116,22 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (offset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || offset != null) {
+      oper="+";
+      if (offset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (offset != null) {
       buf.append(offset.toString());
+    }
+    if (offset != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -4781,7 +5200,9 @@ public class GMOps extends Operation {
     if (black_point != null) {
       buf.append(black_point.toString());
     }
-    buf.append(",");
+    if (black_point != null || white_point != null) {
+      buf.append(",");
+    }
     if (white_point != null) {
       buf.append(white_point.toString());
     }
@@ -4807,9 +5228,13 @@ public class GMOps extends Operation {
     if (black_point != null) {
       buf.append(black_point.toString());
     }
-    buf.append(",");
+    if (black_point != null || white_point != null) {
+      buf.append(",");
+    }
     if (white_point != null) {
       buf.append(white_point.toString());
+    }
+    if (white_point != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -4837,15 +5262,21 @@ public class GMOps extends Operation {
     if (black_point != null) {
       buf.append(black_point.toString());
     }
-    buf.append(",");
+    if (black_point != null || white_point != null) {
+      buf.append(",");
+    }
     if (white_point != null) {
       buf.append(white_point.toString());
+    }
+    if (white_point != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
         buf.append("%");
     }
-    buf.append(",");
+    if (percent != null || gamma != null) {
+      buf.append(",");
+    }
     if (gamma != null) {
       buf.append(gamma.toString());
     }
@@ -5275,7 +5706,9 @@ public class GMOps extends Operation {
     if (brightness != null) {
       buf.append(brightness.toString());
     }
-    buf.append(",");
+    if (brightness != null || saturation != null) {
+      buf.append(",");
+    }
     if (saturation != null) {
       buf.append(saturation.toString());
     }
@@ -5301,11 +5734,15 @@ public class GMOps extends Operation {
     if (brightness != null) {
       buf.append(brightness.toString());
     }
-    buf.append(",");
+    if (brightness != null || saturation != null) {
+      buf.append(",");
+    }
     if (saturation != null) {
       buf.append(saturation.toString());
     }
-    buf.append(",");
+    if (saturation != null || hue != null) {
+      buf.append(",");
+    }
     if (hue != null) {
       buf.append(hue.toString());
     }
@@ -5470,7 +5907,9 @@ public class GMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -5496,14 +5935,18 @@ public class GMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
-    oper="+";
-    if (angle.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (sigma != null || angle != null) {
+      oper="+";
+      if (angle.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (angle != null) {
       buf.append(angle.toString());
     }
@@ -5769,8 +6212,10 @@ public class GMOps extends Operation {
     if (channel != null) {
       buf.append(channel.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (channel != null || operator != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (operator != null) {
       buf.append(operator.toString());
     }
@@ -5796,13 +6241,17 @@ public class GMOps extends Operation {
     if (channel != null) {
       buf.append(channel.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (channel != null || operator != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (operator != null) {
       buf.append(operator.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (operator != null || rvalue != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (rvalue != null) {
       buf.append(rvalue.toString());
     }
@@ -5828,15 +6277,21 @@ public class GMOps extends Operation {
     if (channel != null) {
       buf.append(channel.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (channel != null || operator != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (operator != null) {
       buf.append(operator.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (operator != null || rvalue != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (rvalue != null) {
       buf.append(rvalue.toString());
+    }
+    if (rvalue != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -5905,8 +6360,10 @@ public class GMOps extends Operation {
     if (channelType != null) {
       buf.append(channelType.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (channelType != null || N != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (N != null) {
       buf.append(N.toString());
     }
@@ -6033,7 +6490,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -6059,14 +6518,18 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -6092,21 +6555,27 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -6132,23 +6601,31 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
+    }
+    if (y != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -6642,7 +7119,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -6709,7 +7188,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -6776,8 +7257,10 @@ public class GMOps extends Operation {
     if (channelType != null) {
       buf.append(channelType.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (channelType != null || low != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (low != null) {
       buf.append(low.toString());
     }
@@ -6803,12 +7286,16 @@ public class GMOps extends Operation {
     if (channelType != null) {
       buf.append(channelType.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (channelType != null || low != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (low != null) {
       buf.append(low.toString());
     }
-    buf.append("x");
+    if (low != null || high != null) {
+      buf.append("x");
+    }
     if (high != null) {
       buf.append(high.toString());
     }
@@ -6875,7 +7362,9 @@ public class GMOps extends Operation {
     if (x != null) {
       buf.append(x.toString());
     }
-    buf.append(",");
+    if (x != null || y != null) {
+      buf.append(",");
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -6942,7 +7431,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -6968,14 +7459,18 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
@@ -7001,21 +7496,27 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (x.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || x != null) {
+      oper="+";
+      if (x.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -7139,7 +7640,9 @@ public class GMOps extends Operation {
     if (horizontal != null) {
       buf.append(horizontal.toString());
     }
-    buf.append("x");
+    if (horizontal != null || vertical != null) {
+      buf.append("x");
+    }
     if (vertical != null) {
       buf.append(vertical.toString());
     }
@@ -7206,7 +7709,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -7232,9 +7737,13 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
+    }
+    if (height != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -7302,10 +7811,12 @@ public class GMOps extends Operation {
     if (x != null) {
       buf.append(x.toString());
     }
-    oper="+";
-    if (y.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (x != null || y != null) {
+      oper="+";
+      if (y.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -7371,6 +7882,8 @@ public class GMOps extends Operation {
 
     if (degrees != null) {
       buf.append(degrees.toString());
+    }
+    if (degrees != null || special != null) {
     }
     if (special != null) {
       buf.append(special.toString());
@@ -7438,7 +7951,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -7464,14 +7979,18 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
@@ -7497,21 +8016,27 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
-    oper="+";
-    if (yOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (xOffset != null || yOffset != null) {
+      oper="+";
+      if (yOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (yOffset != null) {
       buf.append(yOffset.toString());
     }
@@ -7578,7 +8103,9 @@ public class GMOps extends Operation {
     if (horizontalFactor != null) {
       buf.append(horizontalFactor.toString());
     }
-    buf.append("x");
+    if (horizontalFactor != null || verticalFactor != null) {
+      buf.append("x");
+    }
     if (verticalFactor != null) {
       buf.append(verticalFactor.toString());
     }
@@ -7645,7 +8172,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -7671,14 +8200,18 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
@@ -7704,21 +8237,27 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (xOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || xOffset != null) {
+      oper="+";
+      if (xOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (xOffset != null) {
       buf.append(xOffset.toString());
     }
-    oper="+";
-    if (yOffset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (xOffset != null || yOffset != null) {
+      oper="+";
+      if (yOffset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (yOffset != null) {
       buf.append(yOffset.toString());
     }
@@ -7845,7 +8384,9 @@ public class GMOps extends Operation {
     if (clusterThreshold != null) {
       buf.append(clusterThreshold.toString());
     }
-    buf.append("x");
+    if (clusterThreshold != null || smoothingThreshold != null) {
+      buf.append("x");
+    }
     if (smoothingThreshold != null) {
       buf.append(smoothingThreshold.toString());
     }
@@ -7912,8 +8453,10 @@ public class GMOps extends Operation {
     if (attribute != null) {
       buf.append(attribute.toString());
     }
-    iCmdArgs.add(buf.toString());
-    buf.setLength(0);
+    if (attribute != null || value != null) {
+      iCmdArgs.add(buf.toString());
+      buf.setLength(0);
+    }
     if (value != null) {
       buf.append(value.toString());
     }
@@ -7980,7 +8523,9 @@ public class GMOps extends Operation {
     if (azimuth != null) {
       buf.append(azimuth.toString());
     }
-    buf.append("x");
+    if (azimuth != null || elevation != null) {
+      buf.append("x");
+    }
     if (elevation != null) {
       buf.append(elevation.toString());
     }
@@ -8047,7 +8592,9 @@ public class GMOps extends Operation {
     if (azimuth != null) {
       buf.append(azimuth.toString());
     }
-    buf.append("x");
+    if (azimuth != null || elevation != null) {
+      buf.append("x");
+    }
     if (elevation != null) {
       buf.append(elevation.toString());
     }
@@ -8114,7 +8661,9 @@ public class GMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -8181,7 +8730,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -8207,9 +8758,13 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
+    }
+    if (height != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -8278,7 +8833,9 @@ public class GMOps extends Operation {
     if (xDegrees != null) {
       buf.append(xDegrees.toString());
     }
-    buf.append("x");
+    if (xDegrees != null || yDegrees != null) {
+      buf.append("x");
+    }
     if (yDegrees != null) {
       buf.append(yDegrees.toString());
     }
@@ -8345,7 +8902,9 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
@@ -8371,14 +8930,18 @@ public class GMOps extends Operation {
     if (width != null) {
       buf.append(width.toString());
     }
-    buf.append("x");
+    if (width != null || height != null) {
+      buf.append("x");
+    }
     if (height != null) {
       buf.append(height.toString());
     }
-    oper="+";
-    if (offset.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (height != null || offset != null) {
+      oper="+";
+      if (offset.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (offset != null) {
       buf.append(offset.toString());
     }
@@ -8690,6 +9253,8 @@ public class GMOps extends Operation {
 
     if (value != null) {
       buf.append(value.toString());
+    }
+    if (value != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())
@@ -9042,7 +9607,9 @@ public class GMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
@@ -9068,14 +9635,18 @@ public class GMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
-    oper="+";
-    if (amount.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (sigma != null || amount != null) {
+      oper="+";
+      if (amount.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (amount != null) {
       buf.append(amount.toString());
     }
@@ -9101,21 +9672,27 @@ public class GMOps extends Operation {
     if (radius != null) {
       buf.append(radius.toString());
     }
-    buf.append("x");
+    if (radius != null || sigma != null) {
+      buf.append("x");
+    }
     if (sigma != null) {
       buf.append(sigma.toString());
     }
-    oper="+";
-    if (amount.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (sigma != null || amount != null) {
+      oper="+";
+      if (amount.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (amount != null) {
       buf.append(amount.toString());
     }
-    oper="+";
-    if (threshold.doubleValue() < 0)
-      oper="";
-    buf.append(oper);
+    if (amount != null || threshold != null) {
+      oper="+";
+      if (threshold.doubleValue() < 0)
+        oper="";
+      buf.append(oper);
+    }
     if (threshold != null) {
       buf.append(threshold.toString());
     }
@@ -9302,7 +9879,9 @@ public class GMOps extends Operation {
     if (amplitude != null) {
       buf.append(amplitude.toString());
     }
-    buf.append("x");
+    if (amplitude != null || wavelength != null) {
+      buf.append("x");
+    }
     if (wavelength != null) {
       buf.append(wavelength.toString());
     }
@@ -9369,7 +9948,9 @@ public class GMOps extends Operation {
     if (x != null) {
       buf.append(x.toString());
     }
-    buf.append(",");
+    if (x != null || y != null) {
+      buf.append(",");
+    }
     if (y != null) {
       buf.append(y.toString());
     }
@@ -9435,6 +10016,8 @@ public class GMOps extends Operation {
 
     if (threshold != null) {
       buf.append(threshold.toString());
+    }
+    if (threshold != null || percent != null) {
     }
     if (percent != null) {
       if (percent.booleanValue())

@@ -1,11 +1,14 @@
 package org.chii2.medialibrary.file;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.chii2.medialibrary.api.file.FileService;
 import org.chii2.medialibrary.file.filter.FileExtensionFilter;
 import org.chii2.medialibrary.file.scanner.FileScanner;
+import org.chii2.medialibrary.file.watcher.AbstractFileWatcher;
 import org.chii2.medialibrary.file.watcher.FileWatcher;
+import org.chii2.medialibrary.file.watcher.WinFileWatcher;
 import org.chii2.util.ConfigUtils;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -15,8 +18,9 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -25,14 +29,14 @@ import java.util.concurrent.LinkedBlockingQueue;
  * FileService Implement provide watcher and scanner functionality
  */
 public class FileServiceImpl implements FileService, EventHandler {
-    // Request queue
-    protected BlockingQueue<Map<String, Object>> queue;
+    // Scanner Queue
+    private BlockingQueue<Map<String, Object>> scannerQueue;
     // Injected ConfigAdmin Service
     private ConfigurationAdmin configAdmin;
     // Injected EventAdmin Service
     private EventAdmin eventAdmin;
     //Configuration File
-    private final static String CONFIG_FILE = "org.chii2.medialibrary.file";
+    private static final String CONFIG_FILE = "org.chii2.medialibrary.file";
     // Movie Directory Configuration Key
     private static final String MOVIE_DIRECTORY = "movie.directory";
     // Video File Extension Configuration Key
@@ -42,15 +46,19 @@ public class FileServiceImpl implements FileService, EventHandler {
     // Image File Extension Configuration Key
     private static final String IMAGE_EXTENSION = "image.extension";
     // Movie directories
-    private List<String> movieDirectories = Arrays.asList(System.getProperty("user.home") + "/Videos/Movies");
+    private List<String> movieDirectories = Arrays.asList(System.getProperty("user.home") + SystemUtils.FILE_SEPARATOR + "Movies");
     // Movie file extension filter
     private List<String> movieExtFilters = Arrays.asList(".avi", ".mkv", ".mpeg", ".rm", ".rmvb", ".wmv");
     // Image directories
-    private List<String> imageDirectories = Arrays.asList(System.getProperty("user.home") + "/Pictures");
+    private List<String> imageDirectories = Arrays.asList(System.getProperty("user.home") + SystemUtils.FILE_SEPARATOR + "Pictures");
     // Image file extension filter
     private List<String> imageExtFilters = Arrays.asList(".jpg", ".jpeg", ".tiff", ".tif", ".png", ".gif", ".bmp");
+    // File Scanner
+    private FileScanner fileScanner;
+    // Movie Watcher
+    private AbstractFileWatcher movieWatcher;
     // Image Watcher
-    private FileWatcher imageWatcher;
+    private AbstractFileWatcher imageWatcher;
     // Logger
     private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file");
 
@@ -65,7 +73,7 @@ public class FileServiceImpl implements FileService, EventHandler {
             Configuration config = this.configAdmin.getConfiguration(CONFIG_FILE);
             props = config.getProperties();
         } catch (IOException e) {
-            logger.error("FileService fail to load configuration with exception: {}.", e.getMessage());
+            logger.error("FileService fail to load configuration with exception: {}.", ExceptionUtils.getMessage(e));
         }
         // Load each configuration
         if (props == null || props.isEmpty()) {
@@ -108,15 +116,42 @@ public class FileServiceImpl implements FileService, EventHandler {
             }
         }
 
-        // Init queue
-        this.queue = new LinkedBlockingQueue<Map<String, Object>>();
+        // Init Scanner Queue
+        this.scannerQueue = new LinkedBlockingQueue<>();
 
         // Start File Scanner
-        new Thread(new FileScanner(queue, eventAdmin)).start();
+        this.fileScanner = new FileScanner(this.scannerQueue, this.eventAdmin);
+        Thread scanner = new Thread(this.fileScanner);
+        scanner.setDaemon(false);
+        scanner.start();
+
+        // New Movie Watcher
+        try {
+            if (SystemUtils.IS_OS_WINDOWS) {
+                this.movieWatcher = new WinFileWatcher(this.movieDirectories, true, this.createFilter(this.movieExtFilters), FileService.MOVIE_WATCH_CREATE_TOPIC, FileService.MOVIE_WATCH_MODIFY_TOPIC, FileService.MOVIE_WATCH_DELETE_TOPIC, this.eventAdmin);
+            } else {
+                this.movieWatcher = new FileWatcher(this.movieDirectories, true, this.createFilter(this.movieExtFilters), FileService.MOVIE_WATCH_CREATE_TOPIC, FileService.MOVIE_WATCH_MODIFY_TOPIC, FileService.MOVIE_WATCH_DELETE_TOPIC, this.eventAdmin);
+            }
+            Thread watcher = new Thread(this.movieWatcher);
+            watcher.setDaemon(false);
+            watcher.start();
+        } catch (IOException e) {
+            logger.error("I/O error when create movie watch service: {}.", ExceptionUtils.getMessage(e));
+        }
 
         // New Image Watcher
-        this.imageWatcher = new FileWatcher(this.imageDirectories, this.createFilter(this.imageExtFilters), FileService.IMAGE_WATCH_CREATE_TOPIC, FileService.IMAGE_WATCH_MODIFY_TOPIC, FileService.IMAGE_WATCH_DELETE_TOPIC, this.eventAdmin);
-        new Thread(this.imageWatcher).start();
+        try {
+            if (SystemUtils.IS_OS_WINDOWS) {
+                this.imageWatcher = new WinFileWatcher(this.imageDirectories, true, this.createFilter(this.imageExtFilters), FileService.IMAGE_WATCH_CREATE_TOPIC, FileService.IMAGE_WATCH_MODIFY_TOPIC, FileService.IMAGE_WATCH_DELETE_TOPIC, this.eventAdmin);
+            } else {
+                this.imageWatcher = new FileWatcher(this.imageDirectories, true, this.createFilter(this.imageExtFilters), FileService.IMAGE_WATCH_CREATE_TOPIC, FileService.IMAGE_WATCH_MODIFY_TOPIC, FileService.IMAGE_WATCH_DELETE_TOPIC, this.eventAdmin);
+            }
+            Thread watcher = new Thread(this.imageWatcher);
+            watcher.setDaemon(false);
+            watcher.start();
+        } catch (IOException e) {
+            logger.error("I/O error when create image watch service: {}.", ExceptionUtils.getMessage(e));
+        }
     }
 
     /**
@@ -124,105 +159,89 @@ public class FileServiceImpl implements FileService, EventHandler {
      */
     @SuppressWarnings("unused")
     public void destroy() {
-        // Stop Threads
-        this.imageWatcher.shouldStop = true;
         logger.debug("Chii2 Media Library File Service destroy.");
+        // Stop Threads
+        this.fileScanner.shouldStop = true;
+        this.movieWatcher.shouldStop = true;
+        this.imageWatcher.shouldStop = true;
     }
 
     @Override
     public void handleEvent(Event event) {
         if (FileService.MOVIE_SCAN_REQUEST_TOPIC.equals(event.getTopic())) {
-            List<File> directoryList = new ArrayList<File>();
+            List<Path> directoryList = new ArrayList<>();
             for (String directory : movieDirectories) {
                 if (StringUtils.isNotBlank(directory)) {
-                    directoryList.add(new File(StringUtils.trim(directory)));
+                    directoryList.add(Paths.get(StringUtils.trim(directory)));
                 }
             }
-            Map<String, Object> properties = new Hashtable<String, Object>();
-            properties.put(FileService.DIRECTORY_PROPERTY, directoryList);
-            properties.put(FileService.FILTER_PROPERTY, createFilter(movieExtFilters));
-            properties.put(FileService.TOPIC_PROPERTY, FileService.MOVIE_SCAN_PROVIDED_TOPIC);
-            // Add request to queue
-            try {
-                this.queue.put(properties);
-            } catch (InterruptedException e) {
-                logger.error("Provider producer has been interrupted with error: {}.", ExceptionUtils.getMessage(e));
-            }
+            this.scanFiles(directoryList, createFilter(this.movieExtFilters), FileService.MOVIE_SCAN_PROVIDED_TOPIC);
         } else if (FileService.IMAGE_SCAN_REQUEST_TOPIC.equals(event.getTopic())) {
-            List<File> directoryList = new ArrayList<File>();
-            for (String directory : imageDirectories) {
+            List<Path> directoryList = new ArrayList<>();
+            for (String directory : this.imageDirectories) {
                 if (StringUtils.isNotBlank(directory)) {
-                    directoryList.add(new File(StringUtils.trim(directory)));
+                    directoryList.add(Paths.get(StringUtils.trim(directory)));
                 }
             }
-            Map<String, Object> properties = new Hashtable<String, Object>();
-            properties.put(FileService.DIRECTORY_PROPERTY, directoryList);
-            properties.put(FileService.FILTER_PROPERTY, createFilter(imageExtFilters));
-            properties.put(FileService.TOPIC_PROPERTY, FileService.IMAGE_SCAN_PROVIDED_TOPIC);
-            // Add request to queue
-            try {
-                this.queue.put(properties);
-            } catch (InterruptedException e) {
-                logger.error("Provider producer has been interrupted with error: {}.", ExceptionUtils.getMessage(e));
-            }
+            this.scanFiles(directoryList, createFilter(this.imageExtFilters), FileService.IMAGE_SCAN_PROVIDED_TOPIC);
         }
     }
 
     @Override
     public void scanMovies() {
-        scanMovies(movieDirectories);
+        this.scanMovies(movieDirectories);
     }
 
     @Override
     public void scanMovies(List<String> directories) {
-        scanMovies(directories, movieExtFilters);
+        this.scanMovies(directories, movieExtFilters);
     }
 
     @Override
     public void scanMovies(List<String> directories, List<String> extensions) {
         if (directories != null && !directories.isEmpty()) {
-            List<File> directoryList = new ArrayList<File>();
+            List<Path> directoryList = new ArrayList<>();
             for (String directory : directories) {
                 if (StringUtils.isNotBlank(directory)) {
-                    directoryList.add(new File(StringUtils.trim(directory)));
+                    directoryList.add(Paths.get(StringUtils.trim(directory)));
                 }
             }
             FileExtensionFilter filter;
             if (extensions != null && !extensions.isEmpty()) {
                 filter = createFilter(extensions);
             } else {
-                filter = createFilter(movieExtFilters);
+                filter = createFilter(this.movieExtFilters);
             }
-            scanFiles(directoryList, filter, FileService.MOVIE_SCAN_PROVIDED_TOPIC);
+            this.scanFiles(directoryList, filter, FileService.MOVIE_SCAN_PROVIDED_TOPIC);
         }
     }
 
     @Override
     public void scanImages() {
-        scanImages(imageDirectories);
+        this.scanImages(imageDirectories);
     }
 
     @Override
     public void scanImages(List<String> directories) {
-        scanImages(directories, imageExtFilters);
+        this.scanImages(directories, imageExtFilters);
     }
 
     @Override
     public void scanImages(List<String> directories, List<String> extensions) {
         if (directories != null && !directories.isEmpty()) {
-            List<File> directoryList = new ArrayList<File>();
+            List<Path> directoryList = new ArrayList<>();
             for (String directory : directories) {
                 if (StringUtils.isNotBlank(directory)) {
-                    directoryList.add(new File(StringUtils.trim(directory)));
+                    directoryList.add(Paths.get(StringUtils.trim(directory)));
                 }
             }
             FileExtensionFilter filter;
             if (extensions != null && !extensions.isEmpty()) {
                 filter = createFilter(extensions);
             } else {
-                filter = createFilter(imageExtFilters);
+                filter = createFilter(this.imageExtFilters);
             }
-            scanFiles(directoryList, filter, FileService.IMAGE_SCAN_PROVIDED_TOPIC);
+            this.scanFiles(directoryList, filter, FileService.IMAGE_SCAN_PROVIDED_TOPIC);
         }
     }
 
@@ -233,16 +252,16 @@ public class FileServiceImpl implements FileService, EventHandler {
      * @param filter      File name filter
      * @param topic       Event topic
      */
-    private void scanFiles(List<File> directories, FileExtensionFilter filter, String topic) {
-        Map<String, Object> properties = new Hashtable<String, Object>();
+    private void scanFiles(List<Path> directories, FileExtensionFilter filter, String topic) {
+        Map<String, Object> properties = new Hashtable<>();
         properties.put(FileService.DIRECTORY_PROPERTY, directories);
         properties.put(FileService.FILTER_PROPERTY, filter);
         properties.put(FileService.TOPIC_PROPERTY, topic);
-        // Add request to queue
+        // Add request to scannerQueue
         try {
-            this.queue.put(properties);
+            this.scannerQueue.put(properties);
         } catch (InterruptedException e) {
-            logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
+            logger.error("FileScanner Queue has been interrupted with error: {}, UNEXPECTED BEHAVIOR! PLEASE REPORT THIS BUG!", ExceptionUtils.getMessage(e));
         }
     }
 
@@ -253,7 +272,7 @@ public class FileServiceImpl implements FileService, EventHandler {
      * @return FileExtensionFilter
      */
     private FileExtensionFilter createFilter(List<String> extensions) {
-        List<String> filter = new ArrayList<String>();
+        List<String> filter = new ArrayList<>();
         for (String ext : extensions) {
             if (StringUtils.isNotBlank(ext)) {
                 ext = StringUtils.trim(ext);

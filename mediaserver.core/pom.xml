@@ -15,10 +15,6 @@
     <name>Chii2 Media Server Core</name>
     <url>http://www.chii2.org</url>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.chii2</groupId>

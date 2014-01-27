@@ -1,22 +1,20 @@
 package org.chii2.medialibrary.api.shell.command;
 
-import java.util.List;
-
 /**
  * Media Library Shell Command
  */
 public interface MediaLibraryCommand {
     /**
-     * Command scanAll, scanAll all kinds of media and save them in library, this may also trigger information update from providers
+     * Command scan, scan all kinds of media and save them in library, this may also trigger different providers
      *
-     * @param media Media type, currently supported type are: <movies>
+     * @param options Command Options
      */
-    public void scan(String media);
+    public void scan(String[] options);
 
     /**
      * Command show, show all kinds of media in chii2 media library
      *
-     * @param arguments Show command arguments, currently support arguments are: <movies>
+     * @param options Command Options
      */
-    public void show(String[] arguments);
+    public void show(String[] options);
 }

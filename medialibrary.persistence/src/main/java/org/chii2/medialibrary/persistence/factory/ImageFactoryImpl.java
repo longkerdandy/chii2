@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 public class ImageFactoryImpl implements ImageFactory {
 
     // Logger
-    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.persistence");
+    private final Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.persistence");
 
     /**
      * Life Cycle Init

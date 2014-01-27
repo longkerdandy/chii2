@@ -4,49 +4,51 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileFilter;
+import static java.nio.file.LinkOption.*;
+
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
  *  FileExtensionFilter is used to filer the file name with FileScanner
  */
-public class FileExtensionFilter implements FileFilter {
-
+public class FileExtensionFilter implements DirectoryStream.Filter<Path> {
     // Acceptable File Extensions
-    private List<String> acceptableExtensions;
+    private final List<String> acceptableExtensions;
     // Logger
-    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file.filter");
+    private final Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.file.filter");
 
+    /**
+     * Constructor
+     * @param acceptableExtensions Acceptable Extensions
+     */
     public FileExtensionFilter(List<String> acceptableExtensions) {
         this.acceptableExtensions = acceptableExtensions;
     }
 
     @Override
-    public boolean accept(File file) {
-        // If is directory, accept to go into
-        if (file.isDirectory()) {
+    public boolean accept(Path path) {
+        // Directory, accept to go into
+        if (Files.isDirectory(path, NOFOLLOW_LINKS)) {
             return true;
         }
-        // Empty file
-        if (file.getName().isEmpty()) {
-            logger.debug("File is rejected with empty name.");
-            return false;
-        }
-        // Test file extension
+
+        // Test with acceptable file extensions
         for (String ext : acceptableExtensions) {
             if(StringUtils.isNotEmpty(ext)) {
-                String name = file.getName();
+                String name = path.getFileName().toString();
                 int dotIndex = name.lastIndexOf('.');
                 if (dotIndex > 0 && name.substring(dotIndex) .equalsIgnoreCase(ext)) {
-                    logger.debug("File <{}> is accepted.", file.getName());
+                    logger.debug("File {} is accepted.", path);
                     return  true;
                 }
             }
         }
-        // Should not reach, in case just reject
-        logger.debug("File <{}> is rejected.", file.getName());
+
+        // Not match, reject
+        logger.debug("File {} is rejected.", path);
         return false;
     }
-
 }

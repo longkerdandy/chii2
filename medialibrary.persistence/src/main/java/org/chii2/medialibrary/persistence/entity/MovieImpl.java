@@ -23,12 +23,12 @@ public class MovieImpl implements Movie {
     // List of movie files
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "movie")
     @OrderBy("diskNum ASC")
-    private List<MovieFileImpl> files = new ArrayList<MovieFileImpl>();
+    private List<MovieFileImpl> files = new ArrayList<>();
 
     // List of movie information
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "movie")
     @OrderBy("providerName ASC")
-    private List<MovieInfoImpl> information = new ArrayList<MovieInfoImpl>();
+    private List<MovieInfoImpl> information = new ArrayList<>();
 
     /**
      * Constructor

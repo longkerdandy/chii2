@@ -1,5 +1,8 @@
 package org.chii2.medialibrary.persistence.entity;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.SystemUtils;
+import org.chii2.medialibrary.api.persistence.entity.Image;
 import org.chii2.medialibrary.api.persistence.entity.ImageFile;
 
 import javax.persistence.*;
@@ -112,6 +115,10 @@ public class ImageFileImpl implements ImageFile {
     @Column(name = "USER_COMMENT")
     private String userComment;
 
+    // Image Reference
+    @OneToOne(fetch = FetchType.LAZY)
+    private ImageImpl image;
+
     /**
      * Constructor
      */
@@ -146,7 +153,10 @@ public class ImageFileImpl implements ImageFile {
 
     @Override
     public void setFilePath(String filePath) {
-        this.filePath = filePath;
+        if (!filePath.endsWith(SystemUtils.FILE_SEPARATOR)) {
+            filePath = filePath + SystemUtils.FILE_SEPARATOR;
+        }
+        this.filePath = FilenameUtils.separatorsToUnix(filePath);
     }
 
     @Override
@@ -156,7 +166,7 @@ public class ImageFileImpl implements ImageFile {
 
     @Override
     public void setAbsolutePath(String absolutePath) {
-        this.absolutePath = absolutePath;
+        this.absolutePath = FilenameUtils.separatorsToUnix(absolutePath);
     }
 
     @Override
@@ -357,5 +367,17 @@ public class ImageFileImpl implements ImageFile {
     @Override
     public void setFlash(int flash) {
         this.flash = flash;
+    }
+
+    @Override
+    public Image getImage() {
+        return image;
+    }
+
+    @Override
+    public void setImage(Image image) {
+        if (image.getClass() == ImageImpl.class) {
+            this.image = (ImageImpl) image;
+        }
     }
 }

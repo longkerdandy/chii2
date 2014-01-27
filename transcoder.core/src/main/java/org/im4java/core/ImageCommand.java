@@ -50,7 +50,7 @@ import org.im4java.script.CmdScriptGenerator;
    placeholders within the argument-stack and passes all arguments to the
    generic run-method of ProcessStarter.
 
-   @version $Revision: 1.29 $
+   @version $Revision: 1.31 $
    @author  $Author: bablokb $
  
    @since 0.95
@@ -244,8 +244,14 @@ public class ImageCommand extends ProcessStarter implements ErrorConsumer {
     
   protected void finished(int pReturnCode) throws Exception {
     if (pReturnCode > 0) {
-      CommandException ce = new CommandException(iErrorText.get(0));
+      CommandException ce;
+      if (iErrorText.size() > 0) {
+	ce = new CommandException(iErrorText.get(0));
+      } else {
+	ce = new CommandException("return code: " + pReturnCode);
+      }
       ce.setErrorText(iErrorText);
+      ce.setReturnCode(pReturnCode);
       throw ce;
     } else {
       removeTmpFiles();
@@ -262,14 +268,22 @@ public class ImageCommand extends ProcessStarter implements ErrorConsumer {
                                                             throws IOException {
     ListIterator<String> argIterator = pArgs.listIterator();
     int i = 0;
+    boolean havePlaceholder = false;
     String currentArg = null;
     for (Object obj:pImages) {
       // find the next placeholder
+      havePlaceholder = false;
       while (argIterator.hasNext()) {
         currentArg = argIterator.next();
 	if (currentArg.startsWith(Operation.IMG_PLACEHOLDER)) {
+	  havePlaceholder = true;
 	  break;
 	}
+      }
+      if (!havePlaceholder) {
+	// we have more argument images than placeholders!
+	throw new IllegalArgumentException("more argument images than " +
+                                                              "placeholders!");
       }
       if (obj instanceof String) {
         if (currentArg.length() == Operation.IMG_PLACEHOLDER.length()) {

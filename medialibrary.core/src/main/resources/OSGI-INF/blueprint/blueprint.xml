@@ -56,6 +56,9 @@
             <entry key="event.topics">
                 <list>
                     <value>org/chii2/medialibrary/file/movie/SCAN_PROVIDED</value>
+                    <value>org/chii2/medialibrary/file/movie/WATCH_CREATE</value>
+                    <value>org/chii2/medialibrary/file/movie/WATCH_MODIFY</value>
+                    <value>org/chii2/medialibrary/file/movie/WATCH_DELETE</value>
                     <value>org/chii2/medialibrary/provider/movie/FILE_INFO_PROVIDED</value>
                     <value>org/chii2/medialibrary/provider/movie/FILE_INFO_FAILED</value>
                     <value>org/chii2/medialibrary/provider/movie/INFO_PROVIDED</value>
@@ -72,8 +75,11 @@
             <entry key="event.topics">
                 <list>
                     <value>org/chii2/medialibrary/file/image/SCAN_PROVIDED</value>
-                    <value>org/chii2/medialibrary/provider/image/INFO_PROVIDED</value>
-                    <value>org/chii2/medialibrary/provider/image/INFO_FAILED</value>
+                    <value>org/chii2/medialibrary/file/image/WATCH_CREATE</value>
+                    <value>org/chii2/medialibrary/file/image/WATCH_MODIFY</value>
+                    <value>org/chii2/medialibrary/file/image/WATCH_DELETE</value>
+                    <value>org/chii2/medialibrary/provider/image/FILE_INFO_PROVIDED</value>
+                    <value>org/chii2/medialibrary/provider/image/FILE_INFO_FAILED</value>
                 </list>
             </entry>
         </service-properties>

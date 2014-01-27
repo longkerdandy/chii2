@@ -20,13 +20,12 @@ import java.util.Map;
  * Media Library Core Interface, provide major functionality & operations.
  */
 public class MediaLibraryServiceImpl implements MediaLibraryService {
-
     // Persistence Service
     private PersistenceService persistenceService;
     // Injected EventAdmin Service
     private EventAdmin eventAdmin;
     // Logger
-    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.core");
+    private final Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.core");
 
     /**
      * Life Cycle Init
@@ -53,111 +52,141 @@ public class MediaLibraryServiceImpl implements MediaLibraryService {
     @Override
     public void scanMovies() {
         // Prepare properties
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        Dictionary<String, Object> properties = new Hashtable<>();
         // Send a event
         Event event = new Event(FileService.MOVIE_SCAN_REQUEST_TOPIC, properties);
         logger.debug("Send a movie scan request event.");
-        eventAdmin.postEvent(event);
+        this.eventAdmin.postEvent(event);
     }
 
     @Override
     public void scanImages() {
         // Prepare properties
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        Dictionary<String, Object> properties = new Hashtable<>();
         // Send a event
         Event event = new Event(FileService.IMAGE_SCAN_REQUEST_TOPIC, properties);
         logger.debug("Send a image scan request event.");
-        eventAdmin.postEvent(event);
+        this.eventAdmin.postEvent(event);
     }
 
     @Override
     public List<? extends Movie> getMovies() {
-        return persistenceService.getMovies(-1, -1, null);
+        return this.persistenceService.getMovies(-1, -1, null);
     }
 
     @Override
     public List<? extends Movie> getMovies(int firstResult, int maxResults) {
-        return persistenceService.getMovies(firstResult, maxResults, null);
+        return this.persistenceService.getMovies(firstResult, maxResults, null);
     }
 
     @Override
     public List<? extends Movie> getMovies(int firstResult, int maxResults, Map<String, String> sorts) {
-        return persistenceService.getMovies(firstResult, maxResults, sorts);
+        return this.persistenceService.getMovies(firstResult, maxResults, sorts);
     }
 
     @Override
     public Movie getMovieById(String id) {
-        return persistenceService.getMovieById(id);
+        return this.persistenceService.getMovieById(id);
     }
 
     @Override
     public List<? extends Movie> getMoviesByName(String movieName) {
-        return persistenceService.getMoviesByName(movieName, -1, -1, null);
+        return this.persistenceService.getMoviesByName(movieName, -1, -1, null);
     }
 
     @Override
     public List<? extends Movie> getMoviesByName(String movieName, int firstResult, int maxResults) {
-        return persistenceService.getMoviesByName(movieName, firstResult, maxResults, null);
+        return this.persistenceService.getMoviesByName(movieName, firstResult, maxResults, null);
     }
 
     @Override
     public List<? extends Movie> getMoviesByName(String movieName, int firstResult, int maxResults, Map<String, String> sorts) {
-        return persistenceService.getMoviesByName(movieName, firstResult, maxResults, sorts);
+        return this.persistenceService.getMoviesByName(movieName, firstResult, maxResults, sorts);
     }
 
     @Override
     public byte[] getMovieThumbnailById(String movieId) {
-        return persistenceService.getMovieThumbnailById(movieId);
+        return this.persistenceService.getMovieThumbnailById(movieId);
     }
 
     @Override
     public long getMoviesCount() {
-        return persistenceService.getMoviesCount();
+        return this.persistenceService.getMoviesCount();
     }
 
     @Override
     public long getMovieFilesCount() {
-        return persistenceService.getMovieFilesCount();
+        return this.persistenceService.getMovieFilesCount();
+    }
+
+    @Override
+    public List<? extends Image> getImages() {
+        return this.persistenceService.getImages(-1, -1, null);
+    }
+
+    @Override
+    public List<? extends Image> getImages(int firstResult, int maxResults) {
+        return this.persistenceService.getImages(firstResult, maxResults, null);
     }
 
     @Override
     public List<? extends Image> getImages(int firstResult, int maxResults, Map<String, String> sorts) {
-        return persistenceService.getImages(firstResult, maxResults, sorts);
+        return this.persistenceService.getImages(firstResult, maxResults, sorts);
     }
 
     @Override
     public Image getImageById(String id) {
-        return persistenceService.getImageById(id);
+        return this.persistenceService.getImageById(id);
+    }
+
+    @Override
+    public List<? extends Image> getImagesByField(String fieldName, String fieldValue, boolean strict) {
+        return this.persistenceService.getImagesByField(fieldName, fieldValue, strict, -1, -1, null);
+    }
+
+    @Override
+    public List<? extends Image> getImagesByField(String fieldName, String fieldValue, boolean strict, int firstResult, int maxResults) {
+        return this.persistenceService.getImagesByField(fieldName, fieldValue, strict, firstResult, maxResults, null);
     }
 
     @Override
     public List<? extends Image> getImagesByField(String fieldName, String fieldValue, boolean strict, int firstResult, int maxResults, Map<String, String> sorts) {
-        return persistenceService.getImagesByField(fieldName, fieldValue, strict, firstResult, maxResults, sorts);
+        return this.persistenceService.getImagesByField(fieldName, fieldValue, strict, firstResult, maxResults, sorts);
+    }
+
+    @Override
+    public List<String> getImageAlbums() {
+        return this.persistenceService.getImageAlbums(-1, -1, null);
+    }
+
+    @Override
+    public List<String> getImageAlbums(int firstResult, int maxResults) {
+        return this.persistenceService.getImageAlbums(firstResult, maxResults, null);
     }
 
     @Override
     public List<String> getImageAlbums(int firstResult, int maxResults, Map<String, String> sorts) {
-        return persistenceService.getImageAlbums(firstResult, maxResults, sorts);
+        return this.persistenceService.getImageAlbums(firstResult, maxResults, sorts);
     }
 
     @Override
     public long getImagesCount() {
-        return persistenceService.getImagesCount();
+        return this.persistenceService.getImagesCount();
     }
 
     @Override
     public long getImageAlbumsCount() {
-        return persistenceService.getImageAlbumsCount();
+        return this.persistenceService.getImageAlbumsCount();
     }
 
     @Override
     public long getImagesCountByAlbum(String album) {
-        return persistenceService.getImagesCountByAlbum(album);
+        return this.persistenceService.getImagesCountByAlbum(album);
     }
 
     @Override
     public ImageFile getImageFileById(String id) {
-        return persistenceService.getImageFileById(id);
+        return this.persistenceService.getImageFileById(id);
     }
 
     /**

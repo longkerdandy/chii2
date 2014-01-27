@@ -56,7 +56,7 @@ public class MencoderXvidMP3Profile implements VideoTranscoderProfile {
     }
 
     public List<String> getCommands() {
-        List<String> commands = new ArrayList<String>();
+        List<String> commands = new ArrayList<>();
 
         commands.add("mencoder");
         commands.add("\"" + this.videoFile.getAbsolutePath() + "\"");

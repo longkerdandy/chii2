@@ -14,7 +14,8 @@ import java.util.List;
  */
 public class ConfigUtils {
     // Configuration Split Pattern
-    private static final Pattern ConfigSplitPattern = Pattern.compile(":", Pattern.CASE_INSENSITIVE);
+    private static final Pattern ConfigSplitPattern = Pattern.compile("\\|", Pattern.CASE_INSENSITIVE);
+    private static final Pattern RegexSplitPattern = Pattern.compile(":", Pattern.CASE_INSENSITIVE);
 
     /**
      * Try ro load a config from properties, then parse into a array of configuration string
@@ -101,8 +102,8 @@ public class ConfigUtils {
             Object configs = props.get(key);
             // It config string is not null or empty
             if (configs != null && StringUtils.isNotBlank(String.valueOf(configs))) {
-                List<Pattern> patterns = new ArrayList<Pattern>();
-                for (String config : ConfigSplitPattern.split(StringUtils.trim(String.valueOf(configs)))) {
+                List<Pattern> patterns = new ArrayList<>();
+                for (String config : RegexSplitPattern.split(StringUtils.trim(String.valueOf(configs)))) {
                     if (StringUtils.isNotBlank(config)) {
                         try {
                             patterns.add(Pattern.compile(StringUtils.trim(config), Pattern.CASE_INSENSITIVE));

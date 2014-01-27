@@ -13,10 +13,6 @@
     <name>Chii2 Media Library Api</name>
     <url>http://www.chii2.org</url>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <build>
         <plugins>
             <plugin>

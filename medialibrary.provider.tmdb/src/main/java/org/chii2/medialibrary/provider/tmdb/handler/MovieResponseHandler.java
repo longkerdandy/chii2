@@ -14,15 +14,15 @@ import java.util.List;
  */
 public class MovieResponseHandler extends AsyncCompletionHandler<List<MovieInfo>> {
     // Parser
-    private Parser parser;
+    private final Parser parser;
     // Result count
-    private int count;
+    private final int count;
     // Result poster count
-    private int posterCount;
+    private final int posterCount;
     // Result backdrop count
-    private int backdropCount;
+    private final int backdropCount;
     // Logger
-    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.provider.tmdb");
+    private final Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.provider.tmdb");
 
     /**
      * Constructor
@@ -48,7 +48,7 @@ public class MovieResponseHandler extends AsyncCompletionHandler<List<MovieInfo>
             // Get content
             String content = response.getResponseBody("utf-8");
             // Return
-            return parser.parseMovieInfo(content, count, posterCount, backdropCount);
+            return this.parser.parseMovieInfo(content, this.count, this.posterCount, this.backdropCount);
         } else {
             // Throw exception
             throw new Exception("Receive non successful status from remote site: " + response.getStatusText());

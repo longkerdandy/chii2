@@ -87,7 +87,7 @@ public class MovieInfoImpl implements MovieInfo {
 
     // List of movie images
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "movieInfo")
-    private List<MovieImageImpl> images = new ArrayList<MovieImageImpl>();
+    private List<MovieImageImpl> images = new ArrayList<>();
 
     // Version
     @Column(name = "VERSION")

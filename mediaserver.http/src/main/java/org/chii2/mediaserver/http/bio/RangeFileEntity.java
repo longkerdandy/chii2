@@ -7,6 +7,8 @@ import org.apache.http.HeaderElement;
 import org.apache.http.entity.AbstractHttpEntity;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -24,7 +26,7 @@ public class RangeFileEntity extends AbstractHttpEntity implements Cloneable {
     // File Index
     private int fileIndex = 0;
     // Files
-    private List<File> files;
+    private List<Path> files;
 
     /**
      * Constructor
@@ -32,14 +34,15 @@ public class RangeFileEntity extends AbstractHttpEntity implements Cloneable {
      * @param files       Files
      * @param contentType Content Type
      * @param range       HTTP Range Header
+     * @throws java.io.IOException IOException
      */
-    public RangeFileEntity(List<File> files, String contentType, Header range) {
+    public RangeFileEntity(List<Path> files, String contentType, Header range) throws IOException {
         super();
         this.files = files;
         this.rangeBegin = getRangeBegin(range);
         this.rangeEnd = getRangeEnd(range);
-        for (File file : files) {
-            this.totalSize = this.totalSize + file.length();
+        for (Path file : files) {
+            this.totalSize = this.totalSize + Files.size(file);
         }
         if (this.rangeBegin >= 0 && this.rangeEnd < this.rangeBegin) {
             this.rangeEnd = this.totalSize - 1;
@@ -78,7 +81,7 @@ public class RangeFileEntity extends AbstractHttpEntity implements Cloneable {
     @Override
     public InputStream getContent() throws IOException {
         if (fileIndex < files.size()) {
-            return new FileInputStream(files.get(fileIndex));
+            return Files.newInputStream(files.get(fileIndex));
         } else {
             return null;
         }
@@ -94,11 +97,11 @@ public class RangeFileEntity extends AbstractHttpEntity implements Cloneable {
         byte[] buffer = new byte[BUFFER_SIZE];
         InputStream inputStream = null;
         try {
-            inputStream = new FileInputStream(files.get(fileIndex));
+            inputStream = Files.newInputStream(files.get(fileIndex));
             if (rangeBegin >= 0 && rangeEnd >= rangeBegin) {
                 long offset = rangeBegin;
                 for (int i = 0; i < fileIndex; i++) {
-                    offset = offset - files.get(i).length();
+                    offset = offset - Files.size(files.get(i));
                 }
                 long realOffset = inputStream.skip(offset);
                 rangeBegin = rangeBegin - (offset - realOffset);
@@ -112,7 +115,7 @@ public class RangeFileEntity extends AbstractHttpEntity implements Cloneable {
                             if (inputStream != null) {
                                 inputStream.close();
                             }
-                            inputStream = new FileInputStream(files.get(fileIndex));
+                            inputStream = Files.newInputStream(files.get(fileIndex));
                             continue;
                         } else {
                             break;
@@ -131,7 +134,7 @@ public class RangeFileEntity extends AbstractHttpEntity implements Cloneable {
                             if (inputStream != null) {
                                 inputStream.close();
                             }
-                            inputStream = new FileInputStream(files.get(fileIndex));
+                            inputStream = Files.newInputStream(files.get(fileIndex));
                             continue;
                         } else {
                             break;
@@ -159,12 +162,12 @@ public class RangeFileEntity extends AbstractHttpEntity implements Cloneable {
         return super.clone();
     }
 
-    private int getFileIndex() {
+    private int getFileIndex() throws IOException {
         if (rangeBegin >= 0 && files != null && !files.isEmpty()) {
             int index;
             long size = 0;
             for (index = 0; index < files.size(); index++) {
-                size = size + files.get(index).length();
+                size = size + Files.size(files.get(index));
                 if (rangeBegin < size) {
                     return index;
                 }

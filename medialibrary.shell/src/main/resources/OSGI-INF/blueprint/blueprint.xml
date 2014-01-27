@@ -7,8 +7,10 @@
     </reference>
 
     <!-- Media Library Shell Command Bean -->
-    <bean id="command" class="org.chii2.medialibrary.shell.command.MediaLibraryCommandImpl">
-        <property name="mediaLibrary" ref="mediaLibraryManager" />
+    <bean id="command" class="org.chii2.medialibrary.shell.command.MediaLibraryCommandImpl"
+          init-method="init"
+          destroy-method="destroy">
+        <property name="mediaLibrary" ref="mediaLibraryManager"/>
     </bean>
 
     <!-- Media Library Shell Command Service -->

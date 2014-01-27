@@ -249,8 +249,8 @@ public class MencoderXvidOpts implements MencoderVideoOption {
     @SuppressWarnings({"ConstantConditions"})
     @Override
     public List<String> getVideoOptionCommands() {
-        List<String> options = new ArrayList<String>();
-        LinkedList<String> xvidOptions = new LinkedList<String>();
+        List<String> options = new ArrayList<>();
+        LinkedList<String> xvidOptions = new LinkedList<>();
 
         if (this.fixedQuant >= 1 && this.fixedQuant <= 31) {
             xvidOptions.add("fixed_quant=" + this.fixedQuant);

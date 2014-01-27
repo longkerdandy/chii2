@@ -1,6 +1,6 @@
 package org.chii2.medialibrary.api.persistence.entity;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Date;
 
 /**
@@ -27,7 +27,7 @@ public interface MovieFile {
      *
      * @return File
      */
-    public File getFile();
+    public Path getFile();
 
     /**
      * Get Movie File Name
@@ -62,14 +62,14 @@ public interface MovieFile {
      *
      * @return Absolute File Name (Including Path)
      */
-    public String getAbsoluteName();
+    public String getAbsolutePath();
 
     /**
      * Set Movie Absolute File Name (Including Path)
      *
      * @param absoluteName Absolute File Name (Including Path)
      */
-    public void setAbsoluteName(String absoluteName);
+    public void setAbsolutePath(String absoluteName);
 
     /**
      * Get Movie Name (Guessed from File Name)

@@ -29,6 +29,14 @@ public interface PersistenceService {
     public Movie getMovieById(String id);
 
     /**
+     * Get Movie by MovieFile
+     *
+     * @param movieFile MovieFile
+     * @return Movie
+     */
+    public Movie getMovieByMovieFile(MovieFile movieFile);
+
+    /**
      * Get all possible movie records by movie name
      * The Sort Field must prefix with "file." or "info."
      * eg. "file.duration" will reference to MovieFile duration
@@ -100,6 +108,20 @@ public interface PersistenceService {
      * @return Count
      */
     public long getMovieFilesCount();
+
+    /**
+     * Delete Movie based on MovieFile's Absolute Path or Parent Directory
+     *
+     * @param path MovieFile's Absolute Path or Parent Directory
+     */
+    public void deleteMovie(String path);
+
+    /**
+     * Delete all movies in library
+     *
+     * @return the number of instances that were deleted
+     */
+    public int deleteAllMovies();
 
     /**
      * Get all the Images
@@ -174,23 +196,25 @@ public interface PersistenceService {
     public ImageFile getImageFileById(String id);
 
     /**
+     * Delete Image based on Original File's Absolute Path or Parent Directory
+     *
+     * @param path Original File's Absolute Path or Parent Directory
+     */
+    public void deleteImage(String path);
+
+    /**
      * Delete all images in library
      *
      * @return the number of instances that were deleted
      */
-    public int deleteImages();
+    public int deleteAllImages();
 
     /**
-     * Delete all Movie Information
-     */
-    public void deleteMovieInfo();
-
-    /**
-     * Synchronize Movie Files to database
+     * Synchronize Movie File to database
      *
-     * @param movieFiles Movie Files
+     * @param movieFile Movie File
      */
-    public void synchronize(List<MovieFile> movieFiles);
+    public void synchronizeMovie(MovieFile movieFile);
 
     /**
      * Synchronize Movie Information to database
@@ -198,7 +222,16 @@ public interface PersistenceService {
      * @param movieId Movie ID
      * @param info    Movie Information List
      */
-    public void synchronize(String movieId, List<MovieInfo> info);
+    public void synchronizeMovie(String movieId, List<MovieInfo> info);
+
+    /**
+     * Synchronize ImageFile to dataBase
+     * If File already in database, it will keep current Image, update ImageFile (by replace ImageFile)
+     * If File not present in database, it will create new Image & ImageFile
+     *
+     * @param imageFile ImageFile
+     */
+    public void synchronizeImage(ImageFile imageFile);
 
     /**
      * Persis entity into database, proxy to EntityManager.persist

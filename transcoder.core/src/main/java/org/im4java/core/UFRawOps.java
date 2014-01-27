@@ -398,28 +398,6 @@ public class UFRawOps extends Operation {
   //////////////////////////////////////////////////////////////////////////////
 
   /**
-     Add option --exposure= to the ufraw commandline
-     (see the documentation of ufraw for details).
-  */
-
-  public UFRawOps exposure(Double pExposure) {
-
-    String       oper;                      // only used in some methods
-    StringBuffer buf = new StringBuffer();  // local buffer for option-args
-    buf.append("--exposure=");
-
-    if (pExposure != null) {
-      buf.append(pExposure.toString());
-    }
-    if (buf.length()>0) {
-      iCmdArgs.add(buf.toString());
-    }
-    return this;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
      Add option --black-point= to the ufraw commandline
      (see the documentation of ufraw for details).
   */
@@ -432,28 +410,6 @@ public class UFRawOps extends Operation {
 
     if (pAuto != null) {
       buf.append(pAuto.toString());
-    }
-    if (buf.length()>0) {
-      iCmdArgs.add(buf.toString());
-    }
-    return this;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
-     Add option --black-point= to the ufraw commandline
-     (see the documentation of ufraw for details).
-  */
-
-  public UFRawOps blackPoint(Double pBlack) {
-
-    String       oper;                      // only used in some methods
-    StringBuffer buf = new StringBuffer();  // local buffer for option-args
-    buf.append("--black-point=");
-
-    if (pBlack != null) {
-      buf.append(pBlack.toString());
     }
     if (buf.length()>0) {
       iCmdArgs.add(buf.toString());

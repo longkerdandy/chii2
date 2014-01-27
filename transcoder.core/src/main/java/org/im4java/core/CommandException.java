@@ -26,83 +26,120 @@ import java.util.ArrayList;
 /**
    This class wraps exceptions during image-attribute retrivial.
 
-   @version $Revision: 1.3 $
+   @version $Revision: 1.4 $
    @author  $Author: bablokb $
  
    @since 0.95
- */
+*/
 
 @SuppressWarnings("serial")
-public class CommandException extends IM4JavaException {
+  public class CommandException extends IM4JavaException {
 
-	//////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////
 
-	/**
-    The stderr-output of the command.
-	 */
+    /**
+       The stderr-output of the command.
+    */
 
-	private ArrayList<String> iErrorText = new ArrayList<String>();
+    private ArrayList<String> iErrorText = new ArrayList<String>();
 
-	//////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////
 
-	/**
-     Constructor.
-	 */
+    /**
+       The return-code of the failing command.
 
-	public  CommandException() {
-		super();
-	}
+       @since 1.1.1
+    */
 
-	//////////////////////////////////////////////////////////////////////////////
+    private int iReturnCode = -1;
 
-	/**
-     Constructor.
-	 */
+    //////////////////////////////////////////////////////////////////////////////
 
-	public  CommandException(String pMessage) {
-		super(pMessage);
-	}
+    /**
+       Constructor.
+    */
 
-	//////////////////////////////////////////////////////////////////////////////
+    public  CommandException() {
+      super();
+    }
 
-	/**
-     Constructor.
-	 */
+    //////////////////////////////////////////////////////////////////////////////
 
-	public  CommandException(String pMessage, Throwable pCause) {
-		super(pMessage,pCause);
-	}
+    /**
+       Constructor.
+    */
 
-	//////////////////////////////////////////////////////////////////////////////
+    public  CommandException(String pMessage) {
+      super(pMessage);
+    }
 
-	/**
-     Constructor.
-	 */
+    //////////////////////////////////////////////////////////////////////////////
 
-	public  CommandException(Throwable pCause) {
-		super(pCause);
-	}
+    /**
+       Constructor.
+    */
 
-	//////////////////////////////////////////////////////////////////////////////
+    public  CommandException(String pMessage, Throwable pCause) {
+      super(pMessage,pCause);
+    }
 
-	/**
-     Return the error-text object.
-	 */
+    //////////////////////////////////////////////////////////////////////////////
 
-	public ArrayList<String> getErrorText() {
-		return iErrorText;
-	}
+    /**
+       Constructor.
+    */
+
+    public  CommandException(Throwable pCause) {
+      super(pCause);
+    }
+
+    //////////////////////////////////////////////////////////////////////////////
+
+    /**
+       Return the error-text object.
+    */
+
+    public ArrayList<String> getErrorText() {
+      return iErrorText;
+    }
 
 
-///////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////
 
-	/**
-	 * Set the error text of this exception.
+    /**
+     * Set the error text of this exception.
        
-       @param pErrorText	
-	 */
+     @param pErrorText	
+    */
 
-	public void setErrorText(ArrayList<String> pErrorText) {
-		iErrorText = pErrorText;
-	}
-}
+      public void setErrorText(ArrayList<String> pErrorText) {
+	iErrorText = pErrorText;
+      }
+
+    //////////////////////////////////////////////////////////////////////////////
+
+    /**
+       Return the return-code of the failing command.
+       
+       @since 1.1.1
+    */
+
+    public int getReturnCode() {
+      return iReturnCode;
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+
+    /**
+       Set the return-code of the failing command.
+       
+       @param pReturnCode
+
+       @since 1.1.1
+    */
+
+      public void setReturnCode(int pReturnCode) {
+	iReturnCode = pReturnCode;
+      }
+  }

@@ -31,7 +31,7 @@ import org.im4java.process.ArrayListOutputConsumer;
 
    <p>The class just calls "identify -verbose" and parses the output.</p>
    
-   @version $Revision: 1.7 $
+   @version $Revision: 1.8 $
    @author  $Author: bablokb $
  
    @since 0.95
@@ -66,13 +66,50 @@ public class  Info {
   //////////////////////////////////////////////////////////////////////////////
 
   /**
-     Constructor.
+     This contstructor will automatically parse the full output
+     of identify -verbose.
+ 
+     @param pImage  Source image
+     @since 0.95
   */
 
-  public  Info(String pFilename) throws InfoException {
+  public Info(String pImage) throws InfoException {
+    getCompleteInfo(pImage);
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     This constructor creates an Info-object with basic or complete
+     image-information (depending on the second argument).
+ 
+     @param pImage  Source image
+     @param basic   Set to true for basic information, to false for complete info
+     @since 1.2.0
+  */
+
+  public Info(String pImage, boolean basic) throws InfoException {
+
+    if (!basic) {
+      getCompleteInfo(pImage);
+    } else {
+      getBaseInfo(pImage);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Query complete image-information.
+ 
+     @param pImage  Source image
+     @since 1.2.0
+  */
+
+  private void getCompleteInfo(String pImage) throws InfoException {
     IMOperation op = new IMOperation();
     op.verbose();
-    op.addImage(pFilename);
+    op.addImage(pImage);
 
     try {
       IdentifyCmd identify = new IdentifyCmd();
@@ -125,6 +162,116 @@ public class  Info {
       // value => add (key,value) to attributes
       iAttributes.put(iPrefix+parts[0],parts[1]);
     }
+  }
+
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Query basic image-information.
+ 
+     @param pImage  Source image
+     @since 1.2.0
+  */
+
+  private void getBaseInfo(String pImage) throws InfoException {
+    // create operation
+    IMOperation op = new IMOperation();
+    op.ping();
+    op.format("%m\n%W\n%H\n%g\n%z\n%r");
+    op.addImage(pImage);
+
+    try {
+      // execute ...
+      IdentifyCmd identify = new IdentifyCmd();
+      ArrayListOutputConsumer output = new ArrayListOutputConsumer();
+      identify.setOutputConsumer(output);
+      identify.run(op);
+
+      // ... and parse result
+      ArrayList<String> cmdOutput = output.getOutput();
+      Iterator<String> iter = cmdOutput.iterator();
+      iAttributes.put("Format",iter.next());
+      iAttributes.put("Width",iter.next());
+      iAttributes.put("Height",iter.next());
+      iAttributes.put("Geometry",iter.next());
+      iAttributes.put("Depth",iter.next());
+      iAttributes.put("Class",iter.next());
+    } catch (Exception ex) {
+      throw new InfoException(ex);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Return the image format.
+  */
+
+  public String getImageFormat() {
+    return iAttributes.get("Format");
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Return the image width.
+  */
+
+  public int getImageWidth() throws InfoException {
+    try {
+      return Integer.parseInt(iAttributes.get("Width"));
+    } catch (NumberFormatException ex) {
+      throw new InfoException(ex);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Return the image height.
+  */
+
+  public int getImageHeight() throws InfoException {
+    try {
+      return Integer.parseInt(iAttributes.get("Height"));
+    } catch (NumberFormatException ex) {
+      throw new InfoException(ex);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Return the image depth.
+  */
+
+  public int getImageDepth() throws InfoException {
+    try {
+      return Integer.parseInt(iAttributes.get("Depth"));
+    } catch (NumberFormatException ex) {
+      throw new InfoException(ex);
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Return the image geometry.
+  */
+
+  public String getImageGeometry() {
+    return iAttributes.get("Geometry");
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Return the image class.
+  */
+
+  public String getImageClass() {
+    return iAttributes.get("Class");
   }
 
   //////////////////////////////////////////////////////////////////////////////

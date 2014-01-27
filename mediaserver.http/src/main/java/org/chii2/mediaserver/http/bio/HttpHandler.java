@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -107,7 +108,7 @@ public class HttpHandler implements HttpRequestHandler {
                 if (movie != null) {
                     if (!transcoded) {
                         String mime = transcoder.getVideoMIME(movie.getFormat(), movie.getVideoFormat(), movie.getVideoFormatProfile(), movie.getVideoFormatVersion(), movie.getVideoCodec());
-                        List<File> files = new ArrayList<File>();
+                        List<Path> files = new ArrayList<>();
                         for (MovieFile movieFile : movie.getFiles()) {
                             files.add(movieFile.getFile());
                         }

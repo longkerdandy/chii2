@@ -87,7 +87,7 @@ public interface MediaLibraryService {
      * Get all possible movie records by movie name
      * The Sort Field must prefix with "file." or "info."
      * eg. "file.duration" will reference to MovieFile duration
-     * "info.language" will reference to MovieInfo language
+     * eg. "info.language" will reference to MovieInfo language
      *
      * @param movieName   Movie Name
      * @param firstResult First Result
@@ -122,6 +122,22 @@ public interface MediaLibraryService {
     /**
      * Get all the Images
      *
+     * @return Image List
+     */
+    public List<? extends Image> getImages();
+
+    /**
+     * Get all the Images
+     *
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @return Image List
+     */
+    public List<? extends Image> getImages(int firstResult, int maxResults);
+
+    /**
+     * Get all the Images
+     *
      * @param firstResult First Result
      * @param maxResults  Max Result
      * @param sorts       Sort (by <field, sortType>, sort type maybe "asc" or "desc")
@@ -141,6 +157,30 @@ public interface MediaLibraryService {
      * Get all possible image records by specific image field
      * Add "file." before ImageFile field
      *
+     * @param fieldName  Field Name
+     * @param fieldValue Field Value
+     * @param strict     Strict compare field value equal, else will use %fieldValue%
+     * @return Image List
+     */
+    public List<? extends Image> getImagesByField(String fieldName, String fieldValue, boolean strict);
+
+    /**
+     * Get all possible image records by specific image field
+     * Add "file." before ImageFile field
+     *
+     * @param fieldName   Field Name
+     * @param fieldValue  Field Value
+     * @param strict      Strict compare field value equal, else will use %fieldValue%
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @return Image List
+     */
+    public List<? extends Image> getImagesByField(String fieldName, String fieldValue, boolean strict, int firstResult, int maxResults);
+
+    /**
+     * Get all possible image records by specific image field
+     * Add "file." before ImageFile field
+     *
      * @param fieldName   Field Name
      * @param fieldValue  Field Value
      * @param strict      Strict compare field value equal, else will use %fieldValue%
@@ -150,6 +190,22 @@ public interface MediaLibraryService {
      * @return Image List
      */
     public List<? extends Image> getImagesByField(String fieldName, String fieldValue, boolean strict, int firstResult, int maxResults, Map<String, String> sorts);
+
+    /**
+     * Get image albums from index with max limit
+     *
+     * @return Image Albums
+     */
+    public List<String> getImageAlbums();
+
+    /**
+     * Get image albums from index with max limit
+     *
+     * @param firstResult First Result
+     * @param maxResults  Max Result
+     * @return Image Albums
+     */
+    public List<String> getImageAlbums(int firstResult, int maxResults);
 
     /**
      * Get image albums from index with max limit

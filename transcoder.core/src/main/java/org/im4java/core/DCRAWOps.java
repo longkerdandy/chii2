@@ -346,7 +346,9 @@ public class DCRAWOps extends Operation {
     if (pLeft != null) {
       buf.append(pLeft.toString());
     }
-    buf.append("Integer:pTop");
+    if (pLeft != null || pWidth != null) {
+      buf.append("Integer:pTop");
+    }
     if (pWidth != null) {
       buf.append(pWidth.toString());
     }
@@ -372,7 +374,9 @@ public class DCRAWOps extends Operation {
     if (pMult0 != null) {
       buf.append(pMult0.toString());
     }
-    buf.append("Double:pMult1");
+    if (pMult0 != null || pMult2 != null) {
+      buf.append("Double:pMult1");
+    }
     if (pMult2 != null) {
       buf.append(pMult2.toString());
     }
@@ -435,28 +439,6 @@ public class DCRAWOps extends Operation {
 
     if (pMethod != null) {
       buf.append(pMethod.toString());
-    }
-    if (buf.length()>0) {
-      iCmdArgs.add(buf.toString());
-    }
-    return this;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
-     Add option -o to the dcraw commandline
-     (see the documentation of dcraw for details).
-  */
-
-  public DCRAWOps setOutputColorSpace(String pColorProfileFile) {
-
-    String       oper;                      // only used in some methods
-    StringBuffer buf = new StringBuffer();  // local buffer for option-args
-    iCmdArgs.add("-o");
-
-    if (pColorProfileFile != null) {
-      buf.append(pColorProfileFile.toString());
     }
     if (buf.length()>0) {
       iCmdArgs.add(buf.toString());

@@ -14,6 +14,12 @@ public interface FileService {
     public final static String MOVIE_SCAN_PROVIDED_TOPIC = "org/chii2/medialibrary/file/movie/SCAN_PROVIDED";
     // Event Topic for image scan
     public final static String IMAGE_SCAN_PROVIDED_TOPIC = "org/chii2/medialibrary/file/image/SCAN_PROVIDED";
+    // Event Topic for movie watch create
+    public final static String MOVIE_WATCH_CREATE_TOPIC = "org/chii2/medialibrary/file/movie/WATCH_CREATE";
+    // Event Topic for movie watch modify
+    public final static String MOVIE_WATCH_MODIFY_TOPIC = "org/chii2/medialibrary/file/movie/WATCH_MODIFY";
+    // Event Topic for movie watch delete
+    public final static String MOVIE_WATCH_DELETE_TOPIC = "org/chii2/medialibrary/file/movie/WATCH_DELETE";
     // Event Topic for image watch create
     public final static String IMAGE_WATCH_CREATE_TOPIC = "org/chii2/medialibrary/file/image/WATCH_CREATE";
     // Event Topic for image watch modify
@@ -26,8 +32,10 @@ public interface FileService {
     public final static String FILTER_PROPERTY = "filter";
     // Topic property in the internal event
     public final static String TOPIC_PROPERTY = "topic";
-    // File information property in the provided event, which should contains the scanned file list
-    public final static String FILE_PROPERTY = "files";
+    // File information property in the scan provided event, which should contains the scanned file list
+    public final static String SCAN_PATH_PROPERTY = "scan_files";
+    // File information property in the watch event, which should contains the single file
+    public final static String WATCH_PATH_PROPERTY = "watch_file";
 
     /**
      * Scan default directories (from configuration) for movies files

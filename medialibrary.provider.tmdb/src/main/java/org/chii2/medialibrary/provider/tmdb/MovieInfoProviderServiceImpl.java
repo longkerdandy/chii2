@@ -2,9 +2,10 @@ package org.chii2.medialibrary.provider.tmdb;
 
 import com.ning.http.client.*;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.chii2.medialibrary.api.persistence.factory.MovieFactory;
 import org.chii2.medialibrary.api.provider.MovieInfoProviderService;
-import org.chii2.medialibrary.provider.tmdb.consumer.RequestConsumer;
+import org.chii2.medialibrary.provider.tmdb.fetcher.TMDbFetcher;
 import org.chii2.util.ConfigUtils;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -26,7 +27,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class MovieInfoProviderServiceImpl implements MovieInfoProviderService, EventHandler {
     // Request queue
-    protected BlockingQueue<Map<String, Object>> queue;
+    private BlockingQueue<Map<String, Object>> queue;
     // Configuration FIle
     private final static String CONFIG_FILE = "org.chii2.medialibrary.provider.tmdb";
     // Configuration for the http client compression
@@ -59,9 +60,10 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService, E
     private EventAdmin eventAdmin;
     // Injected MovieFactory
     private MovieFactory movieFactory;
+    // TMDb Fetch
+    private TMDbFetcher fetcher;
     // Logger
-    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.provider.tmdb");
-
+    private final Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.provider.tmdb");
 
     /**
      * Life Cycle Init
@@ -75,7 +77,7 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService, E
             Configuration config = configAdmin.getConfiguration(CONFIG_FILE);
             props = config.getProperties();
         } catch (IOException e) {
-            logger.error("TMDb Provider fail to load configuration with exception: {}.", e.getMessage());
+            logger.error("TMDb Provider fail to load configuration with exception: {}.", ExceptionUtils.getMessage(e));
         }
         // Load each configuration
         if (props == null || props.isEmpty()) {
@@ -142,10 +144,13 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService, E
                 .build();
 
         // Init queue
-        this.queue = new LinkedBlockingQueue<Map<String, Object>>();
+        this.queue = new LinkedBlockingQueue<>();
 
-        // Start Request Consumer
-        new Thread(new RequestConsumer(queue, eventAdmin, movieFactory, config)).start();
+        // TMDB Fetcher
+        this.fetcher = new TMDbFetcher(this.queue, this.eventAdmin, this.movieFactory, config);
+        Thread thread = new Thread(this.fetcher);
+        thread.setDaemon(false);
+        thread.start();
     }
 
     /**
@@ -154,24 +159,26 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService, E
     @SuppressWarnings("unused")
     public void destroy() {
         logger.debug("Chii2 Media Library TMDb Provider destroy.");
+        // Stop Fetcher
+        this.fetcher.shouldStop = true;
     }
 
     @Override
     public void handleEvent(Event event) {
         if (MovieInfoProviderService.MOVIE_INFO_REQUEST_TOPIC.equals(event.getTopic())) {
-            Map<String, Object> properties = new Hashtable<String, Object>();
+            Map<String, Object> properties = new Hashtable<>();
             properties.put(MovieInfoProviderService.MOVIE_ID_PROPERTY, event.getProperty(MovieInfoProviderService.MOVIE_ID_PROPERTY));
             properties.put(MovieInfoProviderService.MOVIE_NAME_PROPERTY, event.getProperty(MovieInfoProviderService.MOVIE_NAME_PROPERTY));
             properties.put(MovieInfoProviderService.MOVIE_YEAR_PROPERTY, event.getProperty(MovieInfoProviderService.MOVIE_YEAR_PROPERTY));
             properties.put(MovieInfoProviderService.RESULT_COUNT_PROPERTY, event.getProperty(MovieInfoProviderService.RESULT_COUNT_PROPERTY));
             properties.put(MovieInfoProviderService.POSTER_COUNT_PROPERTY, event.getProperty(MovieInfoProviderService.POSTER_COUNT_PROPERTY));
             properties.put(MovieInfoProviderService.BACKDROP_COUNT_PROPERTY, event.getProperty(MovieInfoProviderService.BACKDROP_COUNT_PROPERTY));
-            logger.debug("Receive a {} movie information request event.", event.getProperty(MovieInfoProviderService.MOVIE_ID_PROPERTY));
+            logger.debug("Receive a movie information request event for: {}.", event.getProperty(MovieInfoProviderService.MOVIE_ID_PROPERTY));
             // Add request to queue
             try {
                 this.queue.put(properties);
             } catch (InterruptedException e) {
-                logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
+                logger.error("TMDb Fetch queue has been interrupted with error: {}, UNEXPECTED BEHAVIOR! PLEASE REPORT THIS BUG!", ExceptionUtils.getMessage(e));
             }
         }
     }
@@ -193,7 +200,7 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService, E
             return;
         }
 
-        Map<String, Object> properties = new Hashtable<String, Object>();
+        Map<String, Object> properties = new Hashtable<>();
         properties.put(MovieInfoProviderService.MOVIE_ID_PROPERTY, movieId);
         properties.put(MovieInfoProviderService.MOVIE_NAME_PROPERTY, movieName);
         properties.put(MovieInfoProviderService.MOVIE_YEAR_PROPERTY, movieYear);
@@ -204,7 +211,7 @@ public class MovieInfoProviderServiceImpl implements MovieInfoProviderService, E
         try {
             this.queue.put(properties);
         } catch (InterruptedException e) {
-            logger.error("Provider producer has been interrupted with error: {}.", e.getMessage());
+            logger.error("TMDb Fetch queue has been interrupted with error: {}, UNEXPECTED BEHAVIOR! PLEASE REPORT THIS BUG!", ExceptionUtils.getMessage(e));
         }
     }
 

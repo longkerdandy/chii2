@@ -1,6 +1,6 @@
 package org.chii2.medialibrary.file;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,20 +14,20 @@ public class FileExtensionFilterTest {
 
     @Test
     public void FileNameExtensionTest() {
-        List<String> imageExt = new ArrayList<String>();
+        List<String> imageExt = new ArrayList<>();
         imageExt.add(".jpg");
         imageExt.add(".png");
         imageExt.add(".gif");
         FileExtensionFilter imageFilter = new FileExtensionFilter(imageExt);
 
-        assert imageFilter.accept(new File("sample_image.jpg"));
-        assert imageFilter.accept(new File("sample_image.png"));
-        assert imageFilter.accept(new File("sample_image.gif"));
-        assert !imageFilter.accept(new File("sample_image.svg"));
-        assert !imageFilter.accept(new File("sample_image"));
-        assert !imageFilter.accept(new File(".sample_image"));
-        assert !imageFilter.accept(new File("sample_image."));
-        assert imageFilter.accept(new File("sample image.jpg"));
-        assert imageFilter.accept(new File("SAMPLE_IMAGE.JPG"));
+        assert imageFilter.accept(Paths.get("sample_image.jpg"));
+        assert imageFilter.accept(Paths.get("sample_image.png"));
+        assert imageFilter.accept(Paths.get("sample_image.gif"));
+        assert !imageFilter.accept(Paths.get("sample_image.svg"));
+        assert !imageFilter.accept(Paths.get("sample_image"));
+        assert !imageFilter.accept(Paths.get(".sample_image"));
+        assert !imageFilter.accept(Paths.get("sample_image."));
+        assert imageFilter.accept(Paths.get("sample image.jpg"));
+        assert imageFilter.accept(Paths.get("SAMPLE_IMAGE.JPG"));
     }
 }

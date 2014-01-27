@@ -31,7 +31,7 @@ import java.util.ArrayList;
 /**
    This class is an OutputConsumer which saves the output to an ArrayList.
 
-   @version $Revision: 1.3 $
+   @version $Revision: 1.4 $
    @author  $Author: bablokb $
  
    @since 0.95
@@ -50,10 +50,30 @@ public class ArrayListOutputConsumer implements OutputConsumer {
   //////////////////////////////////////////////////////////////////////////////
 
   /**
+     The charset-name for the internal InputStreamReader.
+  */
+
+  private String iCharset = null;
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
      Default Constructor.
   */
 
   public  ArrayListOutputConsumer() {
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+     Constructor taking a charset-name as argument.
+
+     @param pCharset charset-name for internal InputStreamReader
+  */
+
+  public  ArrayListOutputConsumer(String pCharset) {
+    iCharset = pCharset;
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -85,7 +105,12 @@ public class ArrayListOutputConsumer implements OutputConsumer {
 
 
   public void consumeOutput(InputStream pInputStream) throws IOException {
-    InputStreamReader isr = new InputStreamReader(pInputStream);
+    InputStreamReader isr = null;
+    if (iCharset == null) {
+      isr = new InputStreamReader(pInputStream);
+    } else {
+      isr = new InputStreamReader(pInputStream,iCharset);
+    }
     BufferedReader reader = new BufferedReader(isr);
     String line;
     while ((line=reader.readLine()) != null) {

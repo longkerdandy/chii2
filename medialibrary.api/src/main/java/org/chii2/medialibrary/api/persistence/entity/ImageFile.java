@@ -342,4 +342,18 @@ public interface ImageFile {
      * @param flash Flash
      */
     public void setFlash(int flash);
+
+    /**
+     * Get Image Reference
+     *
+     * @return Image
+     */
+    public Image getImage();
+
+    /**
+     * Set Image Reference
+     *
+     * @param image Image
+     */
+    public void setImage(Image image);
 }

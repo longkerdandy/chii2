@@ -15,7 +15,7 @@ import java.io.InputStream;
  */
 public class ImageResponseHandler extends AsyncCompletionHandler<byte[]> {
     // Logger
-    private Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.provider.tmdb");
+    private final Logger logger = LoggerFactory.getLogger("org.chii2.medialibrary.provider.tmdb");
 
     /**
      * Constructor
